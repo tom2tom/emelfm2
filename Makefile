@@ -111,8 +111,8 @@ ifeq ($(WITH_THUMBLIB),0)
 THUMBS_FLAGS =
 THUMBS_LIBS =
 else
-THUMBS_FLAGS = $(shell pkg-config --cflags lib$(BASENAME1))
-THUMBS_LIBS = $(shell pkg-config --libs lib$(BASENAME1))
+THUMBS_FLAGS = $(shell $(PKG_CONFIG) --cflags lib$(BASENAME1))
+THUMBS_LIBS = $(shell $(PKG_CONFIG) --libs lib$(BASENAME1))
 endif
 endif
 
@@ -123,8 +123,8 @@ ifeq ($(WITH_TRACKER),1)
 TRACKER_HEADERS = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME2)*.h)
 TRACKER_SOURCES = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME2)*.c)
 TRACKER_OBJECTS = $(TRACKER_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
-TRACKER_FLAGS = #$(shell pkg-config --cflags ??)
-TRACKER_LIBS = #$(shell pkg-config --libs ??)
+TRACKER_FLAGS = #$(shell $(PKG_CONFIG) --cflags ??)
+TRACKER_LIBS = #$(shell $(PKG_CONFIG) --libs ??)
 endif
 
 ifeq ($(WITH_ACL),0)
@@ -145,15 +145,15 @@ ifeq ($(WITH_VFS),1)
  VFS_HEADERS = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME9)*.h)
  VFS_SOURCES = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME9)*.c)
  VFS_OBJECTS = $(VFS_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
- VFS_FLAGS = $(shell pkg-config --cflags gio-2.0 gio-unix-2.0)
- VFS_LIBS = $(shell pkg-config --libs gio-2.0 gio-unix-2.0)
+ VFS_FLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
+ VFS_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
 else
  ifeq ($(WITH_GVFS),1)
   VFS_HEADERS = #FIXME
   VFS_SOURCES = #FIXME
   VFS_OBJECTS = #FIXME
-  VFS_FLAGS = $(shell pkg-config --cflags gio-2.0 gio-unix-2.0)
-  VFS_LIBS = $(shell pkg-config --libs gio-2.0 gio-unix-2.0)
+  VFS_FLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
+  VFS_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
  endif
 endif
 
@@ -233,9 +233,9 @@ else
   GTK2 = 0
   GTK3 = 1
  else
-  GTK2 = $(shell pkg-config --exists gtk+-2.0 && echo "1" || echo "0")
+  GTK2 = $(shell $(PKG_CONFIG) --exists gtk+-2.0 && echo "1" || echo "0")
   ifeq ($(WITH_LATEST), 1)
-    GTK3 = $(shell pkg-config --exists gtk+-3.0 && echo "1" || echo "0")
+    GTK3 = $(shell $(PKG_CONFIG) --exists gtk+-3.0 && echo "1" || echo "0")
   else
     GTK3 = 0
   endif
@@ -243,37 +243,37 @@ else
 endif
 
 #ifeq ($(WITH_LATEST), 1)
-#GLIB3 = $(shell pkg-config --exists glib-3.0 && echo "1" || echo "0")
+#GLIB3 = $(shell $(PKG_CONFIG) --exists glib-3.0 && echo "1" || echo "0")
 #else
 #GLIB3 = 0
 #endif
 
 # may need extra lib for hal, udisks
-EXTDBUS = $(shell pkg-config --atleast-version=2.26 glib-2.0 && echo "0" || echo "1")
+EXTDBUS = $(shell $(PKG_CONFIG) --atleast-version=2.26 glib-2.0 && echo "0" || echo "1")
 # may need extra lib for threads
-EXTGTHREAD = $(shell pkg-config --atleast-version=2.32 glib-2.0 && echo "0" || echo "1")
+EXTGTHREAD = $(shell $(PKG_CONFIG) --atleast-version=2.32 glib-2.0 && echo "0" || echo "1")
 
 ifeq ($(GTK3), 1)
-lCFLAGS += $(shell pkg-config --cflags gtk+-3.0 gdk-3.0)
+lCFLAGS += $(shell $(PKG_CONFIG) --cflags gtk+-3.0 gdk-3.0)
 else
-lCFLAGS += $(shell pkg-config --cflags gtk+-2.0)
+lCFLAGS += $(shell $(PKG_CONFIG) --cflags gtk+-2.0)
 endif
 ifeq ($(EXTGTHREAD), 1)
-lCFLAGS += $(shell pkg-config --cflags gthread-2.0)
+lCFLAGS += $(shell $(PKG_CONFIG) --cflags gthread-2.0)
 endif
 ifeq ($(EDITOR_SPELLCHECK),1)
-lCFLAGS += $(shell pkg-config --cflags gtkspell-2.0)
+lCFLAGS += $(shell $(PKG_CONFIG) --cflags gtkspell-2.0)
 endif
 ifeq ($(WITH_UDISKS),1)
  ifeq ($(EXTDBUS), 1)
-  lCFLAGS += $(shell pkg-config --cflags dbus-glib-1)
+  lCFLAGS += $(shell $(PKG_CONFIG) --cflags dbus-glib-1)
  endif
 else
 ifeq ($(WITH_HAL),1)
  ifeq ($(EXTDBUS), 1)
-  lCFLAGS += $(shell pkg-config --cflags dbus-1 dbus-glib-1 hal hal-storage)
+  lCFLAGS += $(shell $(PKG_CONFIG) --cflags dbus-1 dbus-glib-1 hal hal-storage)
  else
-  lCFLAGS += $(shell pkg-config --cflags dbus-1 hal hal-storage)
+  lCFLAGS += $(shell $(PKG_CONFIG) --cflags dbus-1 hal hal-storage)
  endif
 endif
 endif
@@ -282,14 +282,14 @@ lLIBS_CFLAGS = -shared -fPIC -DPIC
 
 #setup linking
 ifeq ($(GTK3), 1)
-lLIBS = $(shell pkg-config --libs gtk+-3.0 gdk-3.0)
+lLIBS = $(shell $(PKG_CONFIG) --libs gtk+-3.0 gdk-3.0)
 else
-lLIBS = $(shell pkg-config --libs gtk+-2.0)
+lLIBS = $(shell $(PKG_CONFIG) --libs gtk+-2.0)
 endif
 ifeq ($(EXTGTHREAD), 1)
- lLIBS += $(shell pkg-config --libs gthread-2.0 gmodule-2.0)
+ lLIBS += $(shell $(PKG_CONFIG) --libs gthread-2.0 gmodule-2.0)
 else
- lLIBS += $(shell pkg-config --libs gmodule-2.0)
+ lLIBS += $(shell $(PKG_CONFIG) --libs gmodule-2.0)
 endif
 # -lrt needed for clock_gettime(), explicit -lm, -ldl needed for some arch-linux distros
 lLIBS += -lrt -lm -ldl
@@ -298,18 +298,18 @@ ifeq ($(USE_GAMIN), 1)
 lLIBS += -lfam
 endif
 ifeq ($(EDITOR_SPELLCHECK),1)
-lLIBS += $(shell pkg-config --libs gtkspell-2.0)
+lLIBS += $(shell $(PKG_CONFIG) --libs gtkspell-2.0)
 endif
 ifeq ($(WITH_UDISKS),1)
  ifeq ($(EXTDBUS), 1)
-  lLIBS += $(shell pkg-config --libs dbus-glib-1)
+  lLIBS += $(shell $(PKG_CONFIG) --libs dbus-glib-1)
  endif
 else
 ifeq ($(WITH_HAL),1)
  ifeq ($(EXTDBUS), 1)
-  lLIBS += $(shell pkg-config --libs dbus-1 dbus-glib-1 hal hal-storage)
+  lLIBS += $(shell $(PKG_CONFIG) --libs dbus-1 dbus-glib-1 hal hal-storage)
  else
-  lLIBS += $(shell pkg-config --libs dbus-1 hal hal-storage)
+  lLIBS += $(shell $(PKG_CONFIG) --libs dbus-1 hal hal-storage)
  endif
 endif
 endif
@@ -547,7 +547,7 @@ uninstall_i18n:
 
 test:
 	@echo "testing with splint.."
-	@splint -preproc -weak -warnposix $(LINC) `pkg-config --cflags 'gtk+-2.0'` -I. $(SOURCES)
+	@splint -preproc -weak -warnposix $(LINC) `$(PKG_CONFIG) --cflags 'gtk+-2.0'` -I. $(SOURCES)
 
 test2: $(TARGET)
 	@echo "testing with valgrind.."
