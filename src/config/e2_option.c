@@ -519,12 +519,7 @@ E2_OptionSet *e2_option_register (E2_OptionType type, gchar *name, gchar *group,
 	E2_OptionSet *set = e2_option_get_simple (name);
 	if (set == NULL)
 	{
-#ifdef USE_GLIB2_10
-		set = (E2_OptionSet *) g_slice_alloc0 (sizeof (E2_OptionSet));
-//		set = ALLOCATE0 (E2_OptionSet);
-#else
 		set = ALLOCATE0 (E2_OptionSet);
-#endif
 #if (CHECKALLOCATEDFATAL)
 		CHECKALLOCATEDFATAL (set)
 #else
@@ -1220,12 +1215,7 @@ static void _e2_option_clean1 (E2_OptionSet *set)
 	//or we may want to run the hooks after this change
 	if (set->hook_value_changed.is_setup)
 		g_hook_list_clear (&set->hook_value_changed);
-#ifdef USE_GLIB2_10
-	g_slice_free1 (sizeof (E2_OptionSet), set);
-//	DEALLOCATE (E2_OptionSet, set);
-#else
 	DEALLOCATE (E2_OptionSet, set);
-#endif
 }
 /**
 @brief initialize option system

@@ -959,12 +959,7 @@ gboolean e2_filelist_clear_old_stores (gpointer user_data)
 				FileInfo *info;
 				gtk_tree_model_get (mdl, &iter, FINFO, &info, -1);
 				if (G_LIKELY(info != NULL))
-#ifdef USE_GLIB2_10
-					g_slice_free1 (sizeof(FileInfo), info);
-					//DEALLOCATE (FileInfo, info);
-#else
 					DEALLOCATE (FileInfo, info);
-#endif
 			} while (gtk_tree_model_iter_next (mdl, &iter));
 		}
 		//CHECKME clear filtermodel, if any ?
@@ -1392,11 +1387,7 @@ GtkListStore *e2_filelist_fill_store (GList *entries, ViewInfo *view)
 */
 void e2_filelist_cleaninfo (FileInfo *info, gpointer data)
 {
-#ifdef USE_GLIB2_10
-	g_slice_free1 (sizeof (FileInfo), info);
-#else
 	DEALLOCATE (FileInfo, info);
-#endif
 }
 /**
 @brief convert @a entries from a list of localised heaped strings to a list of FileInfo's
@@ -1443,12 +1434,7 @@ gboolean e2_filelist_make_all_infos (gchar *parentpath, GList **list)
 	//retval = TRUE;
 	for (member = *list; member != NULL; member = member->next)
 	{
-#ifdef USE_GLIB2_10
-		info = (FileInfo *) g_slice_alloc (sizeof (FileInfo));
-//		info = ALLOCATE (FileInfo);
-#else
 		info = ALLOCATE (FileInfo);
-#endif
 #if (CHECKALLOCATEDWARN)
 		CHECKALLOCATEDWARN (info, errval = E2DREAD_ENOMEM;goto errexit;)
 #else
@@ -1647,10 +1633,10 @@ static gpointer _e2_filelist_refresh_store (ViewInfo *view)
 
 	if (!E2DREAD_FAILED (entries))
 	{
-/*		entries is now a list of allocated localised item-name strings.
+/*		entries is a list of allocated localised item-name strings.
 		They're cleared when no longer needed. Some go into replacement
 		liststore data and are cleared with the store. Others that belong to
-		unchanged items are cleared when it's confirmed that they are the same.
+		unchanged items are cleared when it's confirmed that they're the same.
 
 		now we construct array to be populated with corresponding 'mode' data,
 		indicating whether and how the item needs to be processed in this refresh.
@@ -1748,6 +1734,7 @@ static gpointer _e2_filelist_refresh_store (ViewInfo *view)
 			guint newindx = 0;
 			gpointer pindx, orig_key;
 			GList *updates = NULL; //list of FileInfo's for changed or added items
+			GList *gone = NULL; //list of redundant FileInfo's to be cleared later (to avoid glib conflict)
 			FileInfo *currinfoptr, *newinfoptr;
 			GtkTreeIter iter;
 			GtkTreeModel *mdl = GTK_TREE_MODEL (view->store);
@@ -1785,23 +1772,13 @@ loopstart:
 					{
 						//we don't want to use or add this one
 						modes [indx].oldmode = REFRESH_KEEP;
-						//so now get rid of data to prevent leakage
-#ifdef USE_GLIB2_10
-						g_slice_free1 (sizeof (FileInfo), newinfoptr);
-//						DEALLOCATE (FileInfo, newinfoptr);
-#else
-						DEALLOCATE (FileInfo, newinfoptr);
-#endif
+						gone = g_list_prepend (gone, newinfoptr); //for later cleanup
 					}
 					i++;
 				}
 				else //this stored item is not hashed i.e. gone from dir
 				{
-#ifdef USE_GLIB2_10
-					g_slice_free1 (sizeof (FileInfo), currinfoptr);
-#else
-					DEALLOCATE (FileInfo, currinfoptr);
-#endif
+					gone = g_list_prepend (gone, currinfoptr); //for later cleanup
 					CLOSEBGL
 					gboolean more = gtk_list_store_remove (view->store, &iter);
 					OPENBGL
@@ -1981,6 +1958,12 @@ loopstart:
 			g_free (modes);
 #endif
 			g_hash_table_destroy (newlookup);
+
+			if (gone)
+			{
+				g_list_foreach (gone, (GFunc) e2_filelist_cleaninfo, NULL);
+				g_list_free (gone);
+			}
 		}
 		else //modes = NULL
 		{

@@ -584,12 +584,7 @@ E2_Action *e2_action_register (const E2_Action *newaction)
 
 	//now allocate the action structure and initialize it from the
 	//function parameters
-#ifdef USE_GLIB2_10
-	E2_Action *action = (E2_Action *) g_slice_alloc (sizeof (E2_Action));
-//	E2_Action *action = ALLOCATE (E2_Action);
-#else
 	E2_Action *action = ALLOCATE (E2_Action);
-#endif
 	CHECKALLOCATEDFATAL (action);
 	//action name is freed if the action is removed from the actions_hash table
 	//because the names are used as keys
@@ -972,12 +967,7 @@ static void _e2_action_clean1 (E2_Action *action)
 	if (e2_tree_ref_to_iter (actions_store, action->ref, &iter))
 		gtk_tree_store_remove (actions_store, &iter);
 	gtk_tree_row_reference_free (action->ref);
-#ifdef USE_GLIB2_10
-	g_slice_free1 (sizeof (E2_Action), action);
-//	DEALLOCATE (E2_Action, action);
-#else
 	DEALLOCATE (E2_Action, action);
-#endif
 }
 
 /**
