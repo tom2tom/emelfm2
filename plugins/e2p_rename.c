@@ -1239,18 +1239,16 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 #else
 			success = e2_task_backend_rename (localpath, newpath);
 #endif
-			CLOSEBGL
-
 			if (success)
 			{
-				//show renamed item in filelist(s), if needed
+				//show renamed item in filelist(s), if needed (with open bgl)
 				if (incurr)
 					e2_fileview_adjust_name (curr_view,
 						localbase, newbase, utfbase, utfnew, exists);
 				if (inothr)
 					e2_fileview_adjust_name (other_view,
 						localbase, newbase, utfbase, utfnew, exists);
-
+				CLOSEBGL
 				if (!_e2p_ren_get_flag (CONFIRM_P))	//, rt))
 				{	//we didn't ask already, so show what's done
 					gchar *msg = g_strdup_printf (_("Renamed %s to %s in %s"),
@@ -1259,6 +1257,8 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 					g_free (msg);
 				}
 			}
+			else
+				CLOSEBGL
 		}
 
 		F_FREE (utfbase, localbase);
