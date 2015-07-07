@@ -3315,7 +3315,7 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 #endif
 								&& sep == NULL)
 									e2_fileview_adjust_name (curr_view,
-										(*iterator)->filename, new_local, converted, new_name);
+										(*iterator)->filename, new_local, converted, new_name, TRUE);
 
 							g_free (tempname);
 						}
@@ -3329,7 +3329,7 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 #endif
 								&& sep == NULL)
 									e2_fileview_adjust_name (curr_view,
-										(*iterator)->filename, new_local, converted, new_name);
+										(*iterator)->filename, new_local, converted, new_name, FALSE);
 							g_free (tempname);
 							F_FREE (new_local, new_name);
 							g_free (new_name);
@@ -3379,7 +3379,7 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 					{
 						if (sep == NULL)
 							e2_fileview_adjust_name (curr_view,
-								(*iterator)->filename, new_local, converted, new_name);
+								(*iterator)->filename, new_local, converted, new_name, TRUE);
 						_e2_task_update_trash_info (src, dest);
 					}
 					retval = retval && success;
@@ -3404,7 +3404,7 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 				{
 					if (sep == NULL)
 						e2_fileview_adjust_name (curr_view,
-							(*iterator)->filename, new_local, converted, new_name);
+							(*iterator)->filename, new_local, converted, new_name, exists);
 					_e2_task_update_trash_info (src, dest);
 				}
 				retval = retval && success;

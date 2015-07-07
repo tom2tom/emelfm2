@@ -236,7 +236,7 @@ void e2_fileview_focus_row (ViewInfo *view, gint row,
 GHashTable *e2_fileview_log_selected_names (ViewInfo *view);
 void e2_fileview_reselect_names (ViewInfo *view, GHashTable *selnames, gboolean clean);
 void e2_fileview_adjust_name (ViewInfo *view, const gchar *oldname,
-	const gchar *newname, const gchar *oldutf, const gchar *newutf);
+	const gchar *newname, const gchar *oldutf, const gchar *newutf, gboolean exists);
 void e2_fileview_translate_cols_array (gint *src_array,
 	gint *dest_array, gint size);
 void e2_fileview_switch_views (void);

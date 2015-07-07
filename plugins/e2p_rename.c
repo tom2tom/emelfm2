@@ -1175,29 +1175,24 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 		VPATH sdata = { localpath, sdata.spacedata};
 		VPATH ddata = { newpath, sdata.spacedata };
 #endif
+		//check for overwrite
+#ifdef E2_VFS
+		gint result = e2_fs_path_exists (&ddata);
+#else
+		gint result = e2_fs_path_exists (newpath);
+#endif
+		if (result == 1)
+		{
+			//ignore item with same name but different case
+			if (e2_utf8_caseless_match (base_public, newbase_public, -1, -1))
+				result = 0;
+		}
+		gboolean exists = (result > 0);
+
 		//ask, if the confirm option is is force, and the parent's stop btn not pressed
 		if (_e2p_ren_get_flag (CONFIRM_P) && ! rt->abort)
 		{
-			gint result;
-
-			if (check)
-			{
-#ifdef E2_VFS
-				result = e2_fs_path_exists (&ddata);
-#else
-				result = e2_fs_path_exists (newpath);
-#endif
-				if (result == 1)
-				{
-					//no extra info for item with same name but different case
-					if (e2_utf8_caseless_match (base_public, newbase_public, -1, -1))
-						result = 0;
-				}
-			}
-			else
-				result = 0; //no extra advice, in this case
-
-			const gchar *fmt = (result > 0) ?
+			const gchar *fmt = (exists) ?
 				_("Rename\n<b>%s</b>\nto\n<b>%s</b> (which already exists)\nin %s"):
 				_("Rename\n<b>%s</b>\nto\n<b>%s</b>\nin %s");
 			gchar *prompt = g_strdup_printf (fmt, base_public, newbase_public, dir_public);
@@ -1216,19 +1211,7 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 		else	//no individual name-confirmation
 			if (!rt->abort)
 		{
-			//ALWAYS check for overwrite, when not showing specific rename
-#ifdef E2_VFS
-			gint result = e2_fs_path_exists (&ddata);
-#else
-			gint result = e2_fs_path_exists (newpath);
-#endif
-			if (result == 1)
-			{
-				//ignore item with same name but different case
-				if (e2_utf8_caseless_match (base_public, newbase_public, -1, -1))
-					result = 0;
-			}
-			if (result > 0)
+			if (exists)
 			{
 				OPENBGL
 				choice = e2_dialog_ow_check (
@@ -1263,10 +1246,10 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 				//show renamed item in filelist(s), if needed
 				if (incurr)
 					e2_fileview_adjust_name (curr_view,
-						localbase, newbase, utfbase, utfnew);
+						localbase, newbase, utfbase, utfnew, exists);
 				if (inothr)
 					e2_fileview_adjust_name (other_view,
-						localbase, newbase, utfbase, utfnew);
+						localbase, newbase, utfbase, utfnew, exists);
 
 				if (!_e2p_ren_get_flag (CONFIRM_P))	//, rt))
 				{	//we didn't ask already, so show what's done
