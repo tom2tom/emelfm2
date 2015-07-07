@@ -32,6 +32,11 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 
 #define E2_FILE FILE
 
+/**
+@E2_DIRWATCH_NO: indicates local/mounted directory, to be processed syncronously
+@E2_DIRWATCH_YES: indicates non-local directory, to be processed asyncronously
+@E2_DIRWATCH_CHECK: indicates check needed for sync or async process 
+*/
 typedef enum { E2_DIRWATCH_NO, E2_DIRWATCH_YES, E2_DIRWATCH_CHECK } E2_FsReadWatch;
 
 #ifdef E2_VFS
