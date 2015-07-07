@@ -3100,56 +3100,77 @@ void e2_fileview_reselect_names (ViewInfo *view, GHashTable *selnames, gboolean 
 @brief rename an item in the filelist related to @a view
 
 This supports incremental changes to the rows selected in treeview for @a view.
-Used when renaming an item.
+Used when renaming an item. Expects BGL open/off.
 
 @param view data structure for view being processed
 @param oldname item basename to be replaced in @a view 's liststore, localised string
 @param newname item basename to be substituted in @a view 's liststore,localised string
 @param oldutf item basename to be replaced in @a view 's liststore, UTF-8 string
 @param newutf item basename to be substituted in @a view 's liststore, UTF-8 string
+@param duplicate whether to remove an existing item named @newname
 @return
 */
 void e2_fileview_adjust_name (ViewInfo *view, const gchar *oldname,
-	const gchar *newname, const gchar *oldutf, const gchar *newutf)
+	const gchar *newname, const gchar *oldutf, const gchar *newutf, gboolean duplicate)
 {
-	gchar *oldpath = e2_utils_dircat (view, oldname, FALSE);
-#ifdef E2_VFS
-	VPATH ddata = { oldpath, view->spacedata };
-	gboolean isdir = e2_fs_is_dir3 (&ddata E2_ERR_NONE());
-#else
-	gboolean isdir = e2_fs_is_dir3 (oldpath E2_ERR_NONE());
-#endif
-	g_free (oldpath);
+	gboolean isdir;
+	gchar *path, *oldfull, *newfull;
+	GtkTreeModel *mdl = GTK_TREE_MODEL (view->store);
+	FileInfo *info;
+	GtkTreeIter iter;
 
+	if(duplicate)
+	{
+		//incremental filelist-refresh hates duplicate entries, so we clear the unwanted one
+		path = e2_utils_dircat (view, newname, FALSE);
+#ifdef E2_VFS
+		VPATH ddata = { path, view->spacedata };
+		isdir = e2_fs_is_dir3 (&ddata E2_ERR_NONE());
+#else
+		isdir = e2_fs_is_dir3 (path E2_ERR_NONE());
+#endif
+		g_free (path);
+		//append '/' to directory name, to match string in filelist liststore
+		newfull = (isdir) ?
+			e2_utils_strcat (newutf, G_DIR_SEPARATOR_S) : (gchar *)newutf;
+		gtk_tree_model_get_iter_first (mdl, &iter);
+		if (e2_tree_find_iter_from_str_simple (mdl, FILENAME, newfull, &iter, FALSE))
+		{
+			gtk_tree_model_get (mdl, &iter, FINFO, &info, -1);
+			CLOSEBGL
+			gtk_list_store_remove (view->store, &iter);
+			OPENBGL
+			e2_filelist_cleaninfo (info, NULL);
+		}
+		if (isdir)
+			g_free (newfull);
+	}
+
+	path = e2_utils_dircat (view, oldname, FALSE);
+#ifdef E2_VFS
+	VPATH ddata = { path, view->spacedata };
+	isdir = e2_fs_is_dir3 (&ddata E2_ERR_NONE());
+#else
+	isdir = e2_fs_is_dir3 (path E2_ERR_NONE());
+#endif
+	g_free (path);
 	//append '/' to directory name, to match string in filelist liststore
-	gchar *oldfull = (isdir) ?
+	oldfull = (isdir) ?
 		e2_utils_strcat (oldutf, G_DIR_SEPARATOR_S) : (gchar *)oldutf;
 
-	GtkTreeIter iter;
-	gtk_tree_model_get_iter_first (view->model, &iter);
-	if (e2_tree_find_iter_from_str_simple (view->model, FILENAME,
-		oldfull, &iter, FALSE))
+	gtk_tree_model_get_iter_first (mdl, &iter);
+	if (e2_tree_find_iter_from_str_simple (mdl, FILENAME, oldfull, &iter, FALSE))
 	{
-		GtkTreeIter *ip;
-
-		if (GTK_IS_TREE_MODEL_FILTER (view->model))
-		{
-			GtkTreeIter child;
-			gtk_tree_model_filter_convert_iter_to_child_iter
-				(GTK_TREE_MODEL_FILTER (view->model), &child, &iter);
-			ip = &child;
-		}
-		else
-			ip = &iter;
 		//update visible name
-		gchar *newfull = (isdir) ?
+		newfull = (isdir) ?
 			e2_utils_strcat (newutf, G_DIR_SEPARATOR_S) : (gchar *)newutf;
-		gtk_list_store_set (view->store, ip, FILENAME, newfull, -1);
+		CLOSEBGL
+		gtk_list_store_set (view->store, &iter, FILENAME, newfull, -1);
+		OPENBGL
 		if (isdir)
 			g_free (newfull);
 		//update info->filename, to make this match during filelist refresh
-		FileInfo *info;
-		gtk_tree_model_get (view->model, &iter, FINFO, &info, -1);
+		gtk_tree_model_get (mdl, &iter, FINFO, &info, -1);
 		g_strlcpy (info->filename, newname, sizeof (info->filename));
 	}
 	if (isdir)
@@ -3504,12 +3525,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 			addup = TRUE;
 		if (addup)
 		{
-#ifdef USE_GLIB2_10
-			infoptr = (FileInfo *) g_slice_alloc (sizeof (FileInfo));
-//			infoptr = ALLOCATE (FileInfo);
-#else
 			infoptr = ALLOCATE (FileInfo);
-#endif
 			CHECKALLOCATEDFATAL (infoptr);
 			g_strlcpy (infoptr->filename, "..", sizeof (infoptr->filename));
 #ifdef E2_VFSTMP
