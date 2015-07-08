@@ -470,7 +470,7 @@ endif
 endif
 
 $(SU_FILE): po/app.emelfm2.policy.in
-	@sed s~@PREFIX@~$(PREFIX)~g po/app.emelfm2.policy.in > $(SU_FILE)
+	@sed s~@BIN_DIR@~$(BIN_DIR)~g po/app.emelfm2.policy.in > $(SU_FILE)
 
 $(VFS_OBJECTS): $(OBJECTS_DIR)/%.so: %.c $(OPTLIBS)/e2_vfs_dialog.c src/e2_plugins.h
 	@echo "compiling '$*.c'"
@@ -574,7 +574,7 @@ $(OBJECTS_DIR)/$(LIBS):
 	@mkdir -p $(OBJECTS_DIR)/$(OPTLIBS)
 
 $(DESKTOP_FILE):
-	@sed s~@PREFIX@~$(PREFIX)~g po/emelfm2.desktop.in > $(DESKTOP_FILE)
+	@sed s~@BIN_DIR@~$(BIN_DIR)~g po/emelfm2.desktop.in > $(DESKTOP_FILE)
 
 $(BUILD_FILE):
 	@echo "updating build info: '$(BUILD_FILE)'"
