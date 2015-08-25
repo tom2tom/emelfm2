@@ -139,6 +139,7 @@ static void _e2_context_menu_add_items (GtkWidget *menu, GtkTreeModel *model,
 				break;
 			default:
 				gtk_tree_model_get (model, iter, 0, &label, 1, &icon,             4, &command, 5, &arg, -1);
+				_mtype = FALSE; //no shift or control override
 				break;
 		}
 		if (selected || !g_str_has_prefix (command, prefix))
