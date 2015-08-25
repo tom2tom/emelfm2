@@ -1,4 +1,4 @@
-/* $Id: e2_fileview.h 3018 2014-01-21 21:50:09Z tpgww $
+/* $Id: e2_fileview.h 3090 2015-08-25 07:05:32Z tpgww $
 
 Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
 
@@ -261,7 +261,7 @@ void e2_fileview_clean_selected (GPtrArray *selected);
 void e2_fileview_clean1_history (gpointer data);
 void e2_fileview_clear_filter_patterns (ViewInfo *view);
 GPtrArray *e2_fileview_get_selected (ViewInfo *view) G_GNUC_MALLOC;
-GList *e2_fileview_get_selected_local (ViewInfo *view) G_GNUC_MALLOC;
+GList *e2_fileview_get_selected_local (ViewInfo *view, gboolean updir) G_GNUC_MALLOC;
 FileInfo *e2_fileview_get_selected_first_local (ViewInfo *view, gboolean updir);
 gchar *e2_fileview_get_row_name (ViewInfo *view, gint row) G_GNUC_MALLOC;
 void e2_fileview_register_keybindings (GtkWidget *treeview, ViewInfo *view);

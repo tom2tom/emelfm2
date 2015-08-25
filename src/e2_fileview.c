@@ -1,4 +1,4 @@
-/* $Id: e2_fileview.c 3057 2014-02-14 23:23:08Z tpgww $
+/* $Id: e2_fileview.c 3090 2015-08-25 07:05:32Z tpgww $
 
 Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>.
 
@@ -2371,14 +2371,15 @@ FileInfo *e2_fileview_get_selected_first_local (ViewInfo *view, gboolean updir)
 /**
 @brief get list of selected rows' info items
 
-This is usable only when the data is used before any chance
-of filelist refresh, which would invalidate the listed data pointers
+This is usable only when the data is used before any chance of filelist refresh,
+which would invalidate the listed data pointers
 
 @param view rt data for the view to be worked on
+@param updir TRUE to include "../" in the items
 
-@return list of selected rows' info items, excluding ".."
+@return list of selected rows' info items
 */
-GList *e2_fileview_get_selected_local (ViewInfo *view)
+GList *e2_fileview_get_selected_local (ViewInfo *view, gboolean updir)
 {
 /*	NEEDOPENBGL
 	g_signal_emit_by_name (G_OBJECT (view->treeview), "end-selection");
@@ -2402,7 +2403,7 @@ GList *e2_fileview_get_selected_local (ViewInfo *view)
 		if (gtk_tree_model_get_iter (model, &iter, path))
 		{
 			gtk_tree_model_get (model, &iter, FINFO, &info, -1);
-			if (strcmp (info->filename, ".."))	//CHECKME ok, even with localised string?
+			if (updir || strcmp (info->filename, ".."))
 				selectedrow_data = g_list_append (selectedrow_data, info);
 		}
 		gtk_tree_path_free (path);
