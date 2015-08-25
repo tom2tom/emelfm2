@@ -1,6 +1,6 @@
-/* $Id: e2_main.c 3059 2014-02-14 23:38:41Z tpgww $
+/* $Id: e2_main.c 3092 2015-08-25 14:15:27Z tpgww $
 
-Copyright (C) 2003-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2015 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
 
 This file is part of emelFM2.
@@ -880,7 +880,7 @@ gint main (gint argc, gchar *argv[])
 //	sigaction (SIGKILL, &sigdata, NULL);	//CHECKME save this for stop without saving ?
 	sigaction (SIGABRT, &sigdata, NULL);
 	sigaction (SIGQUIT, &sigdata, NULL);
-	sigaction (SIGTSTP, &sigdata, NULL);
+//	sigaction (SIGTSTP, &sigdata, NULL); //abort upon suspend-signal
 	sigaction (SIGHUP, &sigdata, NULL);
 	sigaction (SIGINT, &sigdata, NULL);	//this from a <Ctrl>c in a terminal
 	sigaction (SIGTERM, &sigdata, NULL);
