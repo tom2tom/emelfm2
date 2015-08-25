@@ -1,6 +1,6 @@
-/* $Id: e2_task.c 3042 2014-02-08 07:08:20Z tpgww $
+/* $Id: e2_task.c 3089 2015-08-25 05:44:27Z tpgww $
 
-Copyright (C) 2003-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2015 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2, which is free software. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as published

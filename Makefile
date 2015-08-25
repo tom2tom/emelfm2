@@ -1,6 +1,6 @@
-# $Id: Makefile 3031 2014-01-24 21:07:28Z tpgww $
+# $Id: Makefile 3086 2015-08-25 05:41:29Z tpgww $
 #
-# Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
+# Copyright (C) 2003-2015 tooar <tooar@emelfm2.net>
 #
 # This file is part of emelFM2.
 # emelFM2 is free software; you can redistribute it and/or modify it under the
