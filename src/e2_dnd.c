@@ -1,4 +1,4 @@
-/* $Id: e2_dnd.c 3001 2014-01-17 23:05:07Z tpgww $
+/* $Id: e2_dnd.c 3091 2015-08-25 07:06:10Z tpgww $
 
 Copyright (C) 2006-2014 tooar <tooar@emelfm2.net>.
 
@@ -556,7 +556,7 @@ NOTE some apps omit the leading "//" from the first example, resulting in file:/
 */
 	GList *base, *tmp;
 //	NEEDCLOSEBGL
-	base = e2_fileview_get_selected_local (view);
+	base = e2_fileview_get_selected_local (view, FALSE);
 //	NEEDOPENBGL
 	if (base != NULL)
 	{

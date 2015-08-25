@@ -1,4 +1,4 @@
-/* $Id: e2p_du.c 2840 2013-10-24 10:02:23Z tpgww $
+/* $Id: e2p_du.c 3091 2015-08-25 07:06:10Z tpgww $
 
 Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark
@@ -144,7 +144,7 @@ static gpointer _e2p_du_all (gchar *localpattern)
 	{
 		GList *base, *tmp;
 
-		base = e2_fileview_get_selected_local (curr_view);
+		base = e2_fileview_get_selected_local (curr_view, FALSE);
 		for (tmp = base; tmp != NULL; tmp = tmp->next)
 		{
 			info = tmp->data;

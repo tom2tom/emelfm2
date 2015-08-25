@@ -1,4 +1,4 @@
-/* $Id: e2_command_line.c 2815 2013-10-13 07:00:55Z tpgww $
+/* $Id: e2_command_line.c 3091 2015-08-25 07:06:10Z tpgww $
 
 Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
 
@@ -912,7 +912,7 @@ static gboolean _e2_command_line_insert_action
 			e2_filelist_disable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
 
 			GList *base;
-			base = e2_fileview_get_selected_local (&rt->view);
+			base = e2_fileview_get_selected_local (&rt->view, FALSE);
 			if (base != NULL)
 			{
 				GList *tmp;

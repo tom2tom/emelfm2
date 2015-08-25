@@ -1,4 +1,4 @@
-/* $Id: e2_utils.c 2957 2013-11-18 23:05:50Z tpgww $
+/* $Id: e2_utils.c 3091 2015-08-25 07:06:10Z tpgww $
 
 Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
@@ -1142,7 +1142,7 @@ gchar *e2_utils_expand_macros (const gchar *text, const gchar *for_each)
 				else	//use selected items
 				{
 					e2_filelist_disable_one_refresh (PANEACTIVE);  //prevent any change to the selected items ?
-					GList *sel = e2_fileview_get_selected_local (curr_view);
+					GList *sel = e2_fileview_get_selected_local (curr_view, TRUE);
 #ifdef E2_REFRESH_DEBUG
 					printd (DEBUG, "enable refresh, expand macros 1");
 #endif
@@ -1213,7 +1213,7 @@ gchar *e2_utils_expand_macros (const gchar *text, const gchar *for_each)
 			case 'P':
 			{
 				e2_filelist_disable_one_refresh (PANEINACTIVE);
-				GList *sel = e2_fileview_get_selected_local (other_view);
+				GList *sel = e2_fileview_get_selected_local (other_view, TRUE);
 #ifdef E2_REFRESH_DEBUG
 				printd (DEBUG, "enable refresh, expand macros 2");
 #endif
