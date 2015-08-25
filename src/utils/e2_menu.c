@@ -1,4 +1,4 @@
-/* $Id: e2_menu.c 3068 2014-02-16 06:32:10Z tpgww $
+/* $Id: e2_menu.c 3091 2015-08-25 07:06:10Z tpgww $
 
 Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>
 
@@ -1525,7 +1525,9 @@ static void _e2_menu_fill_filetype_actions_menu (GtkWidget *menu,
 	const gchar **actions)
 {
 	//overhead, in case <system default> is present
-	FileInfo *info = e2_fileview_get_selected_first_local (curr_view, FALSE);
+	FileInfo *info = e2_fileview_get_selected_first_local (curr_view, TRUE);
+	if (info == NULL) //some problem ?
+		return;
 	gchar *localpath = e2_utils_dircat (curr_view, info->filename, TRUE);
 
 	while (*actions != NULL)
