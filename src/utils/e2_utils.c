@@ -620,18 +620,17 @@ gchar *e2_utils_dircat (ViewInfo *view, const gchar *string, gboolean localise)
 /**
 @brief join strings @a string1 and @a string2
 
-This is for localised strings, for which
-g_strconcat() (maybe?) shouldn't be used
+This is for localised strings, for which g_strconcat() (maybe?) shouldn't be used
 TODO allocation-error message needs BGL closed
 
-@param string1 the string which will start the returned string
-@param string2 the string which will be appended
+@param string1 the string which will start the returned string, or NULL 
+@param string2 the string which will be appended, or NULL
 @return newly allocated joined string, or NULL upon error
 */
 gchar *e2_utils_strcat (const gchar *string1, const gchar *string2)
 {
-	gint len1 = strlen (string1);
-	gint len2 = strlen (string2) + sizeof (gchar);	//include the trailing 0
+	gint len1 = (string1 != NULL) ? strlen (string1) : 0;
+	gint len2 = (string2 != NULL) ? strlen (string2) + sizeof (gchar) : sizeof (gchar);//include the trailing 0 
 	gchar *result = g_try_malloc (len1 + len2);
 	CHECKALLOCATEDWARN (result, return NULL;); //TODO assumes BGL closed
 	if (result != NULL)
