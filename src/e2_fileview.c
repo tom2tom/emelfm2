@@ -1,4 +1,4 @@
-/* $Id: e2_fileview.c 3090 2015-08-25 07:05:32Z tpgww $
+/* $Id: e2_fileview.c 3101 2017-04-11 03:47:22Z tpgww $
 
 Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>.
 
@@ -3173,6 +3173,16 @@ void e2_fileview_adjust_name (ViewInfo *view, const gchar *oldname,
 		//update info->filename, to make this match during filelist refresh
 		gtk_tree_model_get (mdl, &iter, FINFO, &info, -1);
 		g_strlcpy (info->filename, newname, sizeof (info->filename));
+/* NOT update info->statbuf, we need to preserve some difference, for list-refreshing check
+		path = e2_utils_dircat (view, newname, FALSE);
+#ifdef E2_VFS
+		ddata.path = path;
+		e2_fs_lstat (&ddata, &info->statbuf E2_ERR_NONE());
+#else
+		e2_fs_lstat (path, &info->statbuf E2_ERR_NONE());
+#endif
+		g_free (path);
+*/
 	}
 	if (isdir)
 		g_free (oldfull);
