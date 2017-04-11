@@ -1,4 +1,4 @@
-/* $Id: e2_task.c 3089 2015-08-25 05:44:27Z tpgww $
+/* $Id: e2_task.c 3099 2017-04-11 03:44:18Z tpgww $
 
 Copyright (C) 2003-2015 tooar <tooar@emelfm2.net>
 
@@ -3179,7 +3179,7 @@ static gboolean _e2_task_trashempty (gpointer from, E2_ActionRuntime *art)
 	return FALSE;
 }
 /**
-@brief rename selected items in active pane to the inactive pane
+@brief rename selected items in active pane
 
 Overwrite checking is performed, if that option is enabled
 The actual operation is performed by a separate back-end function
@@ -3222,6 +3222,7 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 	for (count = 0; count < names->len; count++, iterator++)
 	{
 		gboolean permitted;
+		gboolean done = FALSE;
 		g_string_printf (src, "%s%s", curr_local, (*iterator)->filename);  //separator comes with dir
 #ifdef E2_VFS
 		sdata.path = src->str;
@@ -3314,9 +3315,11 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 							if (e2_task_backend_rename (tempname, src->str)
 #endif
 								&& sep == NULL)
-									e2_fileview_adjust_name (curr_view,
-										(*iterator)->filename, new_local, converted, new_name, TRUE);
-
+							{
+								e2_fileview_adjust_name (curr_view,
+									(*iterator)->filename, new_local, converted, new_name, TRUE);
+								done = TRUE;
+							}
 							g_free (tempname);
 						}
 						else
@@ -3328,8 +3331,11 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 							if (e2_task_backend_rename (tempname, dest->str)
 #endif
 								&& sep == NULL)
-									e2_fileview_adjust_name (curr_view,
-										(*iterator)->filename, new_local, converted, new_name, FALSE);
+							{
+								e2_fileview_adjust_name (curr_view,
+									(*iterator)->filename, new_local, converted, new_name, FALSE);
+								done = TRUE;
+							}
 							g_free (tempname);
 							F_FREE (new_local, new_name);
 							g_free (new_name);
@@ -3378,8 +3384,11 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 					if (success)
 					{
 						if (sep == NULL)
+						{
 							e2_fileview_adjust_name (curr_view,
 								(*iterator)->filename, new_local, converted, new_name, TRUE);
+							done = TRUE;
+						}
 						_e2_task_update_trash_info (src, dest);
 					}
 					retval = retval && success;
@@ -3403,8 +3412,11 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 				if (success)
 				{
 					if (sep == NULL)
+					{
 						e2_fileview_adjust_name (curr_view,
 							(*iterator)->filename, new_local, converted, new_name, exists);
+						done = TRUE;
+					}
 					_e2_task_update_trash_info (src, dest);
 				}
 				retval = retval && success;
@@ -3419,9 +3431,17 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 			if (result2 == NO_TO_ALL)
 				break;
 		}
-		if (retval && count > 0)
+		if (done && count > 1/*&& curr_view->sort_column == FILENAME*/)
+		{
 			//show renamed items while waiting
+#ifdef E2_REFRESH_DEBUG
+			printd(DEBUG,"request refresh after rename");
+#endif
 			e2_filelist_request_refresh (curr_view->dir, TRUE); //NB refresh clears curr_view->selected_names
+#ifdef E2_REFRESH_DEBUG
+			printd(DEBUG,"after post-name request refresh");
+#endif
+		}
 	}
 
 	g_string_free (prompt,TRUE);
