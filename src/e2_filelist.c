@@ -1,4 +1,4 @@
-/* $Id: e2_filelist.c 3083 2015-08-25 05:36:16Z tpgww $
+/* $Id: e2_filelist.c 3100 2017-04-11 03:45:36Z tpgww $
 
 Copyright (C) 2004-2015 tooar <tooar@emelfm2.net>.
 
@@ -395,7 +395,7 @@ retest:
 #ifdef E2_VFSTMP
 				//FIXME dir when not mounted local
 #else
-				printd (DEBUG, "accepting request to refresh %s", view->dir);
+				printd (DEBUG, "accepted request to refresh %s", view->dir);
 #endif
 				//refresh function expects BGL open
 				if (_e2_filelist_refresh_store (view) == GINT_TO_POINTER(1))
@@ -1755,7 +1755,7 @@ loopstart:
 					//FIXME vfs may not have same data as local
 					//FIXME make this faster
 					if (newinfoptr->statbuf.st_atime != currinfoptr->statbuf.st_atime
-					 ||	newinfoptr->statbuf.st_size != currinfoptr->statbuf.st_size
+					 || newinfoptr->statbuf.st_size != currinfoptr->statbuf.st_size
 					 || newinfoptr->statbuf.st_mtime != currinfoptr->statbuf.st_mtime
 					 || newinfoptr->statbuf.st_ctime != currinfoptr->statbuf.st_ctime
 					 || newinfoptr->statbuf.st_mode != currinfoptr->statbuf.st_mode
@@ -1821,6 +1821,8 @@ loopstart:
 #ifdef E2_EXTCOL
 					gchar *extn;
 #endif
+					gboolean caseignore = ! e2_option_bool_get ("namesort-case-sensitive");
+
 					GdkColor *foreground;
 					for (i = 0; i < itemcount; i++)
 					{
@@ -1854,8 +1856,29 @@ loopstart:
 								gtk_tree_model_get (GTK_TREE_MODEL (view->store),
 									&iter, FINFO, &currinfoptr, -1);
 								//simply replace all changeable contents
+								g_free (key);
+								if (caseignore)
+								{
+									gchar *freeme = g_utf8_casefold (name, -1);
+#ifdef USE_GTK2_8
+									key = g_utf8_collate_key_for_filename (freeme, -1);
+#else
+									key = g_utf8_collate_key (freeme, -1);
+#endif
+									g_free (freeme);
+								}
+								else
+#ifdef USE_GTK2_8
+									key = g_utf8_collate_key_for_filename (name, -1);
+#else
+									key = g_utf8_collate_key (name, -1);
+#endif
 								CLOSEBGL
 								gtk_list_store_set (view->store, &iter,
+									FILENAME, name,
+#ifdef E2_EXTCOL
+									EXTN, func(name),
+#endif
 									SIZE, size,
 									PERM, perm,
 									OWNER, owner,
@@ -1863,10 +1886,12 @@ loopstart:
 									MODIFIED, mod,
 									ACCESSED, access,
 									CHANGED, change,
+		 							NAMEKEY, key,
 									FORECOLOR, foreground,	//maybe changed executable status
 									-1);
 								OPENBGL
 								//copy this so original can be cleared
+								g_strlcpy (currinfoptr->filename, newinfoptr->filename, sizeof (currinfoptr->filename));
 								currinfoptr->statbuf = newinfoptr->statbuf;
 							}
 							else
