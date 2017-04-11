@@ -1,4 +1,4 @@
-# $Id: Makefile 3086 2015-08-25 05:41:29Z tpgww $
+# $Id: Makefile 3097 2017-04-11 03:40:21Z tpgww $
 #
 # Copyright (C) 2003-2015 tooar <tooar@emelfm2.net>
 #
@@ -41,7 +41,7 @@ DESKTOP_FILE=docs/desktop_environment/$(TARGET).desktop
 SU_FILE=app.$(TARGET).policy
 
 # build info for build.h etc
-VERSION=0.9.1
+VERSION=0.9.2
 #this is effectively a sub-version, to manage config file upgrades while not changing the version
 RELEASE=
 #RELEASE=.1
