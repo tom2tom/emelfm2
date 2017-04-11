@@ -1,4 +1,4 @@
-/* $Id: e2_keybinding.c 3076 2015-02-02 22:17:12Z tpgww $
+/* $Id: e2_keybinding.c 3094 2017-04-10 10:28:46Z tpgww $
 
 Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
 
@@ -1509,6 +1509,8 @@ static void _e2_keybinding_tree_defaults (E2_OptionSet *set)
 	g_strconcat("\t\t|<Control>F1||",_A(15),".",_A(61),"|",NULL), //"pending.list
 	g_strconcat("\t\t|<Alt>F1||",_A(2),".",_A(61),"|",NULL), //"children.list
 	g_strconcat("\t\t|F2||",_A(6),".",_A(79),"|",NULL), //"rename"
+	g_strconcat("\t\t|<Shift>F2||",_A(6),".",_A(70),"|",NULL), //"owners
+	g_strconcat("\t\t|<Control>F2||",_A(6),".",_A(73),"|",NULL), //"permissions
 	g_strconcat("\t\t|F3||",_A(6),".",_A(109),"|",NULL), //"view"
 	g_strconcat("\t\t|<Shift>F3||",_A(6),".",_A(110),"|",NULL), //"view_again"
 	g_strconcat("\t\t|<Control>F3||",_A(6),".",_A(49),"|",NULL), //"find" (was F4)
@@ -1546,6 +1548,7 @@ static void _e2_keybinding_tree_defaults (E2_OptionSet *set)
 	g_strconcat("\t\t|<Control>e||!",_A(10),".",_A(33),"|0,*",NULL),  //"adjust_ratio" no arg translation ditto
 	g_strconcat("\t\t|<Control>z||",_A(1),".",_A(103),"|",NULL), //"focus toggle"
 	g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|",NULL), //"refresh"
+	g_strconcat("\t\t|<Control>l||",_A(5),".",_A(103),"|",NULL), //"focus toggle" (active)
 	g_strconcat("\t\t|<Control>1||",_A(5),".",_A(103),"|1",NULL), //"focus toggle" no arg translation
 	g_strconcat("\t\t|<Control>2||",_A(5),".",_A(103),"|2",NULL), //"focus toggle"no arg translation
 	g_strconcat("\t\t|<Control>Insert||",_A(1),".",_A(59),"|",NULL), //"insert selection"
