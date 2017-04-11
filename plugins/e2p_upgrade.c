@@ -1,4 +1,4 @@
-/* $Id: e2p_upgrade.c 3047 2014-02-08 21:56:04Z tpgww $
+/* $Id: e2p_upgrade.c 3098 2017-04-11 03:41:31Z tpgww $
 
 Copyright (C) 2005-2013 tooar <tooar@emelfm2.net>
 
@@ -378,9 +378,9 @@ static gboolean _e2p_upgrade_0_9_0 (const gchar *localcfg, const gchar *sed)
 			"\t\t\t|<Shift>Insert|false|",_A(5),".",_A(32),"|",NULL);
 		gchar *oldstr2 = g_strconcat("\t\t\t|<Control>k|false|",_A(5),".",_A(37),"|",NULL);
 		gchar *newstr2 = g_strconcat("\t\t\t|<Alt>Delete|false|",_A(5),".",_A(44),"|",NULL);
-		//see comment above re oldstr1, applies to oldstr3 too
 		gchar *oldstr3 = g_strconcat("\t\t\t|<Alt>Delete|false|",_A(1),".",_A(37),"|",NULL);
 		gchar *newstr3 = g_strconcat("\t\t\t|<Shift><Alt>Delete|false|",_A(5),".",_A(37),"|",NULL);
+		//see comment above re oldstr1, applies to oldstr4 too
 		gchar *oldstr4 = g_strconcat("\t\t\t|<Alt>Delete|false|",_A(1),".",_A(37),"|",NULL);
 		gchar *newstr4 = g_strconcat("\t\t\t|<Alt>Delete|false|",_A(1),".",_A(44),"|\\n",
 			"\t\t\t|<Shift><Alt>Delete|false|",_A(1),".",_A(37),"|",NULL);
@@ -510,6 +510,38 @@ static gboolean _e2p_upgrade_0_9_1 (const gchar *localcfg, const gchar *sed)
 		return _e2p_upgrade_0_4_5 ();	//suggest default
 }
 
+static gboolean _e2p_upgrade_0_9_2 (const gchar *localcfg, const gchar *sed)
+{
+	if (sed != NULL)
+	{
+		//add keybindings NOTE escaped \n to get valid newlines
+		gchar *oldstr1 = g_strconcat("\t\t|F2||",_A(6),".",_A(79),"|",NULL);
+		gchar *newstr1 = g_strconcat("\t\t|F2||",_A(6),".",_A(79),"|\\n",
+			"\t\t|<Shift>F2||",_A(6),".",_A(70),"|\\n",
+			"\t\t|<Control>F2||",_A(6),".",_A(73),"|",NULL);
+		gchar *oldstr2 = g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|",NULL);
+		gchar *newstr2 = g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|\\n",
+			"\t\t|<Control>l||",_A(5),".",_A(103),"|",NULL);
+		gchar *command = g_strconcat (sed,
+			" -i"
+			" -e 's/",oldstr1,"/",newstr1,"/'"
+			" -e 's/",oldstr2,"/",newstr2,"/'"
+			" ",localcfg,NULL);
+
+		gboolean success = (system (command) == 0);
+		if (!success)
+			printd (WARN, "failed to execute command to do upgrade 0.9.2");
+		g_free (oldstr1);
+		g_free (newstr1);
+		g_free (oldstr2);
+		g_free (newstr2);
+		g_free (command);
+		return success;
+	}
+	else
+		return _e2p_upgrade_0_4_5 ();	//suggest default
+}
+
 /**
 @brief interface func to serially perform all relevant updates to config file
  contents and already-cached config data
@@ -629,6 +661,16 @@ static gboolean _e2p_upgrade_all (void)
 					success = FALSE;
 			}
 			if (success && !_e2p_upgrade_0_9_1 (localcfg, sed))
+				success = FALSE;
+		}
+		if (success && strcmp (app.cfgfile_version,"0.9.2") < 0)
+		{
+			if (!saved)
+			{
+				_e2p_upgrade_backup (localcfg);
+				saved = TRUE;
+			}
+			if (!_e2p_upgrade_0_9_2 (localcfg, sed))
 				success = FALSE;
 		}
 
