@@ -10,26 +10,28 @@ without opening an xterm.
 
 emelFM2 is licensed under the FSF General Public License.
 
+This version of emelFM2 requires Gtk+2.6 or later. Gtk+3.x should
+be ok, though some extra problems may emerge. It's too soon to
+comment about gtk+4.
+
 WEBSITES
 ~~~~~~~~
 emelFM2           http://www.emelfm2.net
 
 updated emelFM1   http://www.havens.de/elm/emelfm.html
-old emelFM1       http://www.pitt.edu/~macst92/emelFM/ or
-                  http://emelFM.sourceforge.net/
+old emelFM1           http://emelFM.sourceforge.net/
 
 MAILING LIST
 ~~~~~~~~~
 There is an emelFM2 mailing list provided by freelists.org. You
-can subscribe to the emelFM2 mailing list by sending email to
+can subscribe to that list by sending an email to
 emelfm2-request@freelists.org with 'subscribe' in the subject
 and you can  unsubscribe from the list by sending email to the
 same address with 'unsubscribe' in the subject.
 
+email address: emelfm2@freelists.org
 web interface: http://www.freelists.org/cgi-bin/list.fcgi?list_id=emelfm2
 list archive:  http://www.freelists.org/archives/emelfm2/
-
-email address emelfm2@freelists.org
 
 HELP
 ~~~~
@@ -57,8 +59,10 @@ The help documents USAGE and CONFIGURATION might well be
 translated at some future time, but they are not yet mature.
 Probably not worth translating yet.
 
-COMPILATION, INSTALLATION, UNINSTALLATION
+INSTALLATION, UNINSTALLATION
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 See the INSTALL file.
 
-This version of emelFM2 requires Gtk+2.6 or later.
+BUILD, COMPILE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+See files CONSTRUCT and Makefile.config.

@@ -1,7 +1,8 @@
 Warning:
 
-When using pre-releases, be sure to backup your configuration
-directory regularly (usually ~/.emelfm2). Config upgrades will
-only work properly between full releases. This means your
-configuration might get lost/changed/modifyed if you try
-different pre-releases.
+When using pre-releases, be sure to regularly backup your
+configuration directory (usually ~/.config/emelfm2). Config
+upgrades will only work properly between full releases.
+
+Your configuration might get lost/changed/modified if you
+try different pre-releases.

@@ -5,9 +5,9 @@
 %define _libdir %{prefix}/lib
 
 Name: emelfm2
-Version: 0.9.1
+Version: 0.9.2
 Release: 1
-Summary: Gtk+2 file manager with two-panel format
+Summary: Gtk+2/3 file manager with multi-panel format
 License: GPL3+
 URL: http://emelfm2.net
 Group: File tools

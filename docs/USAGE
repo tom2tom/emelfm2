@@ -43,6 +43,23 @@ If the program has been built with debugging-support enabled (compiled with make
 
 In the above, any DIR may be absolute, or relative to the current directory.
 
+NOTE: If your filesysten encodes path/file names in something other than
+utf-8/ascii (e.g. with german umlauts), you should also have:
+
+1. set the environment variable
+G_FILENAME_ENCODING=character set name (or a comma-separated
+list of such names, and glib uses the first name in that list).
+
+OR
+
+2. set the environment variable G_BROKEN_FILENAMES=1. In that case,
+glib assumes that the locale encoding is used for names.
+
+To cancel the effect of G_BROKEN_FILENAMES you have to unset the
+environment variable, setting it to 0 is not enough!
+
+G_FILENAME_ENCODING takes priority over G_BROKEN_FILENAMES.
+
 USER INTERFACE
 
 The core elements of the UI are:
