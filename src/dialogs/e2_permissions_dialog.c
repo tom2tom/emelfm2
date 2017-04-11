@@ -1,6 +1,6 @@
 /* $Id: e2_permissions_dialog.c 2815 2013-10-13 07:00:55Z tpgww $
 
-Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
 
 This file is part of emelFM2.

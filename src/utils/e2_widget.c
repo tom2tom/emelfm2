@@ -1,6 +1,6 @@
 /* $Id: e2_widget.c 3001 2014-01-17 23:05:07Z tpgww $
 
-Copyright (C) 2003-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
 
 This file is part of emelFM2.

@@ -1,6 +1,6 @@
 /* $Id: e2_fs.h 3079 2015-08-25 05:29:50Z tpgww $
 
-Copyright (C) 2005-2015 tooar <tooar@emelfm2.net>
+Copyright (C) 2005-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

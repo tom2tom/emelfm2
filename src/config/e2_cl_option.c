@@ -1,6 +1,6 @@
 /* $Id: e2_cl_option.c 3061 2014-02-15 00:45:35Z tpgww $
 
-Copyright (C) 2003-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2, which is free software. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as published

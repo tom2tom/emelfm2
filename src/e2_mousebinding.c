@@ -1,6 +1,6 @@
 /* $Id: e2_mousebinding.c 3054 2014-02-14 22:16:24Z tpgww $
 
-Copyright (C) 2008-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2008-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2, which is free software. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as published

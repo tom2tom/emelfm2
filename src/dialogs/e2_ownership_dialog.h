@@ -1,6 +1,6 @@
 /* $Id: e2_ownership_dialog.h 2064 2010-03-12 13:15:36Z tpgww $
 
-Copyright (C) 2004-2009 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

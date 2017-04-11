@@ -1,6 +1,6 @@
 /* $Id: e2_task_backend.c 3044 2014-02-08 07:11:47Z tpgww $
 
-Copyright (C) 2005-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2005-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

@@ -1,6 +1,6 @@
 /* $Id: e2p_upgrade.h 2819 2013-10-23 07:20:16Z tpgww $
 
-Copyright (C) 2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2013-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2, which is free software. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as published

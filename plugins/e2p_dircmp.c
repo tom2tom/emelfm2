@@ -1,6 +1,6 @@
 /* $Id: e2p_dircmp.c 2978 2013-11-30 02:56:32Z tpgww $
 
-Portions copyright (C) 2006-2013 tooar <tooar@emelfm2.net>
+Portions copyright (C) 2006-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

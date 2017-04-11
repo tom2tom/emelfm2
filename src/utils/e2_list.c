@@ -1,6 +1,6 @@
 /* $Id: e2_list.c 2746 2013-09-19 22:59:03Z tpgww $
 
-Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
 
 This file is part of emelFM2.

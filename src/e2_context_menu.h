@@ -1,6 +1,6 @@
 /* $Id: e2_context_menu.h 2534 2012-05-27 08:07:07Z tpgww $
 
-Copyright (C) 2003-2012 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 2004 Florian Zaehringer <flo.zaehringer@web.de>
 
 This file is part of emelFM2.

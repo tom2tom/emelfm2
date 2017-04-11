@@ -1,6 +1,6 @@
 /* $Id: e2_pane.c 3071 2014-02-17 20:27:33Z tpgww $
 
-Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

@@ -1,6 +1,6 @@
 /* $Id: e2_window.h 3055 2014-02-14 23:18:22Z tpgww $
 
-Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

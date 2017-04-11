@@ -1,6 +1,6 @@
 /* $Id: e2_print.h 2076 2010-05-17 22:35:19Z tpgww $
 
-Copyright (C) 2010 tooar <tooar@emelfm2.net>
+Copyright (C) 2010-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

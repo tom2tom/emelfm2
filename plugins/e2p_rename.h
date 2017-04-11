@@ -1,6 +1,6 @@
 /* $Id: e2p_rename.h 3009 2014-01-21 07:09:21Z tpgww $
 
-Copyright (C) 2005-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2005-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software. You can redistribute it and/or modify it under the

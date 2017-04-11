@@ -1,6 +1,6 @@
 /* $Id: e2_option__default.c 3058 2014-02-14 23:38:00Z tpgww $
 
-Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

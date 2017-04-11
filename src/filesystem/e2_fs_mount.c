@@ -1,6 +1,6 @@
 /* $Id: e2_fs_mount.c 2693 2013-08-25 04:38:17Z tpgww $
 
-Copyright (C) 2007-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2007-2017 tooar <tooar@emelfm2.net>
 Copyright (C) 2004-2007 Florian Zaehringer <flo.zaehringer@web.de>
 Copyright (C) 1999-2004 Bill Wilson <bill@gkrellm.net>
 

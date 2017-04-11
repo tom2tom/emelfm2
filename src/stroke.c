@@ -2,7 +2,7 @@
 
 libstroke2 - a pointer-device gesture-management library for *NIX
 Derived from libstroke 0.5.1 @ www.etla.net/libstroke
-Copyright (C) 2008-2010 tooar <tooar@emelfm2.net>
+Copyright (C) 2008-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1996-1999  Mark F. Willey, ETLA Technical
 
 This library is free software; you can redistribute it and/or modify it

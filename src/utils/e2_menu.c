@@ -1,6 +1,6 @@
 /* $Id: e2_menu.c 3091 2015-08-25 07:06:10Z tpgww $
 
-Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

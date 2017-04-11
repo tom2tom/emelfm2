@@ -1,6 +1,6 @@
 /* $Id: e2_plugins.c 2982 2013-11-30 22:21:28Z tpgww $
 
-Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
 
 This file is part of emelFM2.

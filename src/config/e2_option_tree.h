@@ -1,6 +1,6 @@
 /* $Id: e2_option_tree.h 2469 2012-03-16 00:19:24Z tpgww $
 
-Copyright (C) 2004-2012 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

@@ -1,6 +1,6 @@
 /* $Id: e2_view_dialog.c 2901 2013-10-31 22:31:16Z tpgww $
 
-Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2, which is free software. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as published

@@ -1,6 +1,6 @@
 /* $Id: e2p_move.c 2978 2013-11-30 02:56:32Z tpgww $
 
-Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 2004 Florian Zaehringer <flo.zaehringer@web.de>
 Portions copyright (C) 1999 Michael Clark
 

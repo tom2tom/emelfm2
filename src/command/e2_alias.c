@@ -1,6 +1,6 @@
 /* $Id: e2_alias.c 2672 2013-08-10 22:15:10Z tpgww $
 
-Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelfm2.
 emelfm2 is free software; you can redistribute it and/or modify it

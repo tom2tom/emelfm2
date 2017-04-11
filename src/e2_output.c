@@ -1,6 +1,6 @@
 /* $Id: e2_output.c 3077 2015-02-02 22:17:39Z tpgww $
 
-Copyright (C) 2003-2015 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 2004 Florian Zähringer <flo.zaehringer@web.de>
 Portions copyright (C) 1999 Michael Clark.
 

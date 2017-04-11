@@ -1,6 +1,6 @@
 /* $Id: e2_cache.c 2828 2013-10-23 07:54:48Z tpgww $
 
-Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 Copyright (C) 2004 Florian Zaehringer (flo.zaehringer@web.de)
 
 This file is part of emelFM2.

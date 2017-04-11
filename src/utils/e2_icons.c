@@ -1,6 +1,6 @@
 /* $Id: e2_icons.c 3031 2014-01-24 21:07:28Z tpgww $
 
-Copyright (C) 2013-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2013-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

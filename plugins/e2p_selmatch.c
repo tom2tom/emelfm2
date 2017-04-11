@@ -1,6 +1,6 @@
 /* $Id: e2p_selmatch.c 2865 2013-10-27 09:18:13Z tpgww $
 
-Copyright (C) 2009-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2009-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

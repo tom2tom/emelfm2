@@ -1,6 +1,6 @@
 /* $Id: e2_bookmark.h 2118 2010-06-25 04:30:29Z tpgww $
 
-Copyright (C) 2004-2010 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelfm2.
 emelfm2 is free software; you can redistribute it and/or modify it

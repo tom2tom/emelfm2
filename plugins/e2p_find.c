@@ -1,6 +1,6 @@
 /* $Id: e2p_find.c 2928 2013-11-14 07:29:25Z tpgww $
 
-Copyright (C) 2005-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2005-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Matthew Grossman <mattg@oz.net>
 
 This file is part of emelFM2.

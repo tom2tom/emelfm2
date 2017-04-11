@@ -8,7 +8,7 @@
  *
  * Portions copyright (C) 2001-2003 Sven Neumann <sven@gimp.org>
  * Portions copyright (C) 2001-2003 Michael Natterer <mitch@gimp.org>
- * Portions copyright (C) 2009 tooar <tooar@emelfm2.net>
+ * Portions copyright (C) 2009-2017 tooar <tooar@emelfm2.net>
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as

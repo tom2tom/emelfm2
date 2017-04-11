@@ -1,6 +1,6 @@
 /* $Id: e2_textiter.c 2486 2012-04-06 10:14:55Z tpgww $
 
-Portions copyright (C) 2003-2012 tooar <tooar@emelfm2.net>
+Portions copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 2000, 2002 Paolo Maggi
 Portions copyright (C) 2002, 2003 Jeroen Zwartepoorte
 

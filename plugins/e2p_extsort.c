@@ -1,6 +1,6 @@
 /* $Id: e2p_extsort.c 2978 2013-11-30 02:56:32Z tpgww $
 
-Copyright (C) 2003-2010 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark
 
 This file is part of emelFM2.

@@ -1,6 +1,6 @@
 /* $Id: e2p_timeset.c 2841 2013-10-24 10:04:36Z tpgww $
 
-Copyright (C) 2006-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2006-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; you can redistribute it and/or modify it

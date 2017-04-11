@@ -1,6 +1,6 @@
 /* $Id: e2_complete__mount.c 2064 2010-03-12 13:15:36Z tpgww $
 
-Copyright (C) 2005-2010 tooar <tooar@emelfm2.net>
+Copyright (C) 2005-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 2004 Florian Zaehringer <flo.zaehringer@web.de>
 
 This file is part of emelFM2.

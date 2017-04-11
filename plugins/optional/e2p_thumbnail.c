@@ -1,6 +1,6 @@
 /* $Id: e2p_thumbnail.c 2909 2013-11-06 04:39:14Z tpgww $
 
-Copyright (C) 2007-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2007-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2, which is free software. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as published

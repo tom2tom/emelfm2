@@ -1,6 +1,6 @@
 /* $Id: e2_option_tree_context_menu.c 3030 2014-01-23 19:30:30Z tpgww $
 
-Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 2004 Florian Zaehringer <flo.zaehringer@web.de>
 
 This file is part of emelFM2.

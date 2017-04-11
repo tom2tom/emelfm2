@@ -1,6 +1,6 @@
 /* $Id: e2p_crypt.c 2840 2013-10-24 10:02:23Z tpgww $
 
-Copyright (C) 2007-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2007-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; for the most part you can redistribute it

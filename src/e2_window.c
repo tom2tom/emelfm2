@@ -1,6 +1,6 @@
 /* $Id: e2_window.c 3060 2014-02-14 23:40:44Z tpgww $
 
-Copyright (C) 2004-2014 tooar <tooar@emelfm2.net>
+Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark.
 
 This file is part of emelFM2.

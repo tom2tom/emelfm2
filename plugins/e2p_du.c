@@ -1,6 +1,6 @@
 /* $Id: e2p_du.c 3091 2015-08-25 07:06:10Z tpgww $
 
-Copyright (C) 2003-2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2003-2017 tooar <tooar@emelfm2.net>
 Portions copyright (C) 1999 Michael Clark
 
 This file is part of emelFM2.

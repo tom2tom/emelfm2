@@ -1,6 +1,6 @@
 /* $Id: e2p_shred.c 2979 2013-11-30 05:42:37Z tpgww $
 
-Copyright (C) 2013 tooar <tooar@emelfm2.net>
+Copyright (C) 2013-2017 tooar <tooar@emelfm2.net>
 
 This file is part of emelFM2.
 emelFM2 is free software; for the most part you can redistribute it and/or
