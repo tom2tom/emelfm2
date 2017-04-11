@@ -1,0 +1,8 @@
+.svn
+*project*
+*.tags-cache
+src/build/build.h
+*.o
+*.so
+*.deps
+emelfm2
