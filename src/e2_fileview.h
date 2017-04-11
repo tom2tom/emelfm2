@@ -1,4 +1,4 @@
-/* $Id: e2_fileview.h 3090 2015-08-25 07:05:32Z tpgww $
+/* $Id: e2_fileview.h 3096 2017-04-11 02:01:13Z tpgww $
 
 Copyright (C) 2004-2013 tooar <tooar@emelfm2.net>
 
@@ -37,7 +37,7 @@ enum { FILENAME = 0,
 enum
 {
 	E2DREAD_ENOENT,	//empty dir (not really an error)
-	E2DREAD_NS,		//stat dir failed
+	E2DREAD_NS,	//stat dir failed
 	E2DREAD_DNR,	//dir not opened
 	E2DREAD_DNCH,	//cannot cd into dir to poll its contents
 	E2DREAD_DNF,	//read cancelled by user after timeout
