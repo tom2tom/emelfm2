@@ -141,22 +141,17 @@ void e2_widget_set_toggletip (GtkWidget *widget, const gchar *initialtip,
 */
 void e2_widget_set_tip (GtkWidget *widget, const gchar *tiptext1, const gchar *tiptext2)
 {
-/*
+
 #ifdef DISPLAYTHREADSAFE
 	gtk_tooltips_set_tip (app.tooltips, widget, tiptext1, tiptext2);
 #else
-*/
 	/* gtk >= 2.12 (downstream) uses gtk_widget_set_tooltip_text(), and for
 	   gtk < 2.16.3 that synchronously accesses X server, so needs BGL closed */
 	gboolean close = (app.gtkversion >= 21200 //revised tips-code is in play from 2.12.0
 				   && app.gtkversion < 21603);//tip-setting mechanism adjusted in 2.16.3
 	if (close)
 	{
-#ifdef NATIVE_BGL
-		printd (WARN, "Closing BGL with default mutex will sometimes be recursively bad");
-		CLOSEBGL
-#else
-# ifdef DEBUG_MESSAGES
+#ifdef DEBUG_MESSAGES
 		//FIXME find a way to make errorcheck mutex block, to avoid having to abort
 		gint _lockres = pthread_mutex_trylock (&display_mutex);
 		if (_lockres != 0)
@@ -168,10 +163,9 @@ void e2_widget_set_tip (GtkWidget *widget, const gchar *tiptext1, const gchar *t
 				return;
 			}
 		}
-# else
+#else
 		//recursive mutex is more tolerant
 		CLOSEBGL
-# endif
 #endif
 	}
 /*	else
@@ -181,7 +175,7 @@ void e2_widget_set_tip (GtkWidget *widget, const gchar *tiptext1, const gchar *t
 
 	if (close)
 		OPENBGL
-//#endif
+#endif //ndef DISPLAYTHREADSAFE
 }
 #endif //def USE_GTK2_12TIPS
 
