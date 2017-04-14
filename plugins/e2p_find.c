@@ -73,7 +73,7 @@ check tracker usage
 #define TRACKERFIND
 
 #ifdef E2_SMALLSCREEN
-//notebook tabs at top, lef-align labels
+//notebook tabs at top, left-align labels
 # define LABEL_ALIGN 0.02
 #else
 # define LABEL_ALIGN 0.5
@@ -1861,12 +1861,12 @@ static void _e2p_find_widget_changed_cb (GtkWidget *widget, gpointer user_data)
 	gboolean clean;
 	GtkWidget *box, *label;
 
-	box = (GtkWidget *) g_object_get_data (G_OBJECT(widget), PAGE_DATAKEY);
+	box = (GtkWidget *) g_object_get_data (G_OBJECT (widget), PAGE_DATAKEY);
 	NEEDCLOSEBGL
 	clean = TRUE;
 	_e2p_find_whether_page_is_clean (box, &clean);
 
-	label = (GtkWidget *) g_object_get_data (G_OBJECT(box), LABEL_DATAKEY);
+	label = (GtkWidget *) g_object_get_data (G_OBJECT (box), LABEL_DATAKEY);
 #ifdef USE_GTK3_0
 	if (clean)
 	{
@@ -3281,7 +3281,7 @@ static void _e2p_find_make_name_tab (GtkWidget *notebook, E2_FindDialogRuntime *
 #endif
 
 	_e2p_find_notify_all_widgets (vbox, vbox);
-	g_object_set_data (G_OBJECT(vbox), LABEL_DATAKEY, label);
+	g_object_set_data (G_OBJECT (vbox), LABEL_DATAKEY, label);
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), vbox, label);
 }
 /**
@@ -3797,12 +3797,19 @@ static void _e2p_find_make_content_tab (GtkWidget *notebook, E2_FindDialogRuntim
 		{
 #ifdef USE_GTK3_0
 	 		hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, E2_PADDING);
+			//TODO set hbox's style properties
+# ifdef E2_SMALLSCREEN
+			g_object_set (G_OBJECT (hbox), "margin-start", 5, NULL);
+# else
+			g_object_set (G_OBJECT (hbox), "halign", GTK_ALIGN_CENTER, NULL);
+# endif
+			gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, E2_PADDING_XSMALL);
 #else
 			hbox = gtk_hbox_new (FALSE, E2_PADDING);
-#endif
 			GtkWidget *align = gtk_alignment_new (LABEL_ALIGN, 0.0, 0.0, 0.6);
 			gtk_container_add (GTK_CONTAINER (align), hbox);
 			gtk_box_pack_start (GTK_BOX (vbox), align, FALSE, FALSE, E2_PADDING_XSMALL);
+#endif
 			e2_widget_add_mid_label (hbox, _("Using"), 0.0, FALSE, E2_PADDING_SMALL);
 			GtkWidget *button = _e2p_find_create_radio_button (hbox, radio,
 				TRACK_CONTENT_P, FALSE, "tracker", rt);	//no translation
@@ -4255,7 +4262,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(1),_("detfind"),_e2p_find_dialog_create,
 		_("_Find.."),
 		_("Find and list items, using detailed criteria"),
-		"plugin_" ANAME E2ICONTB)
+		"plugin-" ANAME E2ICONTB)
 
 	nocacheflags = !e2_cache_check ("find-plugin-flags");
 	if (nocacheflags)
