@@ -889,7 +889,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(14),_("compare"),_e2p_diff,
 		_("C_ompare"),
 		_("Select active-pane items which are duplicated in the other pane"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin

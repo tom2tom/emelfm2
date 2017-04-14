@@ -4604,7 +4604,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_NUMBERED_ACTION(1,_A(6),_("acl"),_e2p_task_acl,
 		_("Change _ACLs.."),
 		_("Change extended permissions of selected items"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 	PLUGINIT_NUMBERED_ACTION(2,_A(6),_("copy_acl"),_e2p_task_aclcopy,
 		_("_Replicate"),
 		_("Recursively apply ACLs of selected items to matching items in the other pane"),

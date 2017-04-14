@@ -254,7 +254,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_NUMBERED_ACTION(1,_A(7),_("selmatch"),_e2p_select_same,
 		_("_Select same"),
 		_("Select items whose whole name matches a selected item in the other pane"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 	PLUGINIT_NUMBERED_ACTION(2,_A(7),aname2,_e2p_select_like,
 		_("Select _like"),
 		_("Select items whose name partially matches a selected item in the other pane"),

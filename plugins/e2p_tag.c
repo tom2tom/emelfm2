@@ -198,7 +198,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_NUMBERED_ACTION(1,_A(6),_("tag"),_e2p_tag_selected,
 		_("_Tag"),
 		_("Log the items selected in active pane"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 	PLUGINIT_NUMBERED_ACTION(2,_A(7),_("retag"),_e2p_retag,
 		_("_Retag"),
 		_("Re-select any items logged in active pane"),

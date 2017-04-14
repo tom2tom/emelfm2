@@ -212,7 +212,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(6),_("foreach"),_e2p_foreach,
 		_("For _each.."),
 		_("Execute an entered command on each selected item separately"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 
 	//setup mutex to protect threaded access to foreach functionality
 #ifdef USE_GLIB2_32

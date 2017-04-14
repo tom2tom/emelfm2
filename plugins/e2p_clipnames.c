@@ -119,7 +119,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(6),_("copy_name"),_e2p_copy_to_clipboard,
 		_("Copy _names"),
 		_("Copy path or name of each selected item to the clipboard"),
-		"plugin_clip"E2ICONTB)
+		"plugin-clip"E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin

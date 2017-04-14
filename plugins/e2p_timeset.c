@@ -1126,7 +1126,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(6),_("timeset"),_e2p_task_times,
 		_("Change _times.."),
 		_("Change any of the time properties of selected items"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 }
 
 /**

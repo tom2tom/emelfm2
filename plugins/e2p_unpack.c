@@ -985,7 +985,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(6),name,_e2p_unpack,
 		_("_Unpack"),
 		_("Unpack archive file into a temporary directory"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 
 	//setup the working dir name
 	unpack_tmp = e2_utils_get_temp_path ("-unpack");

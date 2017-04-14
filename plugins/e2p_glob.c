@@ -675,7 +675,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(7),_("glob"),_e2p_glob,
 		_("_Glob.."),
 		_("Select items matching a specified pattern"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin

@@ -992,7 +992,7 @@ static void _e2p_thumbs_menu_choose_filetype_action_cb (GtkMenuItem *item,
 
 		command = g_string_sized_new (512);
 		command = g_string_assign (command,
-			(gchar *)g_object_get_data (G_OBJECT(item), "action-cmd-key"));
+			(gchar *)g_object_get_data (G_OBJECT (item), "action-cmd-key"));
 		for (member = sel; member != NULL; member = member->next)
 		{
 			GtkTreeIter iter;
@@ -1049,15 +1049,11 @@ static void _e2p_thumbs_refresh_cb (GtkMenuItem *widget, E2_ThumbDialogRuntime *
 	}
 	else if (!g_atomic_int_get (&rt->view->listcontrols.cd_working))
 	{
-#ifndef LOCAL_BGL
 //		NEEDCLOSEBGL
 		OPENBGL
-#endif
 		_e2p_thumbs_refresh_store (rt);
-#ifndef LOCAL_BGL
 		CLOSEBGL
 //		NEEDOPENBGL
-#endif
 	}
 	//if cd is happening already, ignore the refresh request
 }
@@ -1175,7 +1171,7 @@ static void _e2p_thumbs_menu_filetype_actions (GtkWidget *menu,
 				_e2p_thumbs_menu_choose_filetype_action_cb, rt);
 		}
 		//some activation-code wants the command, from the menu item
-		g_object_set_data (G_OBJECT(menu_item), "action-cmd-key", s);
+		g_object_set_data (G_OBJECT (menu_item), "action-cmd-key", s);
 
 		actions++;
 	}
@@ -1977,7 +1973,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(7),aname,_e2p_thumbs_show_action,
 		_("_Thumbnail.."),
 		_("Display thumbnails of image files in the active pane"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 
 	E2_OptionSetupExtra ex;
 	gchar *group = g_strconcat(_C(34),".",_C(27),":",aname,NULL); //_("plugins.options:thumbnail"
