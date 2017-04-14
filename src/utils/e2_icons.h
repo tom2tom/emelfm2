@@ -161,5 +161,10 @@ GtkIconSize e2_icons_get_size (gint psize);
 #endif
 
 gchar *e2_icons_get_custom_path (gboolean withtrailer) G_GNUC_MALLOC;
+gchar *e2_icons_get_full_path (const gchar *base, const gchar *iname, gint psize, gboolean withtrailer) G_GNUC_MALLOC;
+
+#ifdef USE_GTK3_14
+GtkWidget *e2_icons_get_arrow (GtkArrowType direction);
+#endif
 
 #endif //ndef __E2_ICONS_H__
