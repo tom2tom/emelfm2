@@ -2512,7 +2512,7 @@ GPtrArray *e2_fileview_get_selected (ViewInfo *view)
 /*	if (view == curr_view)
 	{
 		NEEDOPENBGL
-		g_signal_emit_by_name (G_OBJECT(view->treeview), "end-selection");
+		g_signal_emit_by_name (G_OBJECT (view->treeview), "end-selection");
 		NEEDCLOSEBGL
 	}
 */
@@ -4640,7 +4640,7 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 			changes, or other reasonable work-around that we can find, to allow
 			the minimum to be dynamically revised in accord with user's changes */
 
-		g_object_set (column,
+		g_object_set (G_OBJECT (column),
 			"sizing", GTK_TREE_VIEW_COLUMN_FIXED,
 			"resizable", TRUE,
 			"fixed-width", thiswidth,

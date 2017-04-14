@@ -815,7 +815,7 @@ static gboolean _e2_option_tree_mnemonic_cb (GtkWidget *button, gboolean group_c
 	E2_KeyBlock *bdata)
 {
 	printd (DEBUG, "_e2_option_tree_mnemonic_cb");
-//	E2_KeyBlock *bdata = g_object_get_data (G_OBJECT(button), KEYCHANGEKEY);
+//	E2_KeyBlock *bdata = g_object_get_data (G_OBJECT (button), KEYCHANGEKEY);
 	if (bdata != NULL && bdata->data != NULL && g_atomic_int_get (&bdata->blocked) != 0)
 	{
 		NEEDCLOSEBGL
@@ -854,7 +854,7 @@ void e2_option_tree_connect_mnemonics (GtkWidget *button_box)
 	GList *btn, *all = gtk_container_get_children (GTK_CONTAINER(button_box));
 	for (btn = all; btn != NULL; btn = btn->next)
 	{
-		g_signal_connect (G_OBJECT(btn->data), "mnemonic-activate",
+		g_signal_connect (G_OBJECT (btn->data), "mnemonic-activate",
 			G_CALLBACK(_e2_option_tree_mnemonic_cb), &blocknow);
 	}
 	g_list_free (all);
@@ -871,7 +871,7 @@ static void _e2_option_tree_set_mnemonics_data (GtkWidget **buttons, guint count
 	for (i = 0; i < count; i++, buttons++)
 	{
 		if (*buttons != NULL)
-			g_object_set_data_full (G_OBJECT(*buttons), KEYCHANGEKEY, &blocknow, NULL);
+			g_object_set_data_full (G_OBJECT (*buttons), KEYCHANGEKEY, &blocknow, NULL);
 	}
 }
 */
@@ -935,7 +935,7 @@ static void _e2_option_tree_key_edit_start_cb (GtkCellRenderer *renderer,
 		E2_Sextet *st = ?
 		_e2_option_tree_set_mnemonics_data ((GtkWidget**)st, 6, &blocknow-replacement);
 		//for current page buttons
-		st = g_object_get_data (G_OBJECT(set->widget), "e2-config-buttons");
+		st = g_object_get_data (G_OBJECT (set->widget), "e2-config-buttons");
 		_e2_option_tree_set_mnemonics_data ((GtkWidget**)st, 6, &blocknow-replacement);
 */
 		g_signal_connect (G_OBJECT (entry), "key-press-event",
@@ -1990,7 +1990,7 @@ void e2_option_tree_add_widget (GtkWidget *parent, gboolean single, GtkWidget *b
 //	g_signal_connect (G_OBJECT (treeview), "drag-drop", G_CALLBACK (drop_cb), set);
 //	g_signal_connect (G_OBJECT (treeview), "drag-end", G_CALLBACK (drag_end_cb), set);
 	//cleanup menu with the treeview
-	g_object_set_data_full (G_OBJECT(treeview), "destroy-menu", context_menu,
+	g_object_set_data_full (G_OBJECT (treeview), "destroy-menu", context_menu,
 		(GDestroyNotify)gtk_widget_destroy);
 	//arrange for data backup if/when the page is opened
 	g_signal_connect (G_OBJECT (treeview), "realize",
