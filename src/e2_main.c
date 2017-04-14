@@ -141,6 +141,8 @@ pthread_mutex_t wait_mutex; // = PTHREAD_MUTEX_INITIALIZER;	if no recursion
 
 static void _e2_main_system_shutdown (gint num); //__attribute__ ((noreturn));
 
+#ifndef DISPLAYTHREADSAFE
+
 /**
 @brief local management of UI-backend-access mutex
 These allow a conservative approach to locking without risk of deadlock
@@ -204,6 +206,8 @@ void e2_main_init_uilock (gboolean free)
 	pthread_mutex_init (&display_mutex, &attr);
 	pthread_mutexattr_destroy (&attr);
 }
+#endif //ndef DISPLAYTHREADSAFE
+
 /**
 @brief idle and then timer callback to do non-time-critical things at session start
 This waits until after both filelists are initialised, as determined by both
@@ -671,15 +675,17 @@ gint main (gint argc, gchar *argv[])
 #ifndef USE_GLIB2_32
 	g_thread_init (NULL);
 #endif
+#ifndef DISPLAYTHREADSAFE
 	e2_main_init_uilock (FALSE);
 # ifndef LOCAL_BGL
-#ifdef USE_GTK3_6
-#warning GTK 3.6 deprecates use of an application-specific display mutex. No reasonable workaround is available.
-#endif
+#  ifdef USE_GTK3_6
+#   warning GTK 3.6 deprecates use of an application-specific display mutex. No reasonable workaround is available.
+#  endif
 	//these are deprecated for gtk 3.6+
 	gdk_threads_set_lock_functions (e2_main_close_uilock, e2_main_open_uilock);
 	gdk_threads_init ();	//setup gdk mutex
 # endif
+#endif
 #ifdef ENABLE_NLS
 	//before gtk_init(), ensure that _() in recent gtk's works cleanly
 	textdomain (BINNAME);
@@ -1084,7 +1090,9 @@ gboolean e2_main_closedown (gboolean compulsory, gboolean saveconfig, gboolean d
 		pthread_mutex_destroy (&wait_mutex);
 #endif
 		OPENBGL //open lock closed around gtk_main()
+#ifndef DISPLAYTHREADSAFE
 		pthread_mutex_destroy (&display_mutex);
+#endif
 		printd (DEBUG, "exit(0) from lounge");
 		exit (0);
 	}
