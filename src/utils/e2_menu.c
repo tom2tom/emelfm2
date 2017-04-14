@@ -366,7 +366,7 @@ GtkWidget *e2_menu_add_action (GtkWidget *menu, const gchar *label, const gchar 
 	{
 		GtkWidget *item = e2_menu_add (menu, label, icon, tip,
 			e2_menu_action_activated_cb, NULL);
-		g_object_set_data_full (G_OBJECT(item), "e2-actruntime",
+		g_object_set_data_full (G_OBJECT (item), "e2-actruntime",
 			art, (GDestroyNotify)e2_action_free_runtime);
 		return item;
 	}
@@ -1170,7 +1170,7 @@ static gboolean _e2_menu_mount_keypress_cb (GtkWidget *menu,
 	printd (DEBUG, "_e2_menu_mount_keypress_cb");
 	if (event->keyval == GDK_Insert)
 	{
-		const gchar *path = g_object_get_data (G_OBJECT(selectedmount), "_mountpoint_");
+		const gchar *path = g_object_get_data (G_OBJECT (selectedmount), "_mountpoint_");
 		NEEDCLOSEBGL
 		e2_command_line_insert (path);
 		NEEDOPENBGL
@@ -1325,7 +1325,7 @@ static void _e2_menu_fill_desktop_actions (GtkWidget *menu, GKeyFile *key_file)
 					item = e2_menu_add (menu, label, NULL, NULL,
 						_e2_menu_choose_filetype_action_cb, command);
 					//cleanup during menu destruction, whether or not this item activated
-					g_object_set_data_full (G_OBJECT(item), "action-cmd-key",
+					g_object_set_data_full (G_OBJECT (item), "action-cmd-key",
 							command, g_free);
 					if (label != command)
 						g_free (label);
@@ -1403,7 +1403,7 @@ static void _e2_menu_fill_desktop_mime (GtkWidget *menu, GKeyFile *key_file)
 		GtkWidget *item = e2_menu_add (menu, label, NULL, NULL,
 			_e2_menu_choose_filetype_action_cb, command);
 		//cleanup during menu destruction
-		g_object_set_data_full (G_OBJECT(item), "action-cmd-key", command, g_free);
+		g_object_set_data_full (G_OBJECT (item), "action-cmd-key", command, g_free);
 		if (label != command)
 			g_free (label);
 	}
@@ -1566,9 +1566,9 @@ static void _e2_menu_fill_filetype_actions_menu (GtkWidget *menu,
 		}
 		//some open-with action code needs the command, from the menu item
 		if (sys != NULL)
-			g_object_set_data_full (G_OBJECT(menu_item), "action-cmd-key", sys, g_free);
+			g_object_set_data_full (G_OBJECT (menu_item), "action-cmd-key", sys, g_free);
 		else
- 			g_object_set_data_full (G_OBJECT(menu_item), "action-cmd-key", cmd, NULL);
+ 			g_object_set_data_full (G_OBJECT (menu_item), "action-cmd-key", cmd, NULL);
 		actions++;
 	}
 

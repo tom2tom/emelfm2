@@ -249,7 +249,7 @@ DBusGConnection *bus,
 		g_error_free (error);
 	}
 
-	g_object_unref (G_OBJECT(prop_proxy));
+	g_object_unref (G_OBJECT (prop_proxy));
 	return version;
 }
 /**
@@ -357,7 +357,7 @@ abort:
 			object_path, error->message);
 		g_error_free (error);
 		g_free (device_iface);
-		g_object_unref (G_OBJECT(prop_proxy));
+		g_object_unref (G_OBJECT (prop_proxy));
 		return FALSE;
 	}
 
@@ -404,7 +404,7 @@ abort:
 			object_path, error->message);
 		g_error_free (error);
 		g_free (device_iface);
-		g_object_unref (G_OBJECT(prop_proxy));
+		g_object_unref (G_OBJECT (prop_proxy));
 		return FALSE;
 	}
 
@@ -458,7 +458,7 @@ abort:
 				object_path, error->message);
 			g_error_free (error);
 			g_free (device_iface);
-			g_object_unref (G_OBJECT(prop_proxy));
+			g_object_unref (G_OBJECT (prop_proxy));
 			return FALSE;
 		}
 #ifdef DEVKIT_IFACE
@@ -676,7 +676,7 @@ static void _e2_devkit_device_data_clear (DeviceData *data)
 //redundant unless some race-risk exists		data->timer_id = 0;
 	}
 	g_free (data->object_path);
-	g_object_unref (G_OBJECT(data->devproxy));
+	g_object_unref (G_OBJECT (data->devproxy));
 	_e2_devkit_device_properties_clear (&data->props);
 
 	DEALLOCATE (DeviceData, data);
@@ -1309,12 +1309,6 @@ static gboolean _e2_devkit_check_unmount (DeviceData *device)
 {
 	gboolean retval;
 
-	if (device->timer_id > 0)
-	{
-		g_source_remove (device->timer_id);	//the source may now be unrelated to this callback
-		device->timer_id = 0;	//ASAP indicate to any other process
-	}
-
 	printd (DEBUG, "Device unmount timer-callback");
 
 	if (device->props.device_is_mounted)
@@ -1335,6 +1329,12 @@ static gboolean _e2_devkit_check_unmount (DeviceData *device)
 	//ensure neither filelist shows the unmounted device
 	_e2_devkit_checkdir (curr_pane);
 	_e2_devkit_checkdir (other_pane);
+
+	if (retval && device->timer_id > 0)
+	{
+		g_source_remove (device->timer_id);	//the source may now be unrelated to this callback
+		device->timer_id = 0;	//ASAP indicate to any other process
+	}
 
 	return retval;
 }
@@ -1690,7 +1690,7 @@ void e2_devkit_init (void)
 	if (_e2_devkit_detect_current_removables (sessionptr))
 	{
 #ifdef USE_GLIB2_26
-		g_signal_connect (G_OBJECT(session.proxy), "g-signal",
+		g_signal_connect (G_OBJECT (session.proxy), "g-signal",
 			G_CALLBACK (_e2_devkit_device_signal_cb), sessionptr);
 #else
 		const gchar *signame;
@@ -1720,7 +1720,7 @@ void e2_devkit_init (void)
 #else
 		dbus_g_connection_unref (session.bus);
 #endif
-		g_object_unref (G_OBJECT(session.proxy));
+		g_object_unref (G_OBJECT (session.proxy));
 		g_hash_table_destroy (session.logged_devices);
 		memset (sessionptr, 0, sizeof (DevicesSession));
 	}
@@ -1740,7 +1740,7 @@ void e2_devkit_disconnect (void)
 		dbus_g_connection_unref (session.bus);
 #endif
 	if (session.proxy != NULL)
-		g_object_unref (G_OBJECT(session.proxy));
+		g_object_unref (G_OBJECT (session.proxy));
 	if (session.logged_devices != NULL)
 		g_hash_table_destroy (session.logged_devices);
 }

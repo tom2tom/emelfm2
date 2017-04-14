@@ -686,7 +686,7 @@ gboolean e2_view_dialog_read_text (VPATH *localfile, E2_ViewDialogRuntime *rt)
 							if (coding_names [row][col] != NULL)
 							{
 								button = gtk_check_button_new_with_label (coding_names [row][col]);
-								g_signal_connect (G_OBJECT(button), "toggled",
+								g_signal_connect (G_OBJECT (button), "toggled",
 									G_CALLBACK (_e2_view_dialog_lang_toggle), &drt);
 #ifdef USE_GTK3_2
 								gtk_grid_attach (GTK_GRID (table), button, row, col, 1, 1);
@@ -1767,6 +1767,7 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 
 	GtkWidget *hbox = e2_view_dialog_create_searchbar (rt);
 	gtk_container_add (GTK_CONTAINER (hndlbox), hbox);
+//#ifdef USE_GTK3_12 TODO deprecated action area use
 	//add things to the action-area
 	GtkWidget *hbbox =
 #ifdef USE_GTK2_14
@@ -2016,7 +2017,7 @@ static gboolean _e2_view_dialog_viewatQ (E2_ActionTaskData *qed)
 		gtk_widget_show (dialog);
 		//insert the text now
 		gtk_text_view_set_buffer (GTK_TEXT_VIEW (vrt->textview), vrt->textbuffer);
-		g_object_unref (G_OBJECT(vrt->textbuffer)); //destroy buffer with view
+		g_object_unref (G_OBJECT (vrt->textbuffer)); //destroy buffer with view
 		if (found)
 		{	//FIXME sometimes it scrolls to wrong spot
 			//see API doco for gtk_text_view_scroll_to_iter() re idle-time processing

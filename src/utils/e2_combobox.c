@@ -486,7 +486,7 @@ void e2_combobox_clear_value (GtkWidget *combo, const gchar *value, gboolean wit
 			gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 	}
 
-	GList **history = (GList**) g_object_get_data (G_OBJECT(combo), "e2-combo-history");
+	GList **history = (GList**) g_object_get_data (G_OBJECT (combo), "e2-combo-history");
 	if (history != NULL && *history != NULL)
 	{
 		GList *tmp;
@@ -770,7 +770,7 @@ GtkWidget *e2_combobox_get (void (*activate_cb)(GtkEntry*,gpointer),
 
 		if (history != NULL)
 		{
-			g_object_set_data (G_OBJECT(combo), "e2-combo-history", history);
+			g_object_set_data (G_OBJECT (combo), "e2-combo-history", history);
 			//enable prompt UI updates
 			g_signal_connect (G_OBJECT
 #ifdef USE_GTK2_14
