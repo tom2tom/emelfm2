@@ -87,7 +87,11 @@ typedef struct _E2_ViewInfo
 	gint sort_column;	//copy of current sort column, can be <0
 	gboolean extsort;	//TRUE when name-sorting is by extension
 	GtkSortType sort_order; //copy of current sort order
+#ifdef USE_GTK3_14
+	GtkWidget *sort_arrow;
+#else
 	GtkWidget *sort_arrows[MAX_COLUMNS];
+#endif
 	GtkLabel *name_label;	//for showing active pane by changing label content
 //	E2_FSType dirtype;	//flags for type of namespace this view belongs to
 	E2_FSSensitive case_sensitive_names; //cache, FIXME needs to be cleared when removable device changes
@@ -243,7 +247,7 @@ void e2_fileview_switch_views (void);
 //void e2_fileview_switch_views_simple (void);
 void e2_fileview_set_font (void);
 void e2_fileview_set_row_background (ViewInfo *view,
-	GtkTreeIter *iter, GdkColor *color);
+	GtkTreeIter *iter, GDKCOLOR *color);
 void e2_fileview_clear_row_background (ViewInfo *view,
 	GtkTreeIter *iter);
 void e2_fileview_update_col_cachedata (void);
@@ -251,6 +255,9 @@ gboolean e2_fileview_is_cased (ViewInfo *view);
 void e2_fileview_get_scroll_data (ViewInfo *view, gint *leftcol, gint *toprow);
 gboolean e2_fileview_scroll_to_position (ViewInfo *view, gint leftcol, gint toprow);
 //gint e2_fileview_find_name_col (ViewInfo *view); unused
+#ifdef USE_GTK3_14
+void e2_fileview_set_arrow (ViewInfo *view, GtkArrowType arrow);
+#endif
 gboolean e2_fileview_prepare_list (ViewInfo *view);
 void e2_fileview_scroll_list (GThread *viewthread);
 gboolean e2_fileview_cd_watch (E2_CDwatch *data);

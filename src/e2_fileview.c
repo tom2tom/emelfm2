@@ -44,6 +44,9 @@ ToDo
 #include "e2_option.h"
 //#include "e2_tree_dialog.h"
 #include "e2_dialog.h"
+#ifdef USE_GTK3_14
+# include "e2_icons.h"
+#endif
 #include "e2_task.h"
 #ifdef E2_MOUSECUSTOM
 # include "e2_mousebinding.h"
@@ -76,9 +79,9 @@ gint stored_col_order[2][MAX_COLUMNS];
 gint displayed_col_order[2][MAX_COLUMNS];
 
 // Colors
-//GdkColor LIST_COLOR;
+//GDKCOLOR LIST_COLOR;
 #ifdef E2_SELTXT_RECOLOR
-GdkColor selectedtext;
+GDKCOLOR selectedtext;
 #endif
 
 gboolean btn2_released;	//flag used to decide if middle-btn DnD menu is wanted
@@ -681,25 +684,30 @@ gboolean e2_fileview_sort_column (gint colnum, ViewInfo *view)
 	if (colnum == EXTENSION)
 		//FIXME do a more-intuitive arrow
 		arrow = (view->sort_order == GTK_SORT_ASCENDING) ?
-		GTK_ARROW_RIGHT : GTK_ARROW_LEFT;
+			GTK_ARROW_RIGHT : GTK_ARROW_LEFT;
 	else
 		arrow = (view->sort_order == GTK_SORT_ASCENDING) ?
-		GTK_ARROW_DOWN : GTK_ARROW_UP;
-
-	gtk_arrow_set (GTK_ARROW (view->sort_arrows[realcol]), arrow,
-			//different shadow types don't do any good, really ...
-//			(view->extsort) ? GTK_SHADOW_ETCHED_IN : GTK_SHADOW_OUT);
-			GTK_SHADOW_NONE);
+			GTK_ARROW_DOWN : GTK_ARROW_UP;
+#ifdef USE_GTK3_14
+	if (view->sort_arrow)
+		gtk_widget_destroy (view->sort_arrow);
+#else
+	//different shadow types don't do any good, really ...
+	gtk_arrow_set (GTK_ARROW (view->sort_arrows[realcol]), arrow, GTK_SHADOW_NONE);
 	if (old_sortcol != realcol)
 	{	//column is not already sorted
 		//replace sort indicator
 		gtk_widget_hide (view->sort_arrows[old_sortcol]);
 		gtk_widget_show (view->sort_arrows[realcol]);
 	}
+#endif
 	//remember the column, for cacheing
 	view->sort_column = realcol;
 	//do the sort
 	gtk_tree_sortable_set_sort_column_id (sortable, realcol, view->sort_order);
+#ifdef USE_GTK3_14
+	e2_fileview_set_arrow (view, arrow);
+#endif
 	return TRUE;
 }
 
@@ -909,20 +917,25 @@ static void _e2_fileview_column_header_clicked_cb (GtkTreeViewColumn *col,
 	else
 		arrow = (view->sort_order == GTK_SORT_ASCENDING) ? GTK_ARROW_DOWN : GTK_ARROW_UP;
 
-	gtk_arrow_set (GTK_ARROW (view->sort_arrows[i]), arrow,
-			//different shadow types don't do any good, really ...
-			GTK_SHADOW_NONE);
+#ifdef USE_GTK3_14
+	gtk_widget_destroy (view->sort_arrow);
+#else
+	//different shadow types don't do any good, really ...
+	gtk_arrow_set (GTK_ARROW (view->sort_arrows[i]), arrow, GTK_SHADOW_NONE);
 	if (m != i)
 	{	//column is not already sorted
 		//replace sort indicator
 		gtk_widget_hide (view->sort_arrows[m]);
 		gtk_widget_show (view->sort_arrows[i]);
 	}
+#endif
 	//remember the column, for cacheing
 	view->sort_column = i;
 	//do the sort
 	gtk_tree_sortable_set_sort_column_id (sortable, i, view->sort_order);
-
+#ifdef USE_GTK3_14
+	e2_fileview_set_arrow (view, arrow);
+#endif
 	gtk_widget_grab_focus (view->treeview);
 	NEEDOPENBGL
 }
@@ -2628,7 +2641,7 @@ void e2_fileview_set_font (void)
 @return
 */
 void e2_fileview_set_row_background (ViewInfo *view, GtkTreeIter *iter,
-	GdkColor *color)
+	GDKCOLOR *color)
 {
 	//set the attribute column for this row
 	gtk_list_store_set (GTK_LIST_STORE (view->store), iter, BACKCOLOR, color, -1);
@@ -2647,7 +2660,7 @@ void e2_fileview_clear_row_background (ViewInfo *view, GtkTreeIter *iter)
 {
 	//restore the background-attribute column for this row
 #ifdef E2_ASSISTED
-	GdkColor *bc;
+	GDKCOLOR *bc;
 	if (e2_option_bool_get ("color-background-set"))
 		bc = e2_option_color_get ("color-background");
 	else
@@ -4429,6 +4442,41 @@ static gpointer _e2_fileview_change_dir (E2_Listman *cddata)
 	printd (DEBUG, "_e2_fileview_change_dir ends");
 	return NULL;
 }
+
+#ifdef USE_GTK3_14
+/**
+@brief add and display the sort-column arrow in the pane related to @a view
+Expects BGL closed
+
+@param view runtime data for view being processed
+@param arrow GtkArrowType indicating which type of arrow
+@return
+*/
+void e2_fileview_set_arrow (ViewInfo *view, GtkArrowType arrow)
+{
+	gint *order_array = (view == &app.pane1.view) ? displayed_col_order[0] : displayed_col_order[1];
+	gint i, m = 0;
+	for (i = 0; i < MAX_COLUMNS; i++)
+	{
+		if (order_array[i] == view->sort_column)
+		{
+			m = i;
+			break;
+		}
+	}
+
+	GList *cols = gtk_tree_view_get_columns (GTK_TREE_VIEW (view->treeview));
+	GtkTreeViewColumn *col = g_list_nth_data (cols, m);
+	g_list_free (cols);
+
+	GtkBox *headerbox;
+	g_object_get (G_OBJECT (col), "widget", &headerbox, NULL);
+
+	view->sort_arrow = e2_icons_get_arrow (arrow);
+	gtk_box_pack_end (headerbox, view->sort_arrow, FALSE, FALSE, 0);
+	gtk_widget_show (view->sort_arrow);
+}
+#endif
 /**
 @brief create filelist for the pane related to @a view
 
@@ -4475,8 +4523,10 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 
 	//set general treeview properties
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (tvw), TRUE);
+#ifndef USE_GTK3_14
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (tvw),	//useless with managed backcolors
 		e2_option_bool_get ("panes-hinted"));
+#endif
 //#ifdef USE_GTK2_10
 //FIXME use this if it's as functional as E2_ALTLEFTMOUSE, seems not so
 //	gtk_tree_view_set_rubber_banding (GTK_TREE_VIEW (tvw), TRUE);	//"drag-selection"
@@ -4495,6 +4545,7 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 		||
 		(e2_option_bool_get ("pane2-uses-other") && view == app.pane2.view) );
 */
+	GtkArrowType arrow;
 	gint i;
 	//set columns' properties
 	for (i = 0; i < MAX_COLUMNS; i++)
@@ -4504,7 +4555,6 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 		gchar *option_name;
 		E2_OptionSet *set;
 		GtkWidget *headerbox, *label;
-		GtkArrowType arrow;
 		GtkCellRenderer *renderer;
 		GtkTreeViewColumn *column;
 
@@ -4536,6 +4586,7 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 		if (m == FILENAME)
 			//remember the filename column label in case we need to use it for active-pane flagging
 			view->name_label = GTK_LABEL (label);
+#ifndef USE_GTK3_14
 		//set the current sort arrow
 		if (m == view->sort_column
 				&& view->sort_order == GTK_SORT_DESCENDING)
@@ -4545,6 +4596,7 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 		view->sort_arrows[m] = gtk_arrow_new (arrow, GTK_SHADOW_IN);
 		//this doesn't show the indicator at the end of the header ! (and different exp, fill don't help)
 		gtk_box_pack_end (GTK_BOX(headerbox), view->sort_arrows[m], FALSE, FALSE, 0);
+#endif
 
 		renderer = gtk_cell_renderer_text_new ();
 		g_object_set (G_OBJECT (renderer),
@@ -4566,8 +4618,13 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 			id, //this is for seaching & sorting, displayed title is in widget label
 			renderer,
 			"text", m,
+#ifdef USE_GTK3_4
+			"foreground-rgba", FORECOLOR,
+			"cell-background-rgba", BACKCOLOR,
+#else
 			"foreground-gdk", FORECOLOR,
 			"cell-background-gdk", BACKCOLOR,	//this column is generally NULL'd, except for drop-target highlighting
+#endif
 			NULL);
 
 		gint thiswidth = width_array[m];
@@ -4639,7 +4696,13 @@ GtkWidget *e2_fileview_create_list (ViewInfo *view)
 	//inital sort parameters set from cache
 	gtk_tree_sortable_set_sort_column_id (sortable,
 		view->sort_column, view->sort_order);
+#ifdef USE_GTK3_14
+	arrow = (view->sort_order == GTK_SORT_DESCENDING) ?
+		GTK_ARROW_UP : GTK_ARROW_DOWN;
+	e2_fileview_set_arrow (view, arrow);
+#else
 	gtk_widget_show (view->sort_arrows[view->sort_column]);
+#endif
 
 #ifndef E2_MOUSECUSTOM
 	//FIXME do this once, not for both panes
