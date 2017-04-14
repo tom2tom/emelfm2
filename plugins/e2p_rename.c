@@ -1094,7 +1094,6 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 
 	//FIXME start an async task-thread
 	GtkWidget *dialog;
-	gboolean check;
 
 	if (_e2p_ren_get_flag (CONFIRM_P))	//, rt))
 	{ //setup for repeated non-modal dialogs
@@ -1124,12 +1123,10 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 		e2_dialog_add_defined_button (dialog, &local_btn);
 
 		e2_dialog_setup (dialog, app.main_window);
-		check = e2_option_bool_get ("confirm-overwrite");
 	}
 	else
 	{
 		dialog = NULL;
-		check = FALSE;
 	}
 
 	e2_filelist_disable_refresh ();
@@ -1258,7 +1255,9 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 				}
 			}
 			else
+			{
 				CLOSEBGL
+			}
 		}
 
 		F_FREE (utfbase, localbase);
@@ -1976,7 +1975,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(1),_("renext"),_e2p_rename_dialog_create,
 		_("_Rename.."),
 		_("Rename items, using wildcards or regular-expressions"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 
 	if (!e2_cache_check ("rename-flags"))
 	{
