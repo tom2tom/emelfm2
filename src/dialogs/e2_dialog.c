@@ -106,7 +106,7 @@ static void _e2_dialog_activated_cb (GtkEntry *entry, GtkWidget *dialog)
 {
 	//mimic yes or apply button
 //	NEEDOPENBGL
-	g_signal_emit_by_name (G_OBJECT(dialog), "response", GTK_RESPONSE_YES);
+	g_signal_emit_by_name (G_OBJECT (dialog), "response", GTK_RESPONSE_YES);
 //	NEEDCLOSEBGL
 }
 /**
@@ -208,15 +208,17 @@ DialogButtons e2_dialog_wait (GtkWidget *dialog,
 		}
 		else
 		{
+#ifndef DISPLAYTHREADSAFE
 			//allow for aborting the process using this loop
 			//this is a macro, it can't be conditional by itself
 			pthread_cleanup_push ((gpointer)OPENBGL_NAME,
-#ifdef DEBUG_MESSAGES
+# ifdef DEBUG_MESSAGES
 				NULL
-#else
+# else
 				&display_mutex
-#endif
+# endif
 			);
+#endif
 #if 1
 			CLOSEBGL
 			gtk_widget_queue_draw (dialog);
@@ -229,7 +231,9 @@ DialogButtons e2_dialog_wait (GtkWidget *dialog,
 //			gdk_flush (); //also in e2_main_loop_run();
 			e2_main_loop_run (wdata.loopdata);
 			OPENBGL
+#ifndef DISPLAYTHREADSAFE
 			pthread_cleanup_pop (0); //another macro
+#endif
 		}
 
 		//prevent fatal multiple-callbacks if this func is repeatedly called
@@ -383,10 +387,14 @@ DialogButtons e2_dialog_show (GtkWidget *dialog, GtkWidget *parent,
 		va_end (args);
 	}
 	if (flags & E2_DIALOG_CLOSELOCK) //or else BGL is assumed already closed
+	{
 		CLOSEBGL
+	}
 	e2_dialog_setup (dialog, parent);
 	if (flags & E2_DIALOG_CLOSELOCK)
+	{
 		OPENBGL
+	}
 	return e2_dialog_run (dialog, parent, flags);
 }
 /**
@@ -407,7 +415,9 @@ DialogButtons e2_dialog_run (GtkWidget *dialog, GtkWidget *parent, E2_DialogFlag
 	gboolean lock = flags & E2_DIALOG_CLOSELOCK;
 
 	if (lock) //or else BGL is assumed already closed
+	{
 		CLOSEBGL
+	}
 
 	if (flags & E2_DIALOG_DONT_SHOW_ALL)
 		gtk_widget_show (dialog);	//this duplicates effect in gtk_dialog_run()
@@ -444,7 +454,9 @@ DialogButtons e2_dialog_run (GtkWidget *dialog, GtkWidget *parent, E2_DialogFlag
 	}
 
 	if (lock)
+	{
 		OPENBGL
+	}
 
 	return ret;
 }
@@ -546,10 +558,17 @@ GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
 //			gtk_misc_set_alignment (GTK_MISC (img), 0.5, 0.0);	//no effect
 //			gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, E2_PADDING);
 			gint isize = e2_icons_get_pixsize (GTK_ICON_SIZE_DIALOG);
+#ifdef USE_GTK3_0
+			//TODO set img's style properties
+//			gtk_widget_set_size_request (align, isize*1.2, isize);
+			g_object_set (G_OBJECT (img), "halign", GTK_ALIGN_END, "height-request", isize, "width-request", isize*1.2, NULL);
+			gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, 0);
+#else
 			GtkWidget *align = gtk_alignment_new (1.0, 0.0, 0.0, 0.0);
 			gtk_widget_set_size_request (align, isize*1.2, isize);
 			gtk_container_add (GTK_CONTAINER (align), img);
 			gtk_box_pack_start (GTK_BOX (hbox), align, FALSE, FALSE, 0);
+#endif
 		}
 		if (label_text != NULL)
 		{
@@ -652,7 +671,16 @@ GtkWidget *e2_dialog_add_sw (GtkWidget *dialog)
 	GtkWidget *hbox = g_object_get_data (G_OBJECT (dialog), "e2-dialog-hbox");
 	if (hbox != NULL)
 	{
+#ifdef USE_GTK3_14
+		GtkContainer *parent;
+		g_object_get (G_OBJECT (hbox), "parent", &parent, NULL);
+		g_object_ref (G_OBJECT (hbox));
+		gtk_container_remove (parent, hbox);
+		gtk_container_add (GTK_CONTAINER(vbox), hbox);
+		g_object_unref (G_OBJECT (hbox));
+#else
 		gtk_widget_reparent (hbox, vbox);
+#endif
 		gtk_box_set_child_packing (GTK_BOX (vbox), hbox, FALSE, FALSE, 0,
 			GTK_PACK_START);
 	}
@@ -1200,8 +1228,12 @@ void e2_dialog_setup_auth (GtkWidget *box)
 	gchar *s = g_strconcat ("<b>",_("You don't have authority to change anything"), "</b>", NULL);
 	gtk_label_set_markup (GTK_LABEL (label), s);
 	g_free (s);
+#ifdef USE_GTK3_0
+	g_object_set(G_OBJECT (label), "margin", E2_PADDING_LARGE, "halign", GTK_ALIGN_CENTER, "valign", GTK_ALIGN_CENTER, NULL);
+#else
 	gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 	gtk_misc_set_padding (GTK_MISC (label), E2_PADDING_LARGE, E2_PADDING_LARGE);
+#endif
 
 	GtkWidget *frame = gtk_frame_new (NULL);
     gtk_container_add (GTK_CONTAINER (frame), label);
