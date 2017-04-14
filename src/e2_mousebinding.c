@@ -897,7 +897,8 @@ This func is a mainloop timer callbacK
 static gboolean _e2_mousebinding_do_action_cb (E2_BtnChain *data)
 {
 	//in case the action takes a while ...
-	g_source_remove (data->timeout_id);
+	printd (DEBUG, "abandoned g_source_remove - _e2_mousebinding_do_action_cb");
+//	g_source_remove (data->timeout_id);
 
 	E2_BtnRuntime *binding = data->binding;
 	e2_action_run_simple_from (binding->action, binding->action_data, data->from);

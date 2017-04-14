@@ -381,7 +381,8 @@ static gboolean _e2_action_do_hover_timeout (E2HoverData *data)
 	//get rid of this ASAP in case of pending departure from hover-widget
 	if (data->timer_id > 0)
 	{
-		g_source_remove (data->timer_id);
+		printd (DEBUG, "abandoned explicit source-remove - _e2_action_do_hover_timeout");
+//		g_source_remove (data->timer_id);
 		data->timer_id = 0;
 	}
 
