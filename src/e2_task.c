@@ -143,7 +143,7 @@ gchar *e2_task_system_command (const gchar *command, const gchar *filepath)
 		if (items != NULL)
 		{
 			//1st menu-item assumed to represent the default
-			ret = (gchar*) g_object_get_data (G_OBJECT(items->data), "action-cmd-key");
+			ret = (gchar*) g_object_get_data (G_OBJECT (items->data), "action-cmd-key");
 			g_list_free (items);
 			if (ret != NULL)
 			{
@@ -1240,18 +1240,16 @@ void e2_task_cleanup (gboolean stay, pthread_t mainID)
 			(GSourceFunc) _e2_task_run_processQ, NULL, NULL);
 	}
 
+#ifndef DISPLAYTHREADSAFE
 	if (kills > 0)
 	{
 		//recreate BGL mutex, it may still be locked by any aborted thread
-#ifdef NATIVE_BGL
-		gboolean FIXME_BGLcleanup;
 		//if actual gtk mutex for BGL, use gtk_quit_add() or something to cleanup
-#else
 		printd (DEBUG, "e2_task_cleanup, replace BGL");
 		e2_main_init_uilock (TRUE); //must cleanup the mess
-#endif
 	}
 	CLOSEBGL
+#endif
 //	printd (DEBUG, "End e2_task_cleanup, BGL back on");
 }
 /* *
@@ -4201,7 +4199,7 @@ static gboolean _e2_task_open_withQ (E2_ActionTaskData *qed)
 		if (g_list_length (items) >= (guint)which)
 		{
 			GtkWidget *menu_item = (GtkWidget *)g_list_nth_data (items, which - 1);
-			command = (gchar *)g_object_get_data (G_OBJECT(menu_item), "action-cmd-key");
+			command = (gchar *)g_object_get_data (G_OBJECT (menu_item), "action-cmd-key");
 			if (command != NULL)
 			{
 				gchar *sys = e2_task_system_command (command, localpath);

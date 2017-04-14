@@ -450,13 +450,13 @@ static GtkTextTag *_e2_output_get_styletag (gint tagnum, E2_OutputTabRuntime *rt
 		{
 			snprintf (tname, sizeof(tname), "Fcolor%u", tt-256);
 			tag = gtk_text_tag_new (tname);
-			g_object_set ((gpointer)tag, "foreground", text_colors[tt-256], NULL);
+			g_object_set (G_OBJECT (tag), "foreground", text_colors[tt-256], NULL);
 		}
 		else if (tt >= 512 && tt < 768)
 		{
 			 snprintf (tname, sizeof(tname), "Bcolor%u", tt-512);
 			 tag = gtk_text_tag_new (tname);
-			 g_object_set ((gpointer)tag, "background", text_colors[tt-512], NULL);
+			 g_object_set (G_OBJECT (tag), "background", text_colors[tt-512], NULL);
 		}
 		else
 		{
@@ -472,7 +472,7 @@ static GtkTextTag *_e2_output_get_styletag (gint tagnum, E2_OutputTabRuntime *rt
 				 break;
 				case 2:
 				 tag = gtk_text_tag_new ("faint");
-				 g_object_set ((gpointer)tag, "weight", PANGO_WEIGHT_LIGHT, NULL);
+				 g_object_set (G_OBJECT (tag), "weight", PANGO_WEIGHT_LIGHT, NULL);
 				 break;
 				case 3:
 #ifdef USE_GTK2_20
@@ -493,11 +493,11 @@ static GtkTextTag *_e2_output_get_styletag (gint tagnum, E2_OutputTabRuntime *rt
 				case 5: //gtk/pango doesn't do blinking, so we fall back to ?
 				case 6:
 				 tag = gtk_text_tag_new ("blink");
-				 g_object_set ((gpointer)tag, "variant", PANGO_VARIANT_SMALL_CAPS, "weight", PANGO_WEIGHT_SEMIBOLD, NULL);
+				 g_object_set (G_OBJECT (tag), "variant", PANGO_VARIANT_SMALL_CAPS, "weight", PANGO_WEIGHT_SEMIBOLD, NULL);
 				 break;
 				case 9:
 				 tag = gtk_text_tag_new ("strike");
-				 g_object_set ((gpointer)tag, "strikethrough", TRUE, NULL);
+				 g_object_set (G_OBJECT (tag), "strikethrough", TRUE, NULL);
 				 break;
 			}
 		}

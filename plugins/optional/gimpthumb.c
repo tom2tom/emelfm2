@@ -602,7 +602,7 @@ gimp_thumbnail_set_uri (GimpThumbnail *thumbnail,
   thumbnail->thumb_mtime    = 0;
 
 #ifdef THUMB_OBJECT
-  g_object_set (thumbnail,
+  g_object_set (G_OBJECT (thumbnail),
                 "image-state",      GIMP_THUMB_STATE_UNKNOWN,
                 "image-filesize",   (gint64) 0,
                 "image-mtime",      (gint64) 0,
@@ -775,7 +775,7 @@ gimp_thumbnail_update_image_data (GimpThumbnail *thumbnail)
   if (state != thumbnail->image_state)
     {
 #ifdef THUMB_OBJECT
-      g_object_set (thumbnail,
+      g_object_set (G_OBJECT (thumbnail),
                     "image-state", state,
                     NULL);
 #else
@@ -786,7 +786,7 @@ gimp_thumbnail_update_image_data (GimpThumbnail *thumbnail)
   if (mtime != thumbnail->image_mtime || filesize != thumbnail->image_filesize)
     {
 #ifdef THUMB_OBJECT
-      g_object_set (thumbnail,
+      g_object_set (G_OBJECT (thumbnail),
                     "image-mtime",    mtime,
                     "image-filesize", filesize,
                     NULL);
@@ -797,7 +797,7 @@ gimp_thumbnail_update_image_data (GimpThumbnail *thumbnail)
 
       if (thumbnail->thumb_state == GIMP_THUMB_STATE_OK)
 #ifdef THUMB_OBJECT
-        g_object_set (thumbnail,
+        g_object_set (G_OBJECT (thumbnail),
                       "thumb-state", GIMP_THUMB_STATE_OLD,
                       NULL);
 #else
@@ -870,7 +870,7 @@ check:
 #ifdef THUMB_OBJECT
       g_object_freeze_notify (G_OBJECT (thumbnail));
 
-      g_object_set (thumbnail, "thumb-state", state, NULL);
+      g_object_set (G_OBJECT (thumbnail), "thumb-state", state, NULL);
 #else
 	  thumbnail->thumb_state = state;
 #endif
@@ -886,7 +886,7 @@ static void
 gimp_thumbnail_reset_info (GimpThumbnail *thumbnail)
 {
 #ifdef THUMB_OBJECT
-  g_object_set (thumbnail,
+  g_object_set (G_OBJECT (thumbnail),
                 "image-width",      0,
                 "image-height",     0,
                 "image-type",       NULL,

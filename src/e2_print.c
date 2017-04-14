@@ -617,7 +617,7 @@ static GObject *_e2_print_get_custom_tab_cb (GtkPrintOperation *po, PrintData *p
 	gtk_widget_show_all (hbox);
 
 	NEEDOPENBGL
-	return G_OBJECT(hbox);
+	return G_OBJECT (hbox);
 }
 /**
 @brief "custom-widget-apply" signal callback on @a po

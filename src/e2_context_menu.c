@@ -274,7 +274,7 @@ static void _e2_context_menu_add_items (GtkWidget *menu, GtkTreeModel *model,
 						{
 							GtkWidget *item = e2_menu_add (menu, label, icon, NULL,
 								e2_menu_action_activated_cb, NULL);
-							g_object_set_data_full (G_OBJECT(item), "e2-actruntime",
+							g_object_set_data_full (G_OBJECT (item), "e2-actruntime",
 								art, (GDestroyNotify)e2_action_free_runtime);
 							//FIXME add tip to config data and from there to this item
 						}
