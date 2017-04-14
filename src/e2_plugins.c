@@ -64,7 +64,7 @@ Plugin *init_plugin (E2PInit mode)
 		//setup UI data to send back to the caller
 		some->label = _("_Hello World");  //the name for the plugins menu item, capitalize according to HIG is best
 		some->description = _("prints \"Hello World\" on the output window");  //the tooltip for the plugins menu item
-		some->icon = "plugin_" ANAME E2ICONTB;  //a non-standard path may be prepended. Just put "" for no icon
+		some->icon = "plugin-" ANAME E2ICONTB;  //a non-standard path may be prepended. Just put "" for no icon
 	}
 	//sometimes we want to operate the plugin, and that needs some setup ...
 	if (mode & E2P_SETUP)
