@@ -26,25 +26,25 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 /**
 @brief setup heap space for a block of file-text color data
 
-Allocates memory for ATOMSPERCHUNK GdkColor data structs and their associated
-pointers.
+Allocates memory for ATOMSPERCHUNK {GdkColor|GdkRGBA} data structs and their
+associated pointers.
 Error messages assume BGL closed.
 
 @return pointer to array of GdkColors, or NULL
 */
-static GdkColor **_e2_option_color_create_chunk (void)
+static GDKCOLOR **_e2_option_color_create_chunk (void)
 {
 #ifdef USE_GLIB2_10
-	gpointer slice = g_slice_alloc0 ((sizeof (GdkColor *) + sizeof (GdkColor)) * ATOMSPERCHUNK);
+	gpointer slice = g_slice_alloc0 ((sizeof (GDKCOLOR *) + sizeof (GDKCOLOR)) * ATOMSPERCHUNK);
 # if (CHECKALLOCATEDWARN)
 	CHECKALLOCATEDWARN (slice, return NULL;)
 # else
 	if (slice == NULL)
 		return NULL;
 # endif
-	GdkColor **pointers = slice;
+	GDKCOLOR **pointers = slice;
 	//store pointers at front, colours at back
-	GdkColor *thisptr = slice + sizeof (GdkColor *) * ATOMSPERCHUNK;
+	GDKCOLOR *thisptr = slice + sizeof (GDKCOLOR *) * ATOMSPERCHUNK;
 	gint i;
 	for (i = 0; i < ATOMSPERCHUNK; i++)
 		pointers[i] = thisptr++;
@@ -74,10 +74,12 @@ static GdkColor **_e2_option_color_create_chunk (void)
 	//CHECKME do we need the chunk itself to keep track of freed space when
 	//an extension is repeated, hence re-hashed ?
 	data->chunk = g_mem_chunk_new
-		(NULL, sizeof(GdkColor), sizeof(GdkColor)*ATOMSPERCHUNK, G_ALLOC_ONLY);
+		(NULL, sizeof(GDKCOLOR), sizeof(GDKCOLOR)*ATOMSPERCHUNK, G_ALLOC_ONLY);
 	//allocate all its atoms
 	for (i = 0; i < ATOMSPERCHUNK; i++)
-		data->pointers[i] = g_chunk_new (GdkColor, data->chunk);
+	{
+		data->pointers[i] = g_chunk_new (GDKCOLOR, data->chunk);
+	}
 	//remember the array and chunk addresses, for later use
 	app.colorchunks = g_list_append (app.colorchunks, data);
 	return (data->pointers);
@@ -101,7 +103,7 @@ static void _e2_option_color_clear_data (void)
 		{
 #ifdef USE_GLIB2_10
 			g_slice_free1 (
-				(sizeof (GdkColor *) + sizeof (GdkColor)) * ATOMSPERCHUNK,
+				(sizeof (GDKCOLOR *) + sizeof (GDKCOLOR)) * ATOMSPERCHUNK,
 				tmp->data);
 #else
 			E2_ColorData *data = (E2_ColorData *) tmp->data;
@@ -137,8 +139,7 @@ void e2_option_color_filetypes_sync (void)
 		NULL);	//data are chunked, and not worth individually clearing
 
 	gint i = ATOMSPERCHUNK;	//force initial chunk creation
-//#warning ignore compiler warning about unitialized usage of id
-	GdkColor **id = NULL;	//assignment for complier-warning prevention only
+	GDKCOLOR **id = NULL;	//assignment for complier-warning prevention only
 	gchar *def_color;
 	gboolean freedef;
 
@@ -191,7 +192,11 @@ void e2_option_color_filetypes_sync (void)
 											id = _e2_option_color_create_chunk ();
 											i = 0;
 										}
+#ifdef USE_GTK3_4
+										gdk_rgba_parse (id[i], usecolor);
+#else
 										gdk_color_parse (usecolor, id[i]);
+#endif
 										if (anycase)
 											local = g_utf8_casefold (ext_type, -1);
 										else
@@ -246,17 +251,25 @@ E2_OptionSet *e2_option_color_register (gchar *name, gchar *group, gchar *desc,
 	E2_OptionSet *set = e2_option_register (E2_OPTION_TYPE_COLOR, name, group,
 		desc, tip, depends, flags);
 	set->ival = -1;
+#ifdef USE_GTK3_4
+	if (gdk_rgba_parse (&set->ex.color.value, value))
+#else
 	if (gdk_color_parse (value, &set->ex.color.value))
+#endif
 		set->sval = g_strdup (value);
 	else
 	{
 		set->sval = g_strdup ("#000000");
+#ifdef USE_GTK3_4
+		gdk_rgba_parse (&set->ex.color.value, set->sval);
+#else
 		gdk_color_parse (set->sval, &set->ex.color.value);
+#endif
 	}
 	return set;
 }
 
-GdkColor *e2_option_color_get (const gchar *name)
+GDKCOLOR *e2_option_color_get (const gchar *name)
 {
 	E2_OptionSet *set = e2_option_get (name);
 	if (set == NULL)
@@ -319,7 +332,11 @@ gboolean e2_option_color_set_str (gchar *name, gchar *value)
 
 gboolean e2_option_color_set_str_direct (E2_OptionSet *set, gchar *value)
 {
+#ifdef USE_GTK3_4
+	if (gdk_rgba_parse (&set->ex.color.value, value))
+#else
 	if (gdk_color_parse (value, &set->ex.color.value))
+#endif
 	{
 		g_free (set->sval);
 		set->sval = g_strdup (value);
@@ -327,7 +344,11 @@ gboolean e2_option_color_set_str_direct (E2_OptionSet *set, gchar *value)
 	}
 	else
 	{
+#ifdef USE_GTK3_4
+		gdk_rgba_parse (&set->ex.color.value, set->sval);
+#else
 		gdk_color_parse (set->sval, &set->ex.color.value);
+#endif
 		return FALSE;
 	}
 }

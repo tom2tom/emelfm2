@@ -101,7 +101,7 @@ void e2_utils_nontet_destroy (E2_Nontet *n);
 void e2_utils_show_memory_message (void);
 void e2_utils_memory_error (void);
 void e2_utils_show_help (gchar *title);
-gchar *e2_utils_color2str (GdkColor *color) G_GNUC_MALLOC;
+gchar *e2_utils_color2str (GDKCOLOR *color) G_GNUC_MALLOC;
 gchar *e2_utils_str_replace (const gchar *str, const gchar *old, const gchar *new) G_GNUC_MALLOC;
 gint e2_utils_LF_line_ends (gchar *text);
 gchar *e2_utils_revert_line_ends (gchar *text, guint linecount, gint separator);

@@ -177,13 +177,18 @@ void e2_utils_show_help (gchar *title)
 }
 /**
 @brief convert color data to string form
-@param color Gdk color data struct
+@param color GdkColor or GdkRGBA color data struct
 @return newly-allocated string with the color data
 */
-gchar *e2_utils_color2str (GdkColor *color)
+gchar *e2_utils_color2str (GDKCOLOR *color)
 {
+#ifdef USE_GTK3_4
+	return g_strdup_printf ("#%.2X%.2X%.2X",
+		(int)color->red*255, (int)color->green*255, (int)color->blue*255);
+#else
 	return g_strdup_printf ("#%.2X%.2X%.2X",
 		color->red/256, color->green/256, color->blue/256);
+#endif
 }
 /**
 @brief replace all occurrences of @a old in @a str with @a new

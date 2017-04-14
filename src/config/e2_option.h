@@ -90,7 +90,7 @@ typedef enum
 
 typedef struct _E2_OptionTypeExtraColor
 {
-	GdkColor value;
+	GDKCOLOR value;
 } E2_OptionTypeExtraColor;
 
 typedef struct _E2_OptionTypeExtraInt
@@ -162,7 +162,7 @@ typedef	union _E2_OptionSetupExtra
 {
 	gboolean exbool;
 	gchar *exstr;
-//	GdkColor excol;
+//	GDKCOLOR excol;
 	struct
 	{
 		gint def;

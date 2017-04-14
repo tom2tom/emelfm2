@@ -90,8 +90,8 @@ static gboolean show_hidden = FALSE;	//session-static value to use in dialogs
 #ifndef STRICT_HIDE
 static gboolean strict_hide = TRUE;
 #endif
-static GdkColor *bad_color;	//static assuming config data won't change during a liststore fill
-static GdkColor *hidden_color;
+static GDKCOLOR *bad_color;	//static assuming config data won't change during a liststore fill
+static GDKCOLOR *hidden_color;
 //static assuming last-closed window sets size for next one in this session only
 static gint window_width = -1;
 static gint window_height = -1;
@@ -606,7 +606,7 @@ static E2_TwResult _e2_treedlg_twcb_scan (VPATH *dirpath,
 {
 	E2_TwResult retval;
 	gboolean colored;
-	GdkColor *foreground;
+	GDKCOLOR *foreground;
 	E2_ERR_DECLARE
 
 	retval = E2TW_CONTINUE;	//default to ok result
@@ -803,7 +803,7 @@ static E2_TwResult _e2_treedlg_twcb_scan (VPATH *dirpath,
 #ifndef ENABLE_FULL_TREE
 			else
 			{
-				GdkColor *current;
+				GDKCOLOR *current;
 				//get parent iter
 				GtkTreeIter parent;
 				const gchar *parentpath;
@@ -1566,7 +1566,15 @@ static gpointer _e2_tree_dialog_run (ViewInfo *view)
 	//2nd is for sortable name key, 3rd & 4th for re-coloring "bad" entries
 	//5th for flags
 	rt->store = gtk_tree_store_new (DIRCOLCOUNT,
-		G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN, GDK_TYPE_COLOR, G_TYPE_UINT);
+		G_TYPE_STRING,
+		G_TYPE_STRING,
+		G_TYPE_BOOLEAN,
+#ifdef USE_GTK3_4
+		GDK_TYPE_RGBA,
+#else
+		GDK_TYPE_COLOR,
+#endif
+		G_TYPE_UINT);
 	rt->view = view;
 	//dirnames treeview
 	rt->treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (rt->store));
@@ -1578,7 +1586,11 @@ static gpointer _e2_tree_dialog_run (ViewInfo *view)
 		DIRNAME, NULL, renderer,
 		"text", DIRNAME,
 		"foreground-set", TXTSET,
+#ifdef USE_GTK3_4
+		"foreground-rgba", TXTCOLOR,
+#else
 		"foreground-gdk", TXTCOLOR,
+#endif
 		NULL);
 
 	//by default, type-ahead searching is enabled on column 0

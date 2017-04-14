@@ -134,7 +134,7 @@ typedef struct _E2_RefreshInfo
 static gpointer _e2_filelist_refresh_store (ViewInfo *view);
 
 #ifdef E2_SELTXT_RECOLOR
-extern GdkColor selectedtext;
+extern GDKCOLOR selectedtext;
 #endif
 
 #ifdef E2_FAM_DNOTIFY
@@ -1058,26 +1058,26 @@ GtkListStore *e2_filelist_fill_store (GList *entries, ViewInfo *view)
 	context = gtk_widget_get_style_context (curr_view->treeview);
 	gtk_style_context_get (context, GTK_STATE_NORMAL, GTK_STYLE_PROPERTY_COLOR,
 		&normal, NULL);
-	GdkColor normal2 = {0,  (guint16)(65535 * normal->red),
+	GDKCOLOR normal2 = {0,  (guint16)(65535 * normal->red),
 							(guint16)(65535 * normal->green),
 							(guint16)(65535 * normal->blue) } ;
-	GdkColor *default_color = &normal2;
+	GDKCOLOR *default_color = &normal2;
 	gdk_rgba_free (normal);
 #else
 	GtkStyle *style = gtk_rc_get_style (curr_view->treeview);
-	GdkColor *default_color = &style->text[GTK_STATE_NORMAL];
+	GDKCOLOR *default_color = &style->text[GTK_STATE_NORMAL];
 #endif
 */
-	GdkColor *default_color = NULL;
+	GDKCOLOR *default_color = NULL;
 #ifdef E2_ASSISTED
-	GdkColor *back_color = (e2_option_bool_get ("color-background-set")) ?
+	GDKCOLOR *back_color = (e2_option_bool_get ("color-background-set")) ?
 		e2_option_color_get ("color-background") : NULL;
 #endif
-	GdkColor *link_color = e2_option_color_get ("color-ft-link");
-	GdkColor *dir_color = e2_option_color_get ("color-ft-dir");
-	GdkColor *dev_color = e2_option_color_get ("color-ft-dev");
-	GdkColor *sock_color = e2_option_color_get ("color-ft-socket");
-	GdkColor *exec_color = e2_option_color_get ("color-ft-exec");
+	GDKCOLOR *link_color = e2_option_color_get ("color-ft-link");
+	GDKCOLOR *dir_color = e2_option_color_get ("color-ft-dir");
+	GDKCOLOR *dev_color = e2_option_color_get ("color-ft-dev");
+	GDKCOLOR *sock_color = e2_option_color_get ("color-ft-socket");
+	GDKCOLOR *exec_color = e2_option_color_get ("color-ft-exec");
 
 	//iterate through the listed FileInfo's
 	for (tmp = entries; tmp != NULL; tmp = tmp->next)
@@ -1254,7 +1254,7 @@ GtkListStore *e2_filelist_fill_store (GList *entries, ViewInfo *view)
 		strftime (changed_buf, sizeof(changed_buf), strf_string, tm_ptr);
 		buf[CHANGED] = e2_utf8_from_locale_fast (changed_buf);
 
-		GdkColor *foreground;
+		GDKCOLOR *foreground;
 		switch (infoptr->statbuf.st_mode & S_IFMT)
 		{
 		  case S_IFLNK:
@@ -1823,7 +1823,7 @@ loopstart:
 #endif
 					gboolean caseignore = ! e2_option_bool_get ("namesort-case-sensitive");
 
-					GdkColor *foreground;
+					GDKCOLOR *foreground;
 					for (i = 0; i < itemcount; i++)
 					{
 						if (modes[i].oldmode == REFRESH_CHANGE
@@ -2072,8 +2072,13 @@ GtkListStore *e2_filelist_make_store (void)
 		// the rest are not displayed
 		G_TYPE_STRING,  //NAMEKEY for i18n name sorts
 		G_TYPE_POINTER,  //FINFO pr to FileInfo for the item
-		GDK_TYPE_COLOR,  //FORECOLOR line colour
-		GDK_TYPE_COLOR  //BACKCOLOR line colour
+#ifdef USE_GTK3_4
+		GDK_TYPE_RGBA,  //FORECOLOR line colour
+		GDK_TYPE_RGBA  //BACKCOLOR line colour
+#else
+		GDK_TYPE_COLOR,
+		GDK_TYPE_COLOR
+#endif
 	//	G_TYPE_BOOLEAN	//VISIBLE whether filtered or not
 		);
 	return store;

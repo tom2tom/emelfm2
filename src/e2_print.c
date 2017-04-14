@@ -408,7 +408,7 @@ static void _e2_print_color_invert (GdkRGBA *color)
 	color->blue = blue;
 }
 #else
-static void _e2_print_color_invert (GdkColor *color)
+static void _e2_print_color_invert (GDKCOLOR *color)
 {
 	guint16 red, green, blue, added;
 

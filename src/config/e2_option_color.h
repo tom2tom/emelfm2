@@ -28,7 +28,7 @@ void e2_option_color_filetypes_sync (void);
 #endif
 E2_OptionSet *e2_option_color_register (gchar *name, gchar *group, gchar *desc,
 	gchar *tip, gchar *depends, gchar *def, E2_OptionFlags flags);
-GdkColor *e2_option_color_get (const gchar *name);
+GDKCOLOR *e2_option_color_get (const gchar *name);
 #ifdef USE_GTK3_0
 gboolean e2_option_color_get_RGBA (const gchar *name, GdkRGBA *color);
 #endif
