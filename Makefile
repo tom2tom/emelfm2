@@ -91,9 +91,16 @@ LIBS_SOURCES = $(foreach dir, $(LIBS), $(wildcard $(dir)/*.c))
 LIBS_OBJECTS = $(LIBS_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
 LIBS_DEP_FILES = $(LIBS_SOURCES:%.c=$(OBJECTS_DIR)/%.deps)
 
+# replicated stock icons installation
+ifeq ($(WITH_SYSTEM_ICONS), 1)
+ICONPATN = png
+else
+ICONPATN = gtk-discard.png
+endif
+
 # optional plugins (and related icons, below)
 PLUGFILEPREFIX=e2p_
-ICONFILEPREFIX=plugin_
+ICONFILEPREFIX=plugin-
 BASENAME1:=thumbnail
 BASENAME2:=track
 BASENAME3:=acl
@@ -333,27 +340,24 @@ install: all install_plugins
 	@echo "installing $(TARGET) to prefix '$(PREFIX)'"
 	@install -d -m 755 $(BIN_DIR)
 	@install -m 755 $(TARGET) $(BIN_DIR)
-	@install -d $(ICON_DIR)
-	@for file in `ls $(ICONS)/ |grep -v 'svn\|stock'`; do \
-		install -m 644 $(ICONS)/$$file $(ICON_DIR); \
+	@for dir in `ls -rA1 -I*.png $(ICONS)`; do \
+		install -d -m 755 $(ICON_DIR)/$$dir; \
+		for file in `ls $(ICONS)/$$dir |grep png`; do \
+			install -m 644 $(ICONS)/$$dir/$$file $(ICON_DIR)/$$dir/$$file; \
+		done \
 	done
-	@install -d $(ICON_DIR)/stock
-ifeq ($(WITH_SYSTEM_ICONS),1)
-	@for file in `ls $(ICONS)/stock/ |grep -v svn`; do \
-		install -m 644 $(ICONS)/stock/$$file $(ICON_DIR)/stock; \
+	@for dir in `ls -rA1 -I*.png $(ICONS)/stock`; do \
+		install -d -m 755 $(ICON_DIR)/stock/$$dir; \
+		for file in `ls $(ICONS)/stock/$$dir |grep $(ICONPATN)`; do \
+			install -m 644 $(ICONS)/stock/$$dir/$$file $(ICON_DIR)/stock/$$dir/$$file; \
+		done \
 	done
-else
-	@for file in `ls $(ICONS)/stock/gtk-discard*`; do \
-		install -m 644 $$file $(ICON_DIR)/stock; \
-	done
-endif
-	@install -d $(DOC_DIR)
+	@install -d -m 755 $(DOC_DIR)
 	@for file in `ls $(DOCS)/ |grep -v svn |grep -v desktop_environment |grep -v api |grep -v emelfm2.1`; do \
 		install -m 644 $(DOCS)/$$file $(DOC_DIR); \
 	done
 	@install -d $(MAN_DIR)
 	@install -m 644 $(DOCS)/emelfm2.1 $(MAN_DIR)/$(TARGET).1;
-
 	@if [ "`grep "#define E2_XDG" $(BUILD_FILE)`" = "#define E2_XDG" ]; then \
 		install -d $(XDG_DESKTOP_DIR); \
 		install -m 644 -T $(DOCS)/desktop_environment/$(TARGET).desktop $(XDG_DESKTOP_DIR)/$(TARGET).desktop; \
@@ -367,16 +371,16 @@ install_plugins: plugins
 	@for file in "$(LIBS_OBJECTS) $(LIBS_XOBJECTS)"; do \
 		install -m 755 $$file $(PLUGINS_DIR); \
 	done
-	@install -d $(ICON_DIR)
+	@install -d -m 755 $(ICON_DIR)/48x48
 #FIXME also handle svg icons etc
 ifeq ($(WITH_THUMBS),1)
-	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME1)_48.png $(ICON_DIR);
+	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME1).png $(ICON_DIR)/48x48;
 endif
 ifeq ($(WITH_TRACKER),1)
-	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME2)_48.png $(ICON_DIR);
+	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME2).png $(ICON_DIR)/48x48;
 endif
 ifeq ($(WITH_ACL),1)
-	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME3)_48.png $(ICON_DIR);
+	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME3).png $(ICON_DIR)/48x48;
 endif
 
 uninstall: uninstall_plugins
@@ -385,9 +389,9 @@ uninstall: uninstall_plugins
 	@rm -rf $(DOC_DIR)
 #	@echo -e "\nif you like you can also delete the icon directory:\n\t$(ICON_DIR)\n"
 	@rm -rf $(ICON_DIR)
-	@test -f "$(XDG_DESKTOP_DIR)/$(TARGET).desktop" && rm -f $(XDG_DESKTOP_DIR)/$(TARGET).desktop
-	@test -f "$(XDG_APPLICATION_DIR)/$(TARGET).applications" && rm -f $(XDG_APPLICATION_DIR)/$(TARGET).applications
-	@rm -f $(MAN_DIR)/$(TARGET).1*;
+	@rm -f $(XDG_DESKTOP_DIR)/$(TARGET).desktop
+	@rm -f $(XDG_APPLICATION_DIR)/$(TARGET).applications
+	@rm -f $(MAN_DIR)/$(TARGET).1*
 
 uninstall_plugins:
 	@echo "uninstalling plugins from prefix '$(PREFIX)'"
