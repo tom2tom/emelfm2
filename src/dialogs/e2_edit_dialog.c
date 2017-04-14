@@ -284,19 +284,15 @@ static void _e2_edit_dialog_save_cb (GtkMenuItem *menuitem,
 #ifdef E2_VFS
 		VPATH sdata = { saved, rt->spacedata };
 #endif
-#ifndef LOCAL_BGL
 //		NEEDCLOSEBGL
 		OPENBGL	//downstream errors invoke local mutex locking
-#endif
 #ifdef E2_VFS
 		e2_task_backend_rename (&ddata, &sdata);	//ignore any warning !!
 #else
 		e2_task_backend_rename (usepath, saved);	//ignore any warning !!
 #endif
-#ifndef LOCAL_BGL
 		CLOSEBGL
 //		NEEDOPENBGL
-#endif
 		g_free (saved);
 	}
 
@@ -1611,6 +1607,7 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 	rt->history = e2_list_copy_with_data (find_history);	//CHECKME why copy these ?
 	rt->rephistory = e2_list_copy_with_data (replace_history);
 
+//#ifdef USE_GTK3_12 TODO deprecated action area use
 	//action_area is a GtkHButtonBox packed at the end of the dialog's vbox
 	//ditto for dialog->separator
 	//locate find-bar between those 2
@@ -1638,7 +1635,7 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 	//create search bar
 	rt->sgroup = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 	GtkWidget *hbox = e2_view_dialog_create_searchbar (rt);
-	g_object_unref (G_OBJECT(rt->sgroup));
+	g_object_unref (G_OBJECT (rt->sgroup));
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	//create (hidden) replace bar, with buttons-area same size as buttons in search bar

@@ -3669,9 +3669,9 @@ void e2_utils_save_state (GtkWidget *widget)
 #ifdef DEBUG_MESSAGES
 			log &= E2_MODIFIER_MASK;
 			printd (DEBUG, "Mod-keys mask now is %u", log);
-			g_object_set_data (G_OBJECT(widget), "e2_keymods", GUINT_TO_POINTER(log));
+			g_object_set_data (G_OBJECT (widget), "e2_keymods", GUINT_TO_POINTER(log));
 #else
-			g_object_set_data (G_OBJECT(widget), "e2_keymods", GUINT_TO_POINTER(log & E2_MODIFIER_MASK));
+			g_object_set_data (G_OBJECT (widget), "e2_keymods", GUINT_TO_POINTER(log & E2_MODIFIER_MASK));
 #endif
 		}
 	}
@@ -3685,7 +3685,7 @@ void e2_utils_save_state (GtkWidget *widget)
 */
 GdkModifierType e2_utils_get_savedstate (GtkWidget *widget)
 {
-	return GPOINTER_TO_UINT (g_object_get_data (G_OBJECT(widget), "e2_keymods"));
+	return GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (widget), "e2_keymods"));
 }
 #else //ndef USE_GTK3_0
 //on gtk 3.0 at least, this doesn't work, returned mask is always 0
