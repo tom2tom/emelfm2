@@ -199,7 +199,11 @@ E2_SpecificConfDialogRuntime *e2_config_dialog_single (gchar *set_name,
 	gchar *label_text2 = g_strconcat ("<b>", rt->set->group, "</b>", NULL);
 	GtkWidget *label = e2_widget_add_mid_label (NULL, label_text2, 0.5, FALSE, 0);
 	g_free (label_text2);
+#ifdef USE_GTK3_0
+	g_object_set(G_OBJECT (label), "margin", E2_PADDING_XSMALL, NULL);
+#else
 	gtk_misc_set_padding (GTK_MISC (label), E2_PADDING_XSMALL, E2_PADDING_XSMALL);
+#endif
 	gtk_container_add (GTK_CONTAINER (frame), label);
 
 	e2_option_connect (rt->dialog, FALSE);
@@ -1362,11 +1366,9 @@ static void _e2_confdlg_font_entry_cb (GtkEditable *entry, GtkWidget *label)
 static void _e2_confdlg_colorpick_response_cb (GtkDialog *dialog, gint response,
 	E2_TreeCfgData *data)
 {
+	GDKCOLOR color;
 #ifdef USE_GTK3_4
-	GdkRGBA color;
 	gchar color_str[8];
-#else
-	GdkColor color;
 #endif
 	GtkTreeIter iter;
 
@@ -1495,7 +1497,7 @@ void e2_confdlg_extcolorpick_cb (GtkButton *button, E2_OptionSet *set)
 	GtkColorChooser *gcc = GTK_COLOR_CHOOSER (dialog);
 	gtk_color_chooser_set_use_alpha (gcc, FALSE);
 	gtk_color_chooser_set_rgba (gcc, &color);
-	g_object_set (G_OBJECT(dialog), "show-editor", TRUE, NULL);
+	g_object_set (G_OBJECT (dialog), "show-editor", TRUE, NULL);
 #else
 	GtkWidget *dialog = gtk_color_selection_dialog_new
 		(_("Set filetype color"));
@@ -1513,6 +1515,7 @@ void e2_confdlg_extcolorpick_cb (GtkButton *button, E2_OptionSet *set)
 	//substitute our own button
 	E2_Button yes_btn;
 	e2_button_derive (&yes_btn, &E2_BUTTON_APPLY, BTN_YES_CONTINUE);
+//#ifdef USE_GTK3_12 TODO deprecated action area use
 	GtkWidget *bbox =
 # ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG (dialog));
@@ -1713,9 +1716,13 @@ static void _e2_confdlg_color_select_cb (GtkButton *button, E2_OptionSet *set)
 static void _e2_confdlg_color_entry_cb (GtkEditable *entry, GtkWidget *label)
 {
 	NEEDCLOSEBGL
+	GDKCOLOR color;
 	gchar *color_str = gtk_editable_get_chars (entry, 0, -1);
-	GdkColor color;
+#ifdef USE_GTK3_4
+	if (gdk_rgba_parse (&color, color_str))
+#else
 	if (gdk_color_parse (color_str, &color))
+#endif
 	{
 		gchar *label_text = g_strdup_printf ("\t<small><i>%s</i></small>  "
 		"<span foreground=\"%s\" background=\"%s\">%s</span> "
@@ -1850,7 +1857,11 @@ static GtkWidget *_e2_confdlg_add_page (GtkTreeIter *parent_iter,
 	gchar *label_text2 = g_strconcat ("<b>", label_text, "</b>", NULL);
 	GtkWidget *label = e2_widget_add_mid_label (NULL, label_text2, 0.5, FALSE, 0);
 	g_free (label_text2);
+#ifdef USE_GTK3_0
+	g_object_set(G_OBJECT (label), "margin", E2_PADDING_XSMALL, NULL);
+#else
 	gtk_misc_set_padding (GTK_MISC (label), E2_PADDING_XSMALL, E2_PADDING_XSMALL);
+#endif
 	gtk_container_add (GTK_CONTAINER (frame), label);
 
 	return vbox;
@@ -1986,7 +1997,9 @@ void e2_config_dialog_create (gchar *page)
 	rt->treeview = catsview =
 		gtk_tree_view_new_with_model (GTK_TREE_MODEL (rt->store));
 	g_object_unref (rt->store);
+#ifndef USE_GTK3_14
 	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (catsview), TRUE);
+#endif
 //#ifdef USE_GTK3_0
 //CHECKME	gtk_scrollable_set_vscroll_policy (GTK_SCROLLABLE (catsview), GTK_SCROLL_NATURAL);
 //#endif
@@ -2129,7 +2142,11 @@ void e2_config_dialog_create (gchar *page)
 					_("Click to open a font select dialog"), _e2_confdlg_font_select_cb, set);
 				//label for font example
 				label = e2_widget_add_mid_label (box, "", 0.0, FALSE, 0);
+#ifdef USE_GTK3_0
+				g_object_set(G_OBJECT (label), "halign", GTK_ALIGN_START, "valign", GTK_ALIGN_START, NULL);
+#else
 				gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+#endif
 				//set label contents
 				NEEDOPENBGL
 				_e2_confdlg_font_entry_cb (GTK_EDITABLE (set->widget), label);
@@ -2163,7 +2180,11 @@ void e2_config_dialog_create (gchar *page)
 					_e2_confdlg_color_select_cb, set);
 				//label for color example
 				label = e2_widget_add_mid_label (box, "", 0.0, FALSE, 0);
+#ifdef USE_GTK3_0
+				g_object_set(G_OBJECT (label), "halign", GTK_ALIGN_START, "valign", GTK_ALIGN_START, NULL);
+#else
 				gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
+#endif
 				//set label contents
 				NEEDOPENBGL
 				_e2_confdlg_color_entry_cb (GTK_EDITABLE (set->widget), label);
@@ -2297,6 +2318,7 @@ void e2_config_dialog_create (gchar *page)
 		&E2_BUTTON_MORE, &E2_BUTTON_DISCARD, &E2_BUTTON_APPLY, NULL);
 
 	//prepare all the buttons for mnemonic-blocking during any keybinding config
+//#ifdef USE_GTK3_12 TODO deprecated action area use
 	e2_option_tree_connect_mnemonics (
 #ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG(config_dialog))
