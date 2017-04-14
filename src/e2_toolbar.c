@@ -2657,30 +2657,52 @@ static void _e2_toolbar_add_items (GtkTreeModel *model,
 							rt->icon_size, NULL, NULL, NULL,
 							(bstyle == 1) ? E2_BUTTON_SHOW_MISSING_ICON : 0);
 						//move image &/| label to the real button
+#ifdef USE_GTK3_14
+						//each button has zero or one child (a box) and (as a GtkBin) is allowed only one
+						GList *firstchildren = gtk_container_get_children (GTK_CONTAINER (button));
+						GList *children = gtk_container_get_children (GTK_CONTAINER (btn2));
+						GtkOrientation way = (e2_option_bool_get_direct (rt->hori)) ?
+							GTK_ORIENTATION_HORIZONTAL:GTK_ORIENTATION_VERTICAL;
+						GtkWidget *holder = gtk_box_new (way, 0);
+						if (firstchildren)
+						{
+							g_object_ref (G_OBJECT (firstchildren->data));
+							gtk_container_remove (GTK_CONTAINER(button), (GtkWidget*)firstchildren->data);
+							gtk_container_add (GTK_CONTAINER(holder), (GtkWidget*)firstchildren->data);
+							g_object_unref (G_OBJECT (firstchildren->data));
+						}
+						if (children)
+						{
+							g_object_ref (G_OBJECT (children->data));
+							gtk_container_remove (GTK_CONTAINER(btn2), (GtkWidget*)children->data);
+							gtk_container_add (GTK_CONTAINER(holder), (GtkWidget*)children->data);
+							g_object_unref (G_OBJECT (children->data));
+							gtk_widget_show_all ((GtkWidget*)children->data);
+						}
+						gtk_container_add (GTK_CONTAINER(button), holder);
+						gtk_widget_show (holder);
+#else
 						//provided that one or both of name, icon != NULL,
 						//button contains alignment which contains a box we want
 						GtkWidget *bbox1 =
-#ifdef USE_GTK2_14
+# ifdef USE_GTK2_14
 							gtk_bin_get_child (GTK_BIN (button));
 						bbox1 = gtk_bin_get_child (GTK_BIN (bbox1));
-#else
+# else
 							GTK_BIN (GTK_BIN (button)->child)->child;
-#endif
+# endif
 						GList *firstchildren = gtk_container_get_children (GTK_CONTAINER (bbox1));
 						GtkWidget *bbox2 =
-#ifdef USE_GTK2_14
+# ifdef USE_GTK2_14
 							gtk_bin_get_child (GTK_BIN (btn2));
 						bbox2 = gtk_bin_get_child (GTK_BIN (bbox2));
-#else
+# else
 							GTK_BIN (GTK_BIN (btn2)->child)->child;
-#endif
+# endif
 						GList *children = gtk_container_get_children (GTK_CONTAINER (bbox2));
-						GList *tmp;
-						for (tmp = children; tmp != NULL; tmp = tmp->next)
-						{
-							gtk_widget_reparent ((GtkWidget *)tmp->data, bbox1);
-							gtk_widget_show_all ((GtkWidget*)tmp->data);
-						}
+						gtk_widget_reparent ((GtkWidget*)children->data, bbox1);
+						gtk_widget_show_all ((GtkWidget*)children->data);
+#endif //ndef USE_GTK3_14
 						gtk_widget_destroy (btn2);
 						ex->true_image = (ex->button_style == 2 || firstchildren == NULL) ? //there is no icon
 							NULL : firstchildren->data;
@@ -2752,29 +2774,41 @@ static void _e2_toolbar_add_items (GtkTreeModel *model,
 				break;
 			case E2_ACTION_TYPE_SEPARATOR:
 			{
-				GtkWidget *sep, *align;
+				GtkWidget *sep;
+#ifndef USE_GTK3_0
+				GtkWidget *align;
+#endif
 				if (e2_option_bool_get_direct (rt->hori))
 				{
-#ifdef USE_GTK3_2
+#ifdef USE_GTK3_0
 					sep = gtk_separator_new (GTK_ORIENTATION_VERTICAL);
+					//TODO set sep's style properties
+					g_object_set (G_OBJECT (sep), "halign", GTK_ALIGN_CENTER, NULL);
 #else
 					sep = gtk_vseparator_new ();
-#endif
 					align = gtk_alignment_new (0.5, 0.5, 1.0, 0.6);
+#endif
 				}
 				else
 				{
-#ifdef USE_GTK3_2
+#ifdef USE_GTK3_0
 					sep = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
+					//TODO set sep's style properties
+					g_object_set (G_OBJECT (sep), "valign", GTK_ALIGN_CENTER, NULL);
 #else
 					sep = gtk_hseparator_new ();
-#endif
 					align = gtk_alignment_new (0.5, 0.5, 0.6, 1.0);
+#endif
 				}
+#ifdef USE_GTK3_0
+				GtkToolItem *tool = gtk_tool_item_new();
+				gtk_container_add (GTK_CONTAINER (tool), sep);
+#else
 				gtk_container_add (GTK_CONTAINER (align), sep);
 				gtk_container_set_border_width (GTK_CONTAINER (align), E2_PADDING_XSMALL);
 				GtkToolItem *tool = gtk_tool_item_new();
 				gtk_container_add (GTK_CONTAINER (tool), align);
+#endif
 				gtk_toolbar_insert (GTK_TOOLBAR (rt->toolbar), tool, (rt->reversed) ? 0:-1);
 				gtk_widget_show_all (GTK_WIDGET (tool));
 			}
