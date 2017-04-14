@@ -635,7 +635,7 @@ static void _e2_window_show_cb (GtkWidget *window, E2_WindowRuntime *rt)
 		app.main_window->window);
 #endif
 	//notice future window-state changes
-	g_signal_connect (G_OBJECT(app.main_window), "window-state-event",
+	g_signal_connect (G_OBJECT (app.main_window), "window-state-event",
 		G_CALLBACK(_e2_window_change_cb), NULL);
 
 	//ensure specified startup dir is visible, in preference-order
@@ -1768,7 +1768,12 @@ void e2_window_create (E2_WindowRuntime *rt)
 		gtk_label_set_text (GTK_LABEL(wid2), who_where->str);
 	g_string_free (who_where, TRUE);
 
-/*	gtk_misc_set_alignment (GTK_MISC (wid2), 0.0, 0.5);
+/*
+#ifdef USE_GTK3_0
+	g_object_set(G_OBJECT (wid2), "halign", GTK_ALIGN_START, "valign", GTK_ALIGN_CENTER, NULL);
+#else
+	gtk_misc_set_alignment (GTK_MISC (wid2), 0.0, 0.5);
+#endif
 #ifdef USE_GTK3_2
 	gtk_grid_attach (GTK_GRID(wid), wid2, 0, 0, 1, 1);
 	QQQ
@@ -1784,7 +1789,12 @@ void e2_window_create (E2_WindowRuntime *rt)
 //# undef wid2
 //#endif
 	app.status_bar_label2 = gtk_label_new (" ");
-/*	gtk_misc_set_alignment (GTK_MISC (app.status_bar_label2), 0.5, 0.5);
+/*
+#ifdef USE_GTK3_0
+	g_object_set(G_OBJECT (app.status_bar_label2), "halign", GTK_ALIGN_CENTER, "valign", GTK_ALIGN_CENTER, NULL);
+#else
+	gtk_misc_set_alignment (GTK_MISC (app.status_bar_label2), 0.5, 0.5);
+#endif
 	gtk_box_pack_start (GTK_BOX (app.vbox_main), app.status_bar_label2, FALSE, TRUE, 0);
 #ifdef USE_GTK3_2
 	gtk_grid_attach (GTK_GRID(wid), app.status_bar_label2, 1, 0, 1, 1);
