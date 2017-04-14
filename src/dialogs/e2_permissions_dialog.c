@@ -129,12 +129,14 @@ static void _e2_permissions_dialog_add_chmod_button (
 {
 	if (label == NULL)
 	{    //align the button reasonably
-		GtkWidget *aligner =  gtk_alignment_new (0.1, 0.5, 0, 0 );
+#ifdef USE_GTK3_0
+		GtkWidget *check_button = gtk_check_button_new ();
+		g_object_set (G_OBJECT (check_button), "margin-start", 25, "valign", GTK_ALIGN_CENTER, NULL);
+		gtk_grid_attach (GTK_GRID(table), check_button, left, top, right-left, bottom-top);
+#else	
+		GtkWidget *aligner = gtk_alignment_new (0.1, 0.5, 0, 0 );
 		GtkWidget *check_button = gtk_check_button_new ();
 		gtk_container_add (GTK_CONTAINER (aligner), check_button);
-#ifdef USE_GTK3_2
-		gtk_grid_attach (GTK_GRID(table), aligner, left, top, right-left, bottom-top);
-#else
 		gtk_table_attach (GTK_TABLE (table), aligner,
 			left, right, top, bottom,
 			GTK_FILL,  //GtkAttachOptions xoptions

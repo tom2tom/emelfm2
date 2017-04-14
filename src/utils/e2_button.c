@@ -332,9 +332,15 @@ GtkWidget *e2_button_get_full (const gchar *label, const gchar *stock, GtkIconSi
 
 	if (need_align)
 	{
+#ifdef USE_GTK3_0
+		//TODO set bbox style parameters
+		g_object_set (G_OBJECT (bbox), "halign", GTK_ALIGN_CENTER, "valign", GTK_ALIGN_CENTER, NULL);
+		gtk_container_add (GTK_CONTAINER (button), bbox);
+#else
 		GtkWidget *align = gtk_alignment_new (0.5, 0.5, 0.0, 0.0);
 		gtk_container_add (GTK_CONTAINER (align), bbox);
 		gtk_container_add (GTK_CONTAINER (button), align);
+#endif
 	}
 	else	//should never happen
 		gtk_container_add (GTK_CONTAINER (button), bbox);

@@ -141,6 +141,11 @@ void e2_widget_set_toggletip (GtkWidget *widget, const gchar *initialtip,
 */
 void e2_widget_set_tip (GtkWidget *widget, const gchar *tiptext1, const gchar *tiptext2)
 {
+/*
+#ifdef DISPLAYTHREADSAFE
+	gtk_tooltips_set_tip (app.tooltips, widget, tiptext1, tiptext2);
+#else
+*/
 	/* gtk >= 2.12 (downstream) uses gtk_widget_set_tooltip_text(), and for
 	   gtk < 2.16.3 that synchronously accesses X server, so needs BGL closed */
 	gboolean close = (app.gtkversion >= 21200 //revised tips-code is in play from 2.12.0
@@ -176,6 +181,7 @@ void e2_widget_set_tip (GtkWidget *widget, const gchar *tiptext1, const gchar *t
 
 	if (close)
 		OPENBGL
+//#endif
 }
 #endif //def USE_GTK2_12TIPS
 
@@ -244,6 +250,11 @@ GtkWidget *e2_widget_get_icon (const gchar *icon, GtkIconSize size)
 	{
 		GdkPixbuf *pixbuf;
 		gchar *fullname;
+		gint width, height;
+		if (!gtk_icon_size_lookup (size, &width, &height))
+		{
+			width = 16; height = 16; //unlikely default to minimum size
+		}
 		if (g_path_is_absolute (icon))
 			fullname = icon;
 		else
@@ -256,11 +267,6 @@ GtkWidget *e2_widget_get_icon (const gchar *icon, GtkIconSize size)
 		if ((pixbuf = gdk_pixbuf_new_from_file (fullname, NULL)) != NULL)
 		{
 			GdkPixbuf *pixbuf2;
-			gint width, height;
-			if (!gtk_icon_size_lookup (size, &width, &height))
-			{
-				width = 16; height = 16; //unlikely default to minimum size
-			}
 			pixbuf2 = gdk_pixbuf_scale_simple (pixbuf, width, height,
 				GDK_INTERP_BILINEAR);
 			image = gtk_image_new_from_pixbuf (pixbuf2);
@@ -296,7 +302,24 @@ GtkWidget *e2_widget_add_mid_label_to_table (GtkWidget *table, gchar *text,
 	label = gtk_label_new (NULL);
 	gtk_label_set_markup (GTK_LABEL (label), text);
 	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+#ifdef USE_GTK3_0
+	gint h;
+	switch ((int)xalign)
+	{
+		case 0:
+			h = GTK_ALIGN_START;
+			break;
+		case 1:
+			h = GTK_ALIGN_END;
+			break;
+		default:
+			h = GTK_ALIGN_CENTER;
+			break;
+	}
+	g_object_set(G_OBJECT (label), "halign", h, "valign", GTK_ALIGN_CENTER, NULL);
+#else
 	gtk_misc_set_alignment (GTK_MISC (label), xalign, 0.5);
+#endif
 //	gtk_label_set_selectable (GTK_LABEL (label), FALSE);
 #ifdef USE_GTK3_2
 	gtk_grid_attach (GTK_GRID (table), label, left, top, right-left, bottom-top);
@@ -339,7 +362,36 @@ GtkWidget *e2_widget_add_label (GtkWidget *box, const gchar *text,
 	GtkWidget *label = gtk_label_new (NULL);
 	gtk_label_set_markup (GTK_LABEL (label), text);
 //	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+#ifdef USE_GTK3_0
+	gint h, v;
+	switch ((int)xalign)
+	{
+		case 0:
+			h = GTK_ALIGN_START;
+			break;
+		case 1:
+			h = GTK_ALIGN_END;
+			break;
+		default:
+			h = GTK_ALIGN_CENTER;
+			break;
+	}
+	switch ((int)yalign)
+	{
+		case 0:
+			v = GTK_ALIGN_START;
+			break;
+		case 1:
+			v = GTK_ALIGN_END;
+			break;
+		default:
+			v = GTK_ALIGN_CENTER;
+			break;
+	}
+	g_object_set(G_OBJECT (label), "halign", h, "valign", v, NULL);
+#else
 	gtk_misc_set_alignment (GTK_MISC (label), xalign, yalign);
+#endif
 	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
 	gtk_label_set_selectable (GTK_LABEL (label), FALSE);
 	if (box != NULL)
