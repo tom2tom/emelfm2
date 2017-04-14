@@ -380,16 +380,20 @@ _e2p_cpbar_exec (VPATH *slocal, VPATH *dlocal, E2_FileTaskMode flags,
 					kill (pid, SIGSTOP);
 					wdata->bflags |= E2_BARTASK_PAUSED;
 					e2_filelist_enable_refresh ();
-					pthread_cleanup_push ((gpointer)OPENBGL_NAME,
-#ifdef DEBUG_MESSAGES
-						 NULL
+#ifdef DISPLAYTHREADSAFE
+					e2_main_loop_run (wdata->loop);
 #else
-						 &display_mutex
-#endif
+					pthread_cleanup_push ((gpointer)OPENBGL_NAME,
+# ifdef DEBUG_MESSAGES
+						NULL
+# else
+						&display_mutex
+# endif
 					);
 					CLOSEBGL
 					e2_main_loop_run (wdata->loop);
 					pthread_cleanup_pop (1);
+#endif
 					kill (pid, SIGCONT);	//don't get to here if stopped or aborted
 				}
 			}
@@ -746,7 +750,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_NUMBERED_ACTION(1,_A(6),_("cpbar"),_e2p_cpbar,
 		_("_Copy"),
 		_("Copy selected items, with displayed progress details"),
-		"plugin_" ANAME E2ICONTB)
+		"plugin-" ANAME E2ICONTB)
 	PLUGINIT_NUMBERED_ACTION(2,_A(6),_("cpbar_with_time"),_e2p_cpbar_sametime,
 		_("Copy with _times"),
 		_("Copy selected items, with preserved time-properties and displayed progress details"),

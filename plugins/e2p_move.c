@@ -386,16 +386,20 @@ _e2p_mvbar_exec (VPATH *slocal, VPATH *dlocal, gboolean realmove,
 					kill (pid, SIGSTOP);
 					wdata->bflags |= E2_BARTASK_PAUSED;
 					e2_filelist_enable_refresh ();
-					pthread_cleanup_push ((gpointer)OPENBGL_NAME,
-#ifdef DEBUG_MESSAGES
-						NULL
+#ifdef DISPLAYTHREADSAFE
+					e2_main_loop_run (wdata->loop);
 #else
+					pthread_cleanup_push ((gpointer)OPENBGL_NAME,
+# ifdef DEBUG_MESSAGES
+						NULL
+# else
 						&display_mutex
-#endif
+# endif
 					);
 					CLOSEBGL
 					e2_main_loop_run (wdata->loop);
 					pthread_cleanup_pop (1);
+#endif
 					kill (pid, SIGCONT);	//don't get to here if stopped or aborted
 				}
 			}
@@ -798,7 +802,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(6),_("mvbar"),_e2p_mvbar,
 		_("_Move"),
 		_("Move selected items, with displayed progress details"),
-		"plugin_" ANAME E2ICONTB)
+		"plugin-" ANAME E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin
