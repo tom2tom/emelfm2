@@ -95,6 +95,19 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # if GLIB_CHECK_VERSION (2,38,0)
 #  define USE_GLIB2_38
 # endif
+# if GLIB_CHECK_VERSION (2,40,0)
+#  define USE_GLIB2_40
+# endif
+# if GLIB_CHECK_VERSION (2,42,0)
+#  define USE_GLIB2_42
+# endif
+# if GLIB_CHECK_VERSION (2,44,0)
+#  define USE_GLIB2_44
+# endif
+# if GLIB_CHECK_VERSION (2,46,0)
+#  define USE_GLIB2_46
+# endif
+//and so on, up to 58
 # if GTK_CHECK_VERSION (2,8,0)
 #  define USE_GTK2_8
 # endif
@@ -149,10 +162,19 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # if GTK_CHECK_VERSION (3,16,0)
 #  define USE_GTK3_16
 # endif
+# if GTK_CHECK_VERSION (3,18,0)
+#  define USE_GTK3_18
+# endif
+# if GTK_CHECK_VERSION (3,20,0)
+#  define USE_GTK3_20
+# endif
+# if GTK_CHECK_VERSION (3,22,0)
+#  define USE_GTK3_22
+# endif
 
 #elif defined(E2_MIN_GTK3)
 //GTK3 is available and either: explicitly requested or GTK2 is not available
-//include extra/different code valid only for gtk 3.0 and corresponding glib 2.28
+//include extra/different code valid only for gtk 3.0 and corresponding glib 2.46
 # define USE_GLIB2_8
 # define USE_GLIB2_10
 # define USE_GLIB2_12
@@ -164,6 +186,15 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # define USE_GLIB2_24
 # define USE_GLIB2_26
 # define USE_GLIB2_28
+# define USE_GLIB2_30
+# define USE_GLIB2_32
+# define USE_GLIB2_34
+# define USE_GLIB2_36
+# define USE_GLIB2_38
+# define USE_GLIB2_40
+# define USE_GLIB2_42
+# define USE_GLIB2_44
+# define USE_GLIB2_46
 # define USE_GTK2_8
 # define USE_GTK2_10
 # define USE_GTK2_12
@@ -197,6 +228,12 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # define GTK3_COMBO_FIX //include workarounds for gtk3.0.x bad behaviour
 #else
 # include <gdk/gdkkeysyms.h>
+#endif
+
+#ifdef USE_GTK3_4
+# define GDKCOLOR GdkRGBA
+#else
+# define GDKCOLOR GdkColor
 #endif
 
 //install stock icons only for gtk 3.10+
@@ -243,9 +280,9 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 //default build with horizontal panes - see Makefile
 //#define E2_PANES_HORIZONTAL
 //default pointsize and file-extension for custom toolbar-icon files
-#define E2ICONTB "_48.png"
+#define E2ICONTB ".png"
 //default pointsize and file-extension for custom dialog-button-icon files
-#define E2ICOND "_32.png"
+#define E2ICOND ".png"
 
 //tag for development of on-demand status-bar updates
 //NOTE need to check all BGL effects
@@ -351,8 +388,8 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # ifndef USE_GLIB2_10
 typedef struct _E2_ColorData
 {
-	GMemChunk *chunk;	//data structure for a block of ATOMSPERCHUNK GdkColor structs
-	GdkColor **pointers;	//allocated space for ATOMSPERCHUNK pointers
+	GMemChunk *chunk;	//data structure for a block of ATOMSPERCHUNK GDKCOLOR structs
+	GDKCOLOR **pointers;	//allocated space for ATOMSPERCHUNK pointers
 } E2_ColorData;
 # endif
 #endif
@@ -805,9 +842,25 @@ pthread_mutex_t history_mutex;
 
 //macros related to blocking simultaneous access to thread-unsafe UI backend (notably xlib)
 
+/*
+#ifdef GDK_WINDOWING_WAYLAND !!and it's actually working
+# define DISPLAYTHREADSAFE
+#endif
+*/
+
+#ifdef DISPLAYTHREADSAFE
+# define CLOSEBGL
+# define OPENBGL
+# define OPENBGL_NAME
+# define CLOSEBGL_IF_OPEN
+# define OPENBGL_IF_CLOSED
+#else
+
 //local management of gdk mutex, to enable tolerant re-locking by the same thread
 //direct mutex-manipulation
 pthread_mutex_t display_mutex;	//BGL replacement
+//workaround for deprecated/lack-of internal X11 lock in gtk3.6+, use display_mutex
+//# define LOCAL_BGL BUT gtk doesn't understand local locking
 
 #ifdef DEBUG_MESSAGES
 # define CLOSEBGL e2_main_close_uilock ();
@@ -817,22 +870,6 @@ pthread_mutex_t display_mutex;	//BGL replacement
 # define CLOSEBGL pthread_mutex_lock (&display_mutex);
 # define OPENBGL pthread_mutex_unlock (&display_mutex);
 # define OPENBGL_NAME pthread_mutex_unlock
-#endif
-
-#ifdef USE_GTK3_6
-//workaround for deprecated/lack-of internal X11 lock in gtk3.6+
-//# define LOCAL_BGL
-# ifdef LOCAL_BGL
-#  define NEEDCLOSEBGL CLOSEBGL
-#  define NEEDCLOSEBGLX CLOSEBGL //locks needing further attention
-#  define NEEDOPENBGL OPENBGL
-# endif
-#endif
-
-#ifndef NEEDCLOSEBGL
-# define NEEDCLOSEBGL
-# define NEEDCLOSEBGLX
-# define NEEDOPENBGL
 #endif
 
 //not locked now and not already locked - this should never happen
@@ -852,6 +889,14 @@ pthread_mutex_t display_mutex;	//BGL replacement
 	if (_lockres == 0) \
 		pthread_mutex_unlock (&display_mutex);
 
+#endif //ndef DISPLAYTHREADSAFE
+
+#ifndef NEEDCLOSEBGL
+# define NEEDCLOSEBGL
+# define NEEDCLOSEBGLX
+# define NEEDOPENBGL
+#endif
+	
 //#define NEWLOOP
 #ifdef NEWLOOP
 extern GMainContext *localctx;
