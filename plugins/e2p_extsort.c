@@ -63,16 +63,25 @@ static gboolean _e2p_sort_by_ext (gpointer from, E2_ActionRuntime *art)
 		rt->view.extsort = TRUE;
 
 	gtk_tree_sortable_get_sort_column_id (sortable, &sortcolnow, &sort_order);
+#ifdef USE_GTK3_14
+	gtk_widget_destroy (rt->view.sort_arrow);
+#else
 	gtk_widget_hide (rt->view.sort_arrows[sortcolnow]);
-	gtk_arrow_set (GTK_ARROW (rt->view.sort_arrows[FILENAME]),
-		(rt->view.sort_order == GTK_SORT_ASCENDING) ?
-			 GTK_ARROW_RIGHT : GTK_ARROW_LEFT, GTK_SHADOW_IN);
-	gtk_widget_show (rt->view.sort_arrows[FILENAME]);
-
+#endif
 	gtk_tree_sortable_set_sort_func (sortable, FILENAME,
 		(GtkTreeIterCompareFunc) e2_fileview_ext_sort, &sort_order, NULL);
 	//do the sort
 	gtk_tree_sortable_set_sort_column_id (sortable, FILENAME, rt->view.sort_order);
+
+	GtkArrowType arrow = (rt->view.sort_order == GTK_SORT_ASCENDING) ?
+		 GTK_ARROW_RIGHT : GTK_ARROW_LEFT;
+#ifdef USE_GTK3_14
+	e2_fileview_set_arrow (&rt->view, arrow);
+#else
+	//different shadow types don't do any good, really ...
+	gtk_arrow_set (GTK_ARROW (rt->view.sort_arrows[FILENAME]), arrow, GTK_SHADOW_NONE);
+	gtk_widget_show (rt->view.sort_arrows[FILENAME]);
+#endif
 	return TRUE;
 }
 
@@ -88,7 +97,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(7),_("sort_by_ext"),_e2p_sort_by_ext,
 		_("Extension _sort"),
 		_("Sort the active file pane by filename extension"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin
