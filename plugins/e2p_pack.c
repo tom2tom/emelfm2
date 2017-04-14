@@ -281,7 +281,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(6),_("pack"),_e2p_pack,
 		_("_Pack.."),
 		_("Build an archive containing the selected items"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin

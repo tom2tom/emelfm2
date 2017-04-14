@@ -219,6 +219,7 @@ static void _e2p_track_choose_rdf_cb (GtkButton *button, E2_TrackDlgData *rt)
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
 
 /*	//hide the dialog's standard 'open' button
+#ifdef USE_GTK3_12 TODO deprecated action area use
 	GtkContainer *bbox = GTK_CONTAINER (
 #ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG (dialog));
@@ -508,7 +509,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(1),_("track"),_e2p_track,
 		_("_Track.."),
 		_("Find items in the tracker database"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 
 	e2_cache_int_register ("track-plugin-type", &service_index, 0);
 	e2_cache_list_register ("track-plugin-history", &query_history);
