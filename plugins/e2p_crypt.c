@@ -4056,8 +4056,16 @@ static DialogButtons _e2pcr_crypt_dialog_run (E2P_CryptOpts *options)
 		gtk_editable_select_region (GTK_EDITABLE (crt.pwrt->pwentry1), 0, -1);
 	}
 	wid = e2_widget_add_box (hbox, TRUE, E2_PADDING, FALSE, FALSE, 0);
+#ifdef USE_GTK3_14
+	GtkContainer *parent;
+	g_object_get (G_OBJECT (crt.pwrt->pwentry1), "parent", &parent, NULL);
+	g_object_ref (G_OBJECT (crt.pwrt->pwentry1));
+	gtk_container_remove (parent, (GtkWidget*)crt.pwrt->pwentry1);
+	gtk_container_add (GTK_CONTAINER(wid), (GtkWidget*)crt.pwrt->pwentry1);
+	g_object_unref (G_OBJECT (crt.pwrt->pwentry1));
+#else
 	gtk_widget_reparent (crt.pwrt->pwentry1, wid);
-
+#endif
 	crt.confirmbox = e2_widget_add_box (dialog_vbox, FALSE, 0, FALSE, FALSE, 0);
 	wid =
 	e2_widget_add_mid_label (crt.confirmbox, _("Confirm password:"), 0, FALSE, E2_PADDING_SMALL); //L, R padding
@@ -4068,7 +4076,15 @@ static DialogButtons _e2pcr_crypt_dialog_run (E2P_CryptOpts *options)
 		gtk_entry_set_text (GTK_ENTRY (crt.pwrt->pwentry2), options->plain_pw);
 	}
 	wid = e2_widget_add_box (crt.confirmbox, TRUE, E2_PADDING, FALSE, FALSE, 0);
+#ifdef USE_GTK3_14
+	g_object_get (G_OBJECT (crt.pwrt->pwentry2), "parent", &parent, NULL);
+	g_object_ref (G_OBJECT (crt.pwrt->pwentry2));
+	gtk_container_remove (parent, (GtkWidget*)crt.pwrt->pwentry2);
+	gtk_container_add (GTK_CONTAINER(wid), (GtkWidget*)crt.pwrt->pwentry2);
+	g_object_unref (G_OBJECT (crt.pwrt->pwentry2));
+#else
 	gtk_widget_reparent (crt.pwrt->pwentry2, wid);
+#endif
 	gtk_widget_destroy (tempbox);	//finished with that now
 
 #ifdef USE_GTK3_0
@@ -4569,7 +4585,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONE_START(_A(6),aname,_e2p_task_docrypt,
 		_("_En/decrypt.."),
 		_("Encrypt or decrypt selected items"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 
 	session_opts.en_suffix = g_strdup (".enc");	//no translation
 	session_opts.de_suffix = g_strdup (".enc");	//no translation
