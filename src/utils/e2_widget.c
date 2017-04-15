@@ -276,6 +276,25 @@ GtkWidget *e2_widget_get_icon (const gchar *icon, GtkIconSize size)
 	return image;
 #endif
 }
+#ifdef USE_GTK3_14
+/**
+@brief get image-widget for an arrow
+@param direction enum GTK_ARROW_UP..GTK_ARROW_RIGHT for arrows up,down,extensionup,extensiondown respectively
+
+@return new unshown GtkImage or NULL
+*/
+GtkWidget *e2_widget_get_arrow (GtkArrowType direction)
+{
+	GtkWidget *arrow;
+	if (cached_arrows[direction] != NULL)
+		arrow = gtk_image_new_from_pixbuf (cached_arrows[direction]);
+	else
+		arrow = gtk_image_new_from_icon_name (STOCK_NAME_MISSING_IMAGE, GTK_ICON_SIZE_MENU);
+	//TODO set arrow properties
+	//g_object_set (G_OBJECT (arrow),,,, NULL);
+	return arrow;
+}
+#endif
 /**
 @brief create a vertically-centred GtkLabel and add it to @a table at specified position
 

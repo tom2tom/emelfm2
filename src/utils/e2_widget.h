@@ -40,6 +40,9 @@ void e2_widget_set_tip (GtkWidget *widget, const gchar *tiptext1, const gchar *t
 #endif
 void e2_widget_swap_tooltip (GtkWidget *widget);
 GtkWidget *e2_widget_get_icon (const gchar *icon, GtkIconSize size) G_GNUC_MALLOC;
+#ifdef USE_GTK3_14
+GtkWidget *e2_widget_get_arrow (GtkArrowType direction) G_GNUC_MALLOC;
+#endif
 
 GtkWidget *e2_widget_add_mid_label (GtkWidget *box, const gchar *text, gfloat align,
 	gboolean exp, guint pad) G_GNUC_MALLOC;
