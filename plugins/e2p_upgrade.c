@@ -522,10 +522,13 @@ static gboolean _e2p_upgrade_0_9_2 (const gchar *localcfg, const gchar *sed)
 		gchar *oldstr2 = g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|",NULL);
 		gchar *newstr2 = g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|\\n",
 			"\t\t|<Control>l||",_A(5),".",_A(103),"|",NULL);
+		//cleanup icon names
 		gchar *command = g_strconcat (sed,
 			" -i"
 			" -e 's/",oldstr1,"/",newstr1,"/'"
 			" -e 's/",oldstr2,"/",newstr2,"/'"
+			" -e 's/_[0-9]{2}\\.png//'"
+			" -e 's/\\|plugin_/\\|plugin-/'"
 			" ",localcfg,NULL);
 
 		gboolean success = (system (command) == 0);
