@@ -965,14 +965,6 @@ gboolean e2_main_closedown (gboolean compulsory, gboolean saveconfig, gboolean d
 		}
 	}
 
-	guint i;
-	for (i = 0; i < MAX_TIMERS; i++)
-	{
-		if (app.timers[i] > 0)
-			g_source_remove (app.timers[i]);
-	}
-	//CHECKME other non-static timers e.g. keybinding timers, edit blink timers etc
-
 	e2_task_cleanup (FALSE, pthread_self());	//cleanup action/command processing
 
 #ifdef E2_FAM
@@ -984,6 +976,15 @@ gboolean e2_main_closedown (gboolean compulsory, gboolean saveconfig, gboolean d
 #ifdef E2_DEVKIT
 	e2_devkit_disconnect ();
 #endif
+        
+	guint i;
+	for (i = 0; i < MAX_TIMERS; i++)
+	{
+		if (app.timers[i] > 0)
+			g_source_remove (app.timers[i]);
+	}
+	//CHECKME other non-static timers e.g. keybinding timers, edit blink timers etc
+        
 #ifdef E2_ADD_STOCKS
 	e2_icons_clear_stocks ();
 #endif
