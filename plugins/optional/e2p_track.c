@@ -219,7 +219,9 @@ static void _e2p_track_choose_rdf_cb (GtkButton *button, E2_TrackDlgData *rt)
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog), filter);
 
 /*	//hide the dialog's standard 'open' button
-#ifdef USE_GTK3_12 TODO deprecated action area use
+#ifdef USE_GTK3_12
+# warning gtk 3.12 deprecated action-area use, but there is no practical alternative
+#endif
 	GtkContainer *bbox = GTK_CONTAINER (
 #ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG (dialog));
@@ -230,10 +232,10 @@ static void _e2p_track_choose_rdf_cb (GtkButton *button, E2_TrackDlgData *rt)
 	GtkWidget *btn = children->data;
 	gtk_widget_hide (btn);
 	g_list_free (children);
+
 	//add 2 buttons that we want
 	E2_Button no_btn;
 	e2_button_derive (&no_btn, &E2_BUTTON_NO, BTN_NO_DEFAULT);
-
 	e2_dialog_add_defined_button (dialog, &E2_BUTTON_?APPLY);
 	e2_dialog_add_defined_button (dialog, &no_btn);
 	e2_dialog_add_defined_button (dialog, &E2_BUTTON_APPLY);
