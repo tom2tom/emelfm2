@@ -2318,7 +2318,9 @@ void e2_config_dialog_create (gchar *page)
 		&E2_BUTTON_MORE, &E2_BUTTON_DISCARD, &E2_BUTTON_APPLY, NULL);
 
 	//prepare all the buttons for mnemonic-blocking during any keybinding config
-//#ifdef USE_GTK3_12 TODO deprecated action area use
+#ifdef USE_GTK3_12
+# warning gtk 3.12 deprecates dialog action-area use, but there is no practical alternative
+#endif
 	e2_option_tree_connect_mnemonics (
 #ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG(config_dialog))
@@ -2326,6 +2328,5 @@ void e2_config_dialog_create (gchar *page)
 		GTK_DIALOG(config_dialog)->action_area
 #endif
 	);
-
 //	app.keytrans = FALSE;	//cancel any keys-translation-flag from earlier in this session
 }

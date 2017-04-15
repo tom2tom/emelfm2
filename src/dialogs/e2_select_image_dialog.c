@@ -1226,23 +1226,25 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 //						"button-spacing", &button_spacing,
 						"action-area-border", &action_area_border,
 						NULL);
+#ifdef USE_GTK3_12
+# warning gtk 3.12 deprecates dialog action-area use, but there is no practical alternative
+#endif
 #ifdef USE_GTK3_0
 	GtkWidget *bbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	GtkWidget *bbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 #else
 	GtkWidget *bbox = gtk_hbox_new (FALSE, 0);
 	GtkWidget *bbox2 = gtk_vbox_new (FALSE, 0);
-//#ifdef USE_GTK3_12 TODO deprecated action area use
 #endif
+	gtk_box_pack_start (GTK_BOX (bbox), bbox2, FALSE, TRUE, action_area_border);
+	gtk_box_pack_start (GTK_BOX (bbox2), rt->dir_chooser, TRUE, TRUE, action_area_border);
+
 	GtkWidget *action_area =
 #ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
 #else
 		GTK_DIALOG (rt->dialog)->action_area;
 #endif
-	gtk_box_pack_start (GTK_BOX (bbox), bbox2, FALSE, TRUE, action_area_border);
-	gtk_box_pack_start (GTK_BOX (bbox2), rt->dir_chooser, TRUE, TRUE, action_area_border);
-
 	g_object_ref (G_OBJECT (action_area));
 	gtk_container_remove (GTK_CONTAINER (dialog_vbox), action_area);
 	gtk_box_pack_start (GTK_BOX (bbox), action_area, FALSE, FALSE, 0);
@@ -1267,7 +1269,7 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 	if (page != 0)
 		gtk_notebook_set_current_page (rt->notebook, page);
 
-#ifdef USE_GTK3_10
+#if 0 //def USE_GTK3_10
 	//icons population can take a while!
 	cursor = gdk_cursor_new (GDK_LEFT_PTR);
 	gdk_window_set_cursor (gtk_widget_get_window (parent), cursor);

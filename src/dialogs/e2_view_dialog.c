@@ -1767,20 +1767,30 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 
 	GtkWidget *hbox = e2_view_dialog_create_searchbar (rt);
 	gtk_container_add (GTK_CONTAINER (hndlbox), hbox);
-//#ifdef USE_GTK3_12 TODO deprecated action area use
 	//add things to the action-area
-	GtkWidget *hbbox =
-#ifdef USE_GTK2_14
-		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
+#ifdef USE_GTK3_12
+# warning gtk 3.12 deprecates dialog action-area use, but there is no practical alternative
+	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
+	gchar *labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
+		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
+	rt->info_label = gtk_label_new (labeltext);
+	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
+		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
+	gtk_container_add (GTK_CONTAINER(hbbox), rt->info_label);
 #else
+	GtkWidget *hbbox =
+# ifdef USE_GTK2_14
+		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
+# else
 		GTK_DIALOG (rt->dialog)->action_area;
-#endif
+# endif
 	//the "not found" warning is created but not displayed
 	gchar *labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
 		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
 	rt->info_label = e2_widget_add_mid_label (hbbox, labeltext, 0.0, TRUE, 0);
 	//left-align the label
 	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (hbbox), rt->info_label, TRUE);
+#endif
 	//search and/or view buttons
 	labeltext = _("_Hide");
 	hide_keycode = e2_utils_get_mnemonic_keycode (labeltext);
