@@ -27,7 +27,7 @@ This file contains functions for e2's command- and dir-lines.
 #include <pthread.h>
 #include "e2_command_line.h"
 #include "e2_complete.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 #ifdef E2_MOUSECUSTOM
 # include "e2_mousebinding.h"
@@ -909,7 +909,7 @@ static gboolean _e2_command_line_insert_action
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "disable refresh, insert action");
 #endif
-			e2_filelist_disable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
+			e2_filestore_disable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
 
 			GList *base;
 			base = e2_fileview_get_selected_local (&rt->view, FALSE);
@@ -944,7 +944,7 @@ static gboolean _e2_command_line_insert_action
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "enable refresh, insert action");
 #endif
-			e2_filelist_enable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
+			e2_filestore_enable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
 		}
 		else
 			retval = FALSE;

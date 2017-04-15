@@ -33,7 +33,7 @@ ToDo - describe how dialogs work
 #include <string.h>
 #include "e2_dialog.h"
 #include "e2_option.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #ifdef E2_MOUSECUSTOM
 # include "e2_mousebinding.h"
 #endif

@@ -27,7 +27,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #endif
 #include "e2_utils.h"
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 
 typedef struct _E2_WildData
@@ -1146,14 +1146,14 @@ gchar *e2_utils_expand_macros (const gchar *text, const gchar *for_each)
 				}
 				else	//use selected items
 				{
-					e2_filelist_disable_one_refresh (PANEACTIVE);  //prevent any change to the selected items ?
+					e2_filestore_disable_one_refresh (PANEACTIVE);  //prevent any change to the selected items ?
 					GList *sel = e2_fileview_get_selected_local (curr_view, TRUE);
 #ifdef E2_REFRESH_DEBUG
 					printd (DEBUG, "enable refresh, expand macros 1");
 #endif
 					if (sel == NULL)
 					{
-						e2_filelist_enable_one_refresh (PANEACTIVE);
+						e2_filestore_enable_one_refresh (PANEACTIVE);
 						e2_output_print_error (_("No item selected"), FALSE);
 						//CHECKME continue parsing instead of aborting
 						g_free (free_this);
@@ -1206,7 +1206,7 @@ gchar *e2_utils_expand_macros (const gchar *text, const gchar *for_each)
 							F_FREE (utf, ((FileInfo *)member->data)->filename);
 						}
 						g_list_free (sel);
-						e2_filelist_enable_one_refresh (PANEACTIVE);
+						e2_filestore_enable_one_refresh (PANEACTIVE);
 					}
 				}
 			}
@@ -1217,14 +1217,14 @@ gchar *e2_utils_expand_macros (const gchar *text, const gchar *for_each)
 			case 'F':
 			case 'P':
 			{
-				e2_filelist_disable_one_refresh (PANEINACTIVE);
+				e2_filestore_disable_one_refresh (PANEINACTIVE);
 				GList *sel = e2_fileview_get_selected_local (other_view, TRUE);
 #ifdef E2_REFRESH_DEBUG
 				printd (DEBUG, "enable refresh, expand macros 2");
 #endif
 				if (sel == NULL)
 				{
-					e2_filelist_enable_one_refresh (PANEINACTIVE);
+					e2_filestore_enable_one_refresh (PANEINACTIVE);
 					e2_output_print_error (_("No item selected in other pane"), FALSE);
 					//FIXME continue parsing instead of aborting
 					g_free (free_this);
@@ -1277,7 +1277,7 @@ gchar *e2_utils_expand_macros (const gchar *text, const gchar *for_each)
 						F_FREE (utf, ((FileInfo *)member->data)->filename);
 					}
 					g_list_free (sel);
-					e2_filelist_enable_one_refresh (PANEINACTIVE);
+					e2_filestore_enable_one_refresh (PANEINACTIVE);
 				}
 			}
 			break;

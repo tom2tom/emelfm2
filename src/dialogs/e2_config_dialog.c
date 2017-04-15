@@ -23,7 +23,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_dialog.h"
 #include "e2_config_dialog.h"
 #include "e2_option_tree.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 #include "e2_plugins.h"
 #include "e2_filetype.h"
@@ -444,7 +444,7 @@ static gboolean _e2_confdlg_apply (gboolean close, E2_ConfigDialogRuntime *rt)
 
 	printd (DEBUG, "config dialog callback: %s", (close) ? "commit" : "apply");
 	//prevent interruptions - disable all refreshing
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	e2_option_disable_config_checks ();
 
 	buildflags = 0;
@@ -708,10 +708,10 @@ static gboolean _e2_confdlg_apply (gboolean close, E2_ConfigDialogRuntime *rt)
 		if (!(buildflags & (E2_OPTION_FLAG_BUILDALL | E2_OPTION_FLAG_BUILDPANES)))
 		{
 #ifdef E2_FAM
-			e2_filelist_request_refresh (curr_view->dir, FALSE);
-			e2_filelist_request_refresh (other_view->dir, TRUE);
+			e2_filestore_request_refresh (curr_view->dir, FALSE);
+			e2_filestore_request_refresh (other_view->dir, TRUE);
 #else
-			e2_filelist_check_dirty (GINT_TO_POINTER(1));
+			e2_filestore_check_dirty (GINT_TO_POINTER(1));
 #endif
 		}
 */
@@ -723,16 +723,16 @@ static gboolean _e2_confdlg_apply (gboolean close, E2_ConfigDialogRuntime *rt)
 		{
 			//option was not set before
 			last_work_time = time (NULL);
-			e2_filelist_start_refresh_checks ();
+			e2_filestore_start_refresh_checks ();
 			rt->refresh_files = TRUE;	//in case we're continuing
 		}
 		else
-			e2_filelist_enable_refresh ();
+			e2_filestore_enable_refresh ();
 	}
 	else if (rt->refresh_files)
 	{
 		//option was set before
-		e2_filelist_stop_refresh_checks ();
+		e2_filestore_stop_refresh_checks ();
 		rt->refresh_files = FALSE;	//in case we're continuing
 	}
 	//after the config file update, set config monitoring according to current option

@@ -33,7 +33,7 @@ These functions are thread-safe, when E2_TREEWALK is defind
 #include <string.h>
 #include <pthread.h>
 #include "e2_filetype.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_dialog.h"
 
 //try to use acl-plugin functionality (if available) to replicate item permissions when copying

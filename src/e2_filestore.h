@@ -1,4 +1,4 @@
-/* $Id: e2_filelist.h 2995 2014-01-13 03:24:50Z tpgww $
+/* $Id: e2_filestore.h 2995 2014-01-13 03:24:50Z tpgww $
 
 Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>
 
@@ -46,26 +46,26 @@ typedef struct _E2_Column
 //gboolean order;  //sort order flag, TRUE for ascending, FALSE for descending
 E2_Column e2_all_columns[MAX_COLUMNS];
 
-gboolean e2_filelist_repoll (GtkWidget *widget, GdkEvent *event, gpointer userdata);
-void e2_filelist_stop_refresh_checks (void);
-void e2_filelist_start_refresh_checks (void);
-void e2_filelist_disable_one_refresh (E2_ListChoice pane);
-void e2_filelist_enable_one_refresh (E2_ListChoice pane);
-gboolean e2_filelist_disable_refresh_action (gpointer from, E2_ActionRuntime *art);
-gboolean e2_filelist_enable_refresh_action (gpointer from, E2_ActionRuntime *art);
-void e2_filelist_disable_refresh (void);
-void e2_filelist_reset_refresh (void); //also does config !!
-void e2_filelist_enable_refresh (void);
-gboolean e2_filelist_request_refresh (gchar *dir, gboolean immediate);
-//void e2_filelist_request_focus (GtkWidget *focus_wid);
-gboolean e2_filelist_check_dirty (gpointer userdata);
-gboolean e2_filelist_clear_old_stores (gpointer user_data);
-GtkListStore *e2_filelist_fill_store (GList *entries, ViewInfo *view) G_GNUC_MALLOC;
-GtkListStore *e2_filelist_make_store (void) G_GNUC_MALLOC;
+gboolean e2_filestore_repoll (GtkWidget *widget, GdkEvent *event, gpointer userdata);
+void e2_filestore_stop_refresh_checks (void);
+void e2_filestore_start_refresh_checks (void);
+void e2_filestore_disable_one_refresh (E2_ListChoice pane);
+void e2_filestore_enable_one_refresh (E2_ListChoice pane);
+gboolean e2_filestore_disable_refresh_action (gpointer from, E2_ActionRuntime *art);
+gboolean e2_filestore_enable_refresh_action (gpointer from, E2_ActionRuntime *art);
+void e2_filestore_disable_refresh (void);
+void e2_filestore_reset_refresh (void); //also does config !!
+void e2_filestore_enable_refresh (void);
+gboolean e2_filestore_request_refresh (gchar *dir, gboolean immediate);
+//void e2_filestore_request_focus (GtkWidget *focus_wid);
+gboolean e2_filestore_check_dirty (gpointer userdata);
+gboolean e2_filestore_clear_old_stores (gpointer user_data);
+GtkListStore *e2_filestore_fill (GList *entries, ViewInfo *view) G_GNUC_MALLOC;
+GtkListStore *e2_filestore_make (void) G_GNUC_MALLOC;
 #ifdef E2_VFS
-GtkListStore *e2_filelist_copy_store (GtkListStore *original) G_GNUC_MALLOC;
+GtkListStore *e2_filestore_copy (GtkListStore *original) G_GNUC_MALLOC;
 #endif
-void e2_filelist_cleaninfo (FileInfo *info, gpointer data);
-gboolean e2_filelist_make_all_infos (gchar *parentpath, GList **list);
+void e2_filestore_cleaninfo (FileInfo *info, gpointer data);
+gboolean e2_filestore_make_all_infos (gchar *parentpath, GList **list);
 
 #endif //ndef __E2_FILELIST_H__

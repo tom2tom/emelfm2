@@ -77,7 +77,7 @@ some dialog-button choices have a BGL problem, if hide dialog after user-choice 
 #include "e2_password_dialog.h"
 #include "e2_task.h"
 #include "e2_icons.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name 
 #define ANAME "crypt"
@@ -4429,7 +4429,7 @@ static gboolean _e2p_task_docryptQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, crypt task");
 #endif
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 
 #ifdef E2_VFS
 	VPATH ddata;
@@ -4472,14 +4472,14 @@ static gboolean _e2p_task_docryptQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "enable refresh, encrypt dialog");
 #endif
-			e2_filelist_enable_refresh ();  //allow updates while we wait
+			e2_filestore_enable_refresh ();  //allow updates while we wait
 			*qed->status = E2_TASK_PAUSED;
 			choice = _e2pcr_crypt_dialog_run (&options);
 			*qed->status = E2_TASK_RUNNING;
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "disable refresh, encrypt dialog");
 #endif
-			e2_filelist_disable_refresh ();
+			e2_filestore_disable_refresh ();
 		}
 
 		switch (choice)
@@ -4556,7 +4556,7 @@ static gboolean _e2p_task_docryptQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, acl task");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 #ifndef E2_MINICRYPT
 	if (options.libhandle != NULL)	//disconnect from the compression library

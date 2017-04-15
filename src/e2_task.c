@@ -28,7 +28,7 @@ some functions do not need TreeRowReferences
 #include "e2_dialog.h"
 #include "e2_option.h"
 #include "e2_ownership_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_filetype.h"
 #include "e2_context_menu.h"
 #ifdef E2_SU_ACTIONS
@@ -1123,7 +1123,7 @@ Expects BGL on/closed
 void e2_task_cleanup (gboolean stay, pthread_t mainID)
 {
 	guint kills = 0;
-	e2_filelist_disable_refresh (); //minimise BGL contention
+	e2_filestore_disable_refresh (); //minimise BGL contention
 	if (stay)
 		_e2_task_change_status (FALSE);	//prevent anything else in Q starting during cleanup
 	else
@@ -1232,7 +1232,7 @@ void e2_task_cleanup (gboolean stay, pthread_t mainID)
 
 	if (stay)
 	{
-		e2_filelist_reset_refresh ();
+		e2_filestore_reset_refresh ();
 
 		_e2_task_change_status (TRUE);	//unhide anything else in Q
 		//restart action thread on next item in Q, if any
@@ -1589,13 +1589,13 @@ void e2_task_refresh_lists (E2_ActionTaskData *qed)
 #ifdef E2_FAM
 	gchar *utf;
 	utf = F_FILENAME_FROM_LOCALE (qed->currdir);
-	e2_filelist_request_refresh (utf, FALSE);
+	e2_filestore_request_refresh (utf, FALSE);
 	F_FREE (utf, qed->currdir);
 	utf = F_FILENAME_FROM_LOCALE (qed->othrdir);
-	e2_filelist_request_refresh (utf, TRUE);
+	e2_filestore_request_refresh (utf, TRUE);
 	F_FREE (utf, qed->othrdir);
 #else
-	e2_filelist_check_dirty (GINT_TO_POINTER (1));
+	e2_filestore_check_dirty (GINT_TO_POINTER (1));
 #endif
 }
 /**
@@ -1880,7 +1880,7 @@ static gboolean _e2_task_copyQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, copy task");
 #endif
-	e2_filelist_disable_refresh ();  //avoid pauses in the copy process
+	e2_filestore_disable_refresh ();  //avoid pauses in the copy process
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -1977,7 +1977,7 @@ static gboolean _e2_task_copyQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, copy task");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 //	printd (DEBUG, "task: copyQ FINISHED");
 	return TRUE;
 }
@@ -2027,7 +2027,7 @@ static gboolean _e2_task_copy_asQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, copy as task");
 #endif
-	e2_filelist_disable_refresh ();  //avoid pauses in the copy process
+	e2_filestore_disable_refresh ();  //avoid pauses in the copy process
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -2117,7 +2117,7 @@ static gboolean _e2_task_copy_asQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, copy as task");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 #ifdef WITH_UNTRASH
@@ -2192,7 +2192,7 @@ static gboolean _e2_task_untrashQ (E2_ActionTaskData *qed)
 	OW_ButtonFlags extras = (multisrc) ? BOTHALL : NONE;
 
 	e2_task_advise ();
-	e2_filelist_disable_refresh ();  //avoid pauses in the move process
+	e2_filestore_disable_refresh ();  //avoid pauses in the move process
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -2308,7 +2308,7 @@ static gboolean _e2_task_untrashQ (E2_ActionTaskData *qed)
 	g_string_free (src, TRUE);
 	g_string_free (dest, TRUE);
 	e2_window_clear_status_message ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return retval;
 }
@@ -2425,7 +2425,7 @@ static gboolean __e2_task_move (E2_ActionTaskData *qed, gchar *trashpath)
 	OW_ButtonFlags extras = (multisrc) ? BOTHALL : NONE;
 
 	e2_task_advise ();
-	e2_filelist_disable_refresh ();  //avoid pauses in the move process
+	e2_filestore_disable_refresh ();  //avoid pauses in the move process
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -2524,7 +2524,7 @@ static gboolean __e2_task_move (E2_ActionTaskData *qed, gchar *trashpath)
 	g_string_free (src, TRUE);
 	g_string_free (dest, TRUE);
 	e2_window_clear_status_message ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return retval;
 }
@@ -2570,7 +2570,7 @@ static gboolean _e2_task_move_asQ (E2_ActionTaskData *qed)
 	gint horz = -1, vert = -1;	//start at default window position
 
 	e2_task_advise ();
-	e2_filelist_disable_refresh ();  //avoid pauses in the move process
+	e2_filestore_disable_refresh ();  //avoid pauses in the move process
 
 	for (count = 0; count < names->len; count++, iterator++)
 	{
@@ -2675,7 +2675,7 @@ static gboolean _e2_task_move_asQ (E2_ActionTaskData *qed)
 	g_string_free (src,TRUE);
 	g_string_free (dest,TRUE);
 	e2_window_clear_status_message ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return retval;
 }
@@ -2728,7 +2728,7 @@ static gboolean _e2_task_symlinkQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, copy task");
 #endif
-	e2_filelist_disable_refresh ();  //avoid pauses in the link process
+	e2_filestore_disable_refresh ();  //avoid pauses in the link process
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -2790,7 +2790,7 @@ static gboolean _e2_task_symlinkQ (E2_ActionTaskData *qed)
 	g_string_free (src, TRUE);
 	g_string_free (dest, TRUE);
 	e2_window_clear_status_message ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 /**
@@ -2836,7 +2836,7 @@ static gboolean _e2_task_symlink_asQ (E2_ActionTaskData *qed)
 	gint horz = -1, vert = -1; //start at default window position
 
 	e2_task_advise ();
-	e2_filelist_disable_refresh ();  //avoid pauses in the link process
+	e2_filestore_disable_refresh ();  //avoid pauses in the link process
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -2920,7 +2920,7 @@ static gboolean _e2_task_symlink_asQ (E2_ActionTaskData *qed)
 	g_string_free (src,TRUE);
 	g_string_free (dest,TRUE);
 	e2_window_clear_status_message ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 /**
@@ -2959,7 +2959,7 @@ static gboolean _e2_task_deleteQ (E2_ActionTaskData *qed)
 
 	//no refresh to avoid pauses in the delete process
 	if (!check)
-		e2_filelist_disable_refresh ();
+		e2_filestore_disable_refresh ();
 	e2_task_advise ();
 
 	for (count = 0; count < names->len; count++, iterator++)
@@ -2994,7 +2994,7 @@ static gboolean _e2_task_deleteQ (E2_ActionTaskData *qed)
 			{
 				case YES_TO_ALL:
 					check = FALSE;
-					e2_filelist_disable_refresh ();  //avoid pauses in the delete process
+					e2_filestore_disable_refresh ();  //avoid pauses in the delete process
 				case OK:
 					success = e2_task_backend_delete
 #ifdef E2_VFS
@@ -3014,7 +3014,7 @@ static gboolean _e2_task_deleteQ (E2_ActionTaskData *qed)
 			}
 			if (success && count > 0 && check)
 				//show updated filelist during pauses
-				e2_filelist_request_refresh (curr_view->dir, FALSE);
+				e2_filestore_request_refresh (curr_view->dir, FALSE);
 
 			if (result == NO_TO_ALL)
 				break;
@@ -3050,7 +3050,7 @@ static gboolean _e2_task_deleteQ (E2_ActionTaskData *qed)
 	g_string_free (src, TRUE);
 	e2_window_clear_status_message ();
 	if (!check)
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 
 	return retval;
 }
@@ -3071,7 +3071,7 @@ static gboolean _e2_task_trashempty (gpointer from, E2_ActionRuntime *art)
 	{
 		GList *entries, *member;
 		gchar *dlocal, *localpath, *itemname;
-		e2_filelist_disable_refresh ();
+		e2_filestore_disable_refresh ();
 		dlocal = F_FILENAME_TO_LOCALE (trashpath);
 #ifdef E2_VFS
 		VPATH ddata = { dlocal, NULL }; //only local spaces for trash
@@ -3090,7 +3090,7 @@ static gboolean _e2_task_trashempty (gpointer from, E2_ActionRuntime *art)
 		{
 			CLOSEBGL
 			//FIXME warn user about error
-			e2_filelist_enable_refresh ();
+			e2_filestore_enable_refresh ();
 			F_FREE (dlocal, trashpath);
 			g_free (trashpath);
 			return FALSE;
@@ -3170,7 +3170,7 @@ static gboolean _e2_task_trashempty (gpointer from, E2_ActionRuntime *art)
 			g_free (msg);
 		}
 		g_free (trashpath);
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 		return TRUE;
 	}
 	e2_output_print_error (_("No trash directory is available"), FALSE);
@@ -3435,7 +3435,7 @@ static gboolean _e2_task_renameQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 			printd(DEBUG,"request refresh after rename");
 #endif
-			e2_filelist_request_refresh (curr_view->dir, TRUE); //NB refresh clears curr_view->selected_names
+			e2_filestore_request_refresh (curr_view->dir, TRUE); //NB refresh clears curr_view->selected_names
 #ifdef E2_REFRESH_DEBUG
 			printd(DEBUG,"after post-name request refresh");
 #endif
@@ -3548,7 +3548,7 @@ static gboolean _e2_task_permissionsQ (E2_ActionTaskData *qed)
 		{
 		  case YES_TO_ALL:
 			all = TRUE;
-			e2_filelist_disable_refresh ();
+			e2_filestore_disable_refresh ();
 			choice = OK;
 		  case OK:
 			if (permitted && optype != E2_CHMOD_NONE)
@@ -3599,7 +3599,7 @@ static gboolean _e2_task_permissionsQ (E2_ActionTaskData *qed)
 	g_string_free (path, TRUE);
 	e2_window_clear_status_message ();
 	if (all)
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 
 	return TRUE;
 }
@@ -3693,7 +3693,7 @@ static gboolean _e2_task_ownershipQ (E2_ActionTaskData *qed)
 		{
 		  case YES_TO_ALL:
 			all = TRUE;
-			e2_filelist_disable_refresh ();
+			e2_filestore_disable_refresh ();
 			choice = OK;
 		  case OK:
 			if (permitted)
@@ -3743,7 +3743,7 @@ static gboolean _e2_task_ownershipQ (E2_ActionTaskData *qed)
 	g_string_free (path,TRUE);
 	e2_window_clear_status_message ();
 	if (all)
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 
 	return TRUE;
 }
@@ -3896,7 +3896,7 @@ static gboolean _e2_task_file_infoQ (E2_ActionTaskData *qed)
 	guint count;
 	E2_SelectedItemInfo **iterator = (E2_SelectedItemInfo **) names->pdata;
 
-	e2_filelist_disable_refresh ();	//prevent access-related refresh
+	e2_filestore_disable_refresh ();	//prevent access-related refresh
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -3926,7 +3926,7 @@ static gboolean _e2_task_file_infoQ (E2_ActionTaskData *qed)
 		g_free (localpath);
 	}
 
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return TRUE;
 }
@@ -4176,7 +4176,7 @@ static gboolean _e2_task_open_withQ (E2_ActionTaskData *qed)
 		//to exactly replicate what the user would see in a context menu
 		localpath = NULL;
 		GtkWidget *dummy = e2_menu_get ();
-		e2_filelist_disable_refresh ();  //downstream may provoke a refresh
+		e2_filestore_disable_refresh ();  //downstream may provoke a refresh
 		if (qed->initiator == (gpointer) curr_view->treeview)
 		{
 			e2_menu_add_filetype_items (dummy, curr_view);
@@ -4194,7 +4194,7 @@ static gboolean _e2_task_open_withQ (E2_ActionTaskData *qed)
 			g_free (localpath);
 		}
 */
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 		GList *items = gtk_container_get_children (GTK_CONTAINER (dummy));
 		if (g_list_length (items) >= (guint)which)
 		{
@@ -4355,11 +4355,11 @@ static gboolean _e2_task_open_in_other_pane (gpointer from, E2_ActionRuntime *ar
 //	The last-activated row in the other pane is focused - this is not
 //	necessarily sensible
 	//CHECKME Q this
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	gchar *name = e2_fileview_get_row_name (curr_view, curr_view->row);
 	if (name == NULL)
 	{
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 		return FALSE;  //the model got mixed up, somehow
 	}
 	gchar *path = e2_utils_strcat (curr_view->dir, name); //separator comes with dir
@@ -4374,7 +4374,7 @@ static gboolean _e2_task_open_in_other_pane (gpointer from, E2_ActionRuntime *ar
 		e2_pane_change_dir (other_pane, path);
 	g_free (name);
 	g_free (path);
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 /**

@@ -23,7 +23,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_dialog.h"
 #include "e2_mkdir_dialog.h"
 #include "e2_task.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_icons.h"
 
 //option-pointers shared by all mkdir dialogs in the session
@@ -703,7 +703,7 @@ static void _e2_mkdirdlg_create_dir (GtkWidget *entry, E2_MkdirDialogRuntime *rt
 #ifdef E2_VFSTMP
 			//FIXME path for non-mounted dirs
 #else
-			e2_filelist_request_refresh (rt->path, TRUE);
+			e2_filestore_request_refresh (rt->path, TRUE);
 #endif
 			e2_list_free_with_data (&missing);
 			return;
@@ -728,7 +728,7 @@ static void _e2_mkdirdlg_create_dir (GtkWidget *entry, E2_MkdirDialogRuntime *rt
 #ifdef E2_VFSTMP
 	//FIXME path for non-mounted dirs
 #else
-		e2_filelist_request_refresh (rt->path, TRUE);
+		e2_filestore_request_refresh (rt->path, TRUE);
 #endif
 		e2_list_update_history (&mkdir_history, dir, NULL, 30, FALSE);
 	}

@@ -28,7 +28,7 @@ Relevant button-events are handled in e2_fileview.c
 #include "e2_dnd.h"
 #include <string.h>
 #include "e2_fileview.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 #include "e2_icons.h"
 
@@ -537,7 +537,7 @@ void e2_dnd_drag_data_get_cb (GtkWidget *treeview, GdkDragContext *context,
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, drag data get");
 #endif
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 
 	/* this is the emerging standard for uri list entries ?
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -605,7 +605,7 @@ NOTE some apps omit the leading "//" from the first example, resulting in file:/
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, drag data get");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 }
 /* *
 @brief UNUSED callback for "drag-drop" signal emitted on the drop site when the user drops data there

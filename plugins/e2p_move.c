@@ -32,7 +32,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_plugins.h"
 #include "e2_dialog.h"
 #include "e2_option.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 #include "e2_icons.h"
 
@@ -385,7 +385,7 @@ _e2p_mvbar_exec (VPATH *slocal, VPATH *dlocal, gboolean realmove,
 				{
 					kill (pid, SIGSTOP);
 					wdata->bflags |= E2_BARTASK_PAUSED;
-					e2_filelist_enable_refresh ();
+					e2_filestore_enable_refresh ();
 #ifdef DISPLAYTHREADSAFE
 					e2_main_loop_run (wdata->loop);
 #else
@@ -500,7 +500,7 @@ _e2p_mvbar_response_cb (GtkDialog *dialog, gint response, E2_BarWindowData *wdat
 				gtk_widget_set_sensitive (wdata->pause_btn, TRUE);
 				gtk_widget_grab_focus (wdata->pause_btn);
 				wdata->bflags &= ~E2_BARTASK_PAUSED;
-				e2_filelist_disable_refresh ();
+				e2_filestore_disable_refresh ();
 				e2_main_loop_quit (wdata->loop);
 				wdata->loop = NULL;
 			}
@@ -514,7 +514,7 @@ _e2p_mvbar_response_cb (GtkDialog *dialog, gint response, E2_BarWindowData *wdat
 			if (wdata->bflags & E2_BARTASK_PAUSED)
 			{
 				wdata->bflags &= ~E2_BARTASK_PAUSED;
-				e2_filelist_disable_refresh ();
+				e2_filestore_disable_refresh ();
 				e2_main_loop_quit (wdata->loop);
 				wdata->loop = NULL;
 			}
@@ -707,7 +707,7 @@ _e2p_mvbarQ (E2_ActionTaskData *qed)
 	iterator = (E2_SelectedItemInfo **) names->pdata;
 
 //	e2_task_advise ();
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -780,12 +780,12 @@ _e2p_mvbarQ (E2_ActionTaskData *qed)
 	g_string_free (src, TRUE);
 	g_string_free (dest, TRUE);
 #ifdef E2_FAM
-	e2_filelist_request_refresh (other_view->dir, FALSE);
-	e2_filelist_request_refresh (curr_view->dir, TRUE);
+	e2_filestore_request_refresh (other_view->dir, FALSE);
+	e2_filestore_request_refresh (curr_view->dir, TRUE);
 #else
-	e2_filelist_check_dirty (GINT_TO_POINTER (1));
+	e2_filestore_check_dirty (GINT_TO_POINTER (1));
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 

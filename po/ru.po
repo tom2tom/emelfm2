@@ -2326,15 +2326,15 @@ msgid ""
 "Pattern provided to strftime() to format date/time strings in the dialog"
 msgstr "Образец для strftime() для форматирования даты/времени в диалоге"
 
-#: e2_filelist.c:1195 e2_toolbar.c:2037
+#: e2_filestore.c:1195 e2_toolbar.c:2037
 msgid "k"
 msgstr "к"
 
-#: e2_filelist.c:1200 e2_toolbar.c:2042
+#: e2_filestore.c:1200 e2_toolbar.c:2042
 msgid "M"
 msgstr "М"
 
-#: e2_filelist.c:1602 e2_pane.c:613
+#: e2_filestore.c:1602 e2_pane.c:613
 #, c-format
 msgid "Cannot access %s, going to %s instead"
 msgstr "Недоступен %s, вместо этого перехожу в %s"

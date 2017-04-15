@@ -115,7 +115,7 @@ The following items are covered:
 #include <signal.h>
 #include <pthread.h>
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_filetype.h"
 #include "e2_plugins.h"
 #include "e2_complete.h"
@@ -266,7 +266,7 @@ static gboolean _e2_main_defer_init (gpointer data)
 	last_work_time = time (NULL);	//actually, only needed when auto-refreshing
 	if (e2_option_bool_get ("auto-refresh"))
 		//initiate filelist dirty-checks
-		e2_filelist_start_refresh_checks ();
+		e2_filestore_start_refresh_checks ();
 	else
 	{
 		//must cleanup the flags in case of later use
@@ -487,7 +487,7 @@ void e2_main_loop_run (E2_MainLoop *loopdata)
 	gint saverefcount;
 
 	gdk_flush ();
-	pthread_cleanup_push ((gpointer)e2_filelist_reset_refresh, NULL);
+	pthread_cleanup_push ((gpointer)e2_filestore_reset_refresh, NULL);
 		//enable refresh
 		//BAD if cfg_refresh_refcount adjusted individually ?
 		saverefcount = g_atomic_int_get (&cfg_refresh_refcount); //proxy for all refcounters
@@ -496,7 +496,7 @@ void e2_main_loop_run (E2_MainLoop *loopdata)
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "enable refresh, e2_main_loop_run");
 #endif
-			e2_filelist_enable_refresh ();
+			e2_filestore_enable_refresh ();
 		}
 #ifdef WAIT_POLL
 		pthread_cleanup_push ((gpointer)_e2_main_loop_clean_loop, loopdata);
@@ -555,7 +555,7 @@ void e2_main_loop_run (E2_MainLoop *loopdata)
 #ifdef E2_REFRESH_DEBUG
 		printd (DEBUG, "disable refresh, e2_main_loop_run");
 #endif
-		e2_filelist_disable_refresh ();
+		e2_filestore_disable_refresh ();
 	}
 	pthread_cleanup_pop (0);
 //	usleep (25000);

@@ -41,7 +41,7 @@ share code with the find plugin ?
 #include "e2_dialog.h"
 #include "e2_task.h"
 #include "e2_icons.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_fs.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
@@ -1129,7 +1129,7 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 		dialog = NULL;
 	}
 
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	e2_dialog_set_cursor (rt->dialog, GDK_WATCH);
 
 	DialogButtons choice;
@@ -1282,7 +1282,7 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 		gtk_widget_destroy (dialog);
 	*rt->status = E2_TASK_PAUSED;
 
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	e2_dialog_set_cursor (rt->dialog, GDK_LEFT_PTR);
 
 	//cleanups

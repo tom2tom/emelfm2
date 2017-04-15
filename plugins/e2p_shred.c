@@ -25,7 +25,7 @@ emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_dialog.h"
 #include "e2_task.h"
 #include "e2_fs.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 #ifdef _LARGEFILE_SOURCE	//if we cater for "large" files (DEFAULT)
 # define csize_t guint64
@@ -804,7 +804,7 @@ static gboolean _e2p_shredQ (E2_ActionTaskData *qed)
 	gboolean multisrc =  (check) ? names->len > 1 : FALSE;
 	gint horz = -1, vert = -1;	//1st dialog at default position
 
-	e2_filelist_disable_refresh ();  //avoid pauses in the delete process
+	e2_filestore_disable_refresh ();  //avoid pauses in the delete process
 	e2_task_advise ();
 
 	for (count = 0; count < names->len; count++, iterator++)
@@ -871,7 +871,7 @@ static gboolean _e2p_shredQ (E2_ActionTaskData *qed)
 	g_string_free (prompt, TRUE);
 	g_string_free (src, TRUE);
 	e2_window_clear_status_message ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return retval;
 }

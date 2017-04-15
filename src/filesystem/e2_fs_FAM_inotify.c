@@ -71,7 +71,7 @@ which should not overlap. So no protection against contemporary access is provid
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <string.h>
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //#define EXTRA_MESSAGES
 
@@ -257,7 +257,7 @@ static gboolean _e2_fs_FAM_inotify_timeout (gpointer user_data)
 			if (more)
 			{
 				last_work_time = time (NULL);	//refresh suspension threshold, in case downstream processing is deferred
-				e2_filelist_check_dirty (GINT_TO_POINTER (1)); //start a refresh ASAP
+				e2_filestore_check_dirty (GINT_TO_POINTER (1)); //start a refresh ASAP
 			}
 #ifdef EXTRA_MESSAGES
 			printd (DEBUG, "clear reports-count for %s", watch_paths[target_id]);
@@ -442,7 +442,7 @@ static gboolean _e2_fs_FAM_inotify_read (gpointer userdata)
 			app.timers[DIRTYCHECK_T] = 0;
 			//arrange to restart upon activity
 			g_signal_connect (G_OBJECT (app.main_window), "event",
-				G_CALLBACK (e2_filelist_repoll), GUINT_TO_POINTER (DIRTYCHECK_T));
+				G_CALLBACK (e2_filestore_repoll), GUINT_TO_POINTER (DIRTYCHECK_T));
 			return FALSE;
 		}
 		return TRUE;

@@ -34,7 +34,7 @@ This file contains utility and helper functions for menus.
 #include "e2_task.h"
 #include "e2_filetype.h"
 #ifdef E2_FS_MOUNTABLE
-# include "e2_filelist.h"
+# include "e2_filestore.h"
 #endif
 
 extern pthread_mutex_t task_mutex;
@@ -1088,10 +1088,10 @@ static void _e2_menu_mount_cb (GtkCheckMenuItem *item, gpointer from)
 	if (newstate) //doing a mount
 	{
 #ifdef E2_FAM
-		e2_filelist_request_refresh (curr_view->dir, FALSE);
-		e2_filelist_request_refresh (other_view->dir, TRUE);
+		e2_filestore_request_refresh (curr_view->dir, FALSE);
+		e2_filestore_request_refresh (other_view->dir, TRUE);
 #else
-		e2_filelist_check_dirty (GINT_TO_POINTER (1));
+		e2_filestore_check_dirty (GINT_TO_POINTER (1));
 #endif
 	}
 	else	//doing an unmount

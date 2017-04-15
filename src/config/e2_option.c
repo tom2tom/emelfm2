@@ -40,7 +40,7 @@ ToDo - description of how options work
 #include "e2_filetype.h"
 #include "e2_plugins.h"
 #include "e2_cl_option.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #ifdef E2_MOUSECUSTOM
 # include "e2_mousebinding.h"
 #endif
@@ -781,6 +781,7 @@ void e2_option_file_write (const gchar *utfpath)
 	VPATH tdata;
 #endif
 	gboolean freepath = (utfpath == NULL);
+	//reportedly, rogue distro(s) can change on-the-fly the case of the trailing encoding in default_config_file!
 	gchar *cfg_file = (freepath) ?
 		g_build_filename (e2_cl_options.config_dir, default_config_file, NULL):
 		(gchar *)utfpath;
@@ -1048,6 +1049,7 @@ If the file is read successfully, log the post-read config dir timestamp
 static gboolean _e2_option_config_file_read (const gchar *config_dir, gpointer *contents)
 {
 	//find absolute path to config file
+	//reportedly, rogue distro(s) can change on-the-fly the case of the trailing encoding in default_config_file!
 	gchar *cfg_file = g_build_filename (config_dir, default_config_file, NULL);
 	gchar *local = F_FILENAME_TO_LOCALE (cfg_file);
 #ifdef E2_VFS

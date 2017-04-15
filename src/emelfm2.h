@@ -716,7 +716,7 @@ enum
 {
 	DIRTYCHECK_T,	//for polling whether filelists are in need of refresh
 	CONFIG_T,	//for config-file change polling
-	REFRESHBEGIN_T,	//for ensuring open BGL when calling _e2_filelist_refresh_manage()
+	REFRESHBEGIN_T,	//for ensuring open BGL when calling _e2_filestore_refresh_manage()
 	REFRESHWAIT_T,	//for pausing until a prior refresh is completed
 	CDWAIT_T,	//for pausing until a prior cd is completed
 	STATUS_T,	//for status-line updates

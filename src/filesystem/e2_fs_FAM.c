@@ -273,7 +273,7 @@ gboolean e2_fs_FAM_cancel_monitor_config (void)
 /**
 @brief poll monitor to check if any monitored thing has changed
 
-Called from e2_filelist_check_dirty() via e2_fs_FAM_check_dirty().
+Called from e2_filestore_check_dirty() via e2_fs_FAM_check_dirty().
 This updates flags to signal that refresh is needed. For a pane, update is
 needed if any directory content has changed, or if the dir is not
 accessible/readable or gone

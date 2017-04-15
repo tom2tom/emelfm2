@@ -28,7 +28,7 @@ the same effect
 #include "emelfm2.h"
 #include <string.h>
 #include "e2_plugins.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name 
 #define ANAME "extsort"

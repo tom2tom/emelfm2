@@ -56,7 +56,7 @@ debugging
 #include "e2_ownership_dialog.h"
 #include "e2_task.h"
 #include "e2_icons.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //define the scope of libacl functions which are available for use here
 #ifdef __linux__
@@ -4287,7 +4287,7 @@ static gboolean _e2p_task_aclcopyQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, acl task");
 #endif
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	e2_task_advise ();
 
 	for (count = 0; count < names->len; count++, iterator++)
@@ -4376,7 +4376,7 @@ static gboolean _e2p_task_aclcopyQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, acl task");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return TRUE;
 }
@@ -4431,7 +4431,7 @@ static gboolean _e2p_task_aclQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, acl task");
 #endif
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	e2_task_advise ();
 
 	for (count=0; count < names->len; count++, iterator++)
@@ -4476,7 +4476,7 @@ static gboolean _e2p_task_aclQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "enable refresh, acl dialog");
 #endif
-			e2_filelist_enable_refresh ();  //allow updates while we wait
+			e2_filestore_enable_refresh ();  //allow updates while we wait
 			*qed->status = E2_TASK_PAUSED;
 #ifdef E2_VFS
 			choice = _e2p_acl_dialog_run (&ddata, &axs_changes, &def_changes,
@@ -4488,7 +4488,7 @@ static gboolean _e2p_task_aclQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 			printd (DEBUG, "disable refresh, permissions dialog");
 #endif
-			e2_filelist_disable_refresh ();
+			e2_filestore_disable_refresh ();
 		}
 
 		switch (choice)
@@ -4584,7 +4584,7 @@ static gboolean _e2p_task_aclQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, acl task");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	return TRUE;
 }

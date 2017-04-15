@@ -49,7 +49,7 @@ DnD ?
 # include "gimpthumb.c"
 #endif
 #include "e2_context_menu.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 #include "e2_filetype.h"
 #include "e2_plugins.h"
@@ -249,7 +249,7 @@ static GtkListStore *_e2p_thumbs_replace_store (E2_ThumbDialogRuntime *rt)
 	}
 
 	E2_ListChoice pane = (rt->view == &app.pane1.view) ? PANE1 : PANE2;
-	e2_filelist_disable_one_refresh (pane);
+	e2_filestore_disable_one_refresh (pane);
 
 	//transfer data from filelist store to iconview store
 	GtkTreeIter itert;
@@ -586,7 +586,7 @@ create:
 #  endif
 # endif
 #endif */
-	e2_filelist_enable_one_refresh (pane);
+	e2_filestore_enable_one_refresh (pane);
 
 	g_atomic_int_set (&rt->blocked, 0);
 	//	printd (DEBUG, "finish icons store fill");

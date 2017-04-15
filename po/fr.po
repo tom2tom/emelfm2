@@ -2352,15 +2352,15 @@ msgstr ""
 "Motif fourni à strftime() pour le format des chaînes date/heure dans le "
 "dialogue"
 
-#: e2_filelist.c:1195 e2_toolbar.c:2037
+#: e2_filestore.c:1195 e2_toolbar.c:2037
 msgid "k"
 msgstr "k"
 
-#: e2_filelist.c:1200 e2_toolbar.c:2042
+#: e2_filestore.c:1200 e2_toolbar.c:2042
 msgid "M"
 msgstr "M"
 
-#: e2_filelist.c:1602 e2_pane.c:613
+#: e2_filestore.c:1602 e2_pane.c:613
 #, c-format
 msgid "Cannot access %s, going to %s instead"
 msgstr "Impossible d'accéder au dossier %s, ouverture par défaut de %s "

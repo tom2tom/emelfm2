@@ -115,7 +115,7 @@ Backwards first, these are displayed in reverse order to their list positions.
 #include "e2_tree_dialog.h"
 #endif
 #include "e2_context_menu.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 static void _e2_pane_change_dir (E2_PaneRuntime *rt, const gchar *newpath,
 	gboolean history, gboolean hook);
@@ -1128,17 +1128,17 @@ static gboolean _e2_pane_refresh_lists (gpointer from, E2_ActionRuntime *art)
 	gboolean withother = other_view->spacedata == NULL || other_view->spacedata->monitored;
 	gboolean retval =
 		(curr_view->spacedata == NULL || curr_view->spacedata->monitored) ?
-		e2_filelist_request_refresh (curr_view->dir, !withother) : TRUE;
+		e2_filestore_request_refresh (curr_view->dir, !withother) : TRUE;
 	if (withother)
-		retval = e2_filelist_request_refresh (other_view->dir, TRUE) && retval;
+		retval = e2_filestore_request_refresh (other_view->dir, TRUE) && retval;
 # else
 	//2 tests, to lessen race due to dir-swap during first call
-	gboolean retval = e2_filelist_request_refresh (curr_view->dir, FALSE);
-	retval = e2_filelist_request_refresh (other_view->dir, TRUE) || retval;
+	gboolean retval = e2_filestore_request_refresh (curr_view->dir, FALSE);
+	retval = e2_filestore_request_refresh (other_view->dir, TRUE) || retval;
 # endif
 	return retval;
 #else
-	e2_filelist_check_dirty (GINT_TO_POINTER (1));
+	e2_filestore_check_dirty (GINT_TO_POINTER (1));
 	return TRUE;
 #endif
 }
@@ -2495,8 +2495,8 @@ void e2_pane_actions_register (void)
 	E2_Action actions[] =
 	{
 	{g_strconcat(_A(14),".",_A(76),NULL),_e2_pane_refresh_lists,FALSE,E2_ACTION_TYPE_ITEM,0,NULL, NULL},
-	{g_strconcat(_A(14),".",_A(77),NULL),e2_filelist_enable_refresh_action,FALSE,E2_ACTION_TYPE_ITEM,0,NULL, NULL},
-	{g_strconcat(_A(14),".",_A(78),NULL),e2_filelist_disable_refresh_action,FALSE,E2_ACTION_TYPE_ITEM,0,NULL, NULL},
+	{g_strconcat(_A(14),".",_A(77),NULL),e2_filestore_enable_refresh_action,FALSE,E2_ACTION_TYPE_ITEM,0,NULL, NULL},
+	{g_strconcat(_A(14),".",_A(78),NULL),e2_filestore_disable_refresh_action,FALSE,E2_ACTION_TYPE_ITEM,0,NULL, NULL},
 	{g_strconcat(_A(14),".",_A(98),NULL),_e2_pane_activate_other_action,FALSE,E2_ACTION_TYPE_ITEM,0,NULL,NULL},
 	{g_strconcat(_A(14),".",_A(101),NULL),_e2_pane_sync,         FALSE,E2_ACTION_TYPE_ITEM, 0, NULL, NULL},
 	{g_strconcat(_A(13),".",_A(25),NULL),_e2_pane_filters_show, TRUE, E2_ACTION_TYPE_ITEM, 0, NULL, NULL},

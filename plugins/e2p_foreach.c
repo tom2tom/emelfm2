@@ -27,7 +27,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_plugins.h"
 #include "e2_task.h"
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name 
 #define ANAME "foreach"
@@ -86,7 +86,7 @@ static gboolean _e2p_foreachQ (E2_ActionTaskData *qed)
 	GPtrArray *names = qed->names;
 	E2_SelectedItemInfo **iterator = (E2_SelectedItemInfo **) names->pdata;
 
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 
 	for (count = 0; count < names->len; count++, iterator++)
 	{
@@ -116,7 +116,7 @@ static gboolean _e2p_foreachQ (E2_ActionTaskData *qed)
 		}
 	}
 
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 
 	g_free (each_cmd);
 	g_list_free (this);

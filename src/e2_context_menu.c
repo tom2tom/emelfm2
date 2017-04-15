@@ -40,7 +40,7 @@ ToDo
 
 #include "e2_context_menu.h"
 #include <string.h>
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_filetype.h"
 
   /*******************/
@@ -321,7 +321,7 @@ void e2_context_menu_show (guint button, guint32 time, gint type, ViewInfo *view
 
 	//one or more items in the menu may invoke downstream code which triggers
 	//a filelist refresh - which we don't want until menu is complete
-	e2_filelist_disable_one_refresh (p);
+	e2_filestore_disable_one_refresh (p);
 
 	E2_OptionSet *set = e2_option_get ("context-menu");
 	if (gtk_tree_model_get_iter_first (set->ex.tree.model, &iter))
@@ -343,7 +343,7 @@ void e2_context_menu_show (guint button, guint32 time, gint type, ViewInfo *view
 				NULL, NULL, button, time);
 	}
 
-	e2_filelist_enable_one_refresh (p);
+	e2_filestore_enable_one_refresh (p);
 }
 /**
 @brief show context-menu action

@@ -40,7 +40,7 @@ ToDo - description of how this works
 #include "e2_action.h"
 #include "e2_context_menu.h"
 #include "e2_toolbar.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 #ifdef E2_MOUSECUSTOM
 # include "e2_mousebinding.h"
@@ -1843,7 +1843,7 @@ void e2_window_recreate (E2_WindowRuntime *rt)
 	printd (DEBUG, "recreate main window");
 
 	//prevent any new refresh from starting during this rebuild
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 
 	//wait until any in-progress filelist process is completed
 	while (TRUE)
@@ -2059,7 +2059,7 @@ void e2_window_recreate (E2_WindowRuntime *rt)
 		gtk_notebook_set_tab_pos (GTK_NOTEBOOK (app.outbook), GTK_POS_RIGHT);
 #endif
 	e2_output_update_style ();
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	gtk_widget_grab_focus (curr_view->treeview);
 }
 /**

@@ -28,7 +28,7 @@ This is NOT thread-safe
 #include <sys/time.h>
 #include <string.h>
 #include "e2_plugins.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_dialog.h"
 #include "e2_ownership_dialog.h"
 #include "e2_task.h"
@@ -994,7 +994,7 @@ static gboolean _e2p_task_timesQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, times task");
 #endif
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 
 	for (count=0; count < names->len; count++, iterator++)
 	{
@@ -1041,7 +1041,7 @@ static gboolean _e2p_task_timesQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, times dialog");
 #endif
-			e2_filelist_enable_refresh ();  //allow updates while we wait
+			e2_filestore_enable_refresh ();  //allow updates while we wait
 
 			*qed->status = E2_TASK_PAUSED;
 			choice = _e2p_times_dialog_run (curr_local,
@@ -1054,7 +1054,7 @@ static gboolean _e2p_task_timesQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, permissions dialog");
 #endif
-			e2_filelist_disable_refresh ();
+			e2_filestore_disable_refresh ();
 		}
 
 		switch (choice)
@@ -1110,7 +1110,7 @@ static gboolean _e2p_task_timesQ (E2_ActionTaskData *qed)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, permissions task");
 #endif
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 

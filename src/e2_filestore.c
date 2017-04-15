@@ -1,4 +1,4 @@
-/* $Id: e2_filelist.c 3100 2017-04-11 03:45:36Z tpgww $
+/* $Id: e2_filestore.c 3100 2017-04-11 03:45:36Z tpgww $
 
 Copyright (C) 2004-2017 tooar <tooar@emelfm2.net>.
 
@@ -18,7 +18,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 */
 
 /**
-@file src/e2_filelist.c
+@file src/e2_filestore.c
 @brief directory content liststore functions
 
 This file contains functions related to creation, filling and emptying a
@@ -48,13 +48,13 @@ for filelist(s), as appropriate. Then for both panes:
   If its dirty-flag is set:
     Clear its dirty-flag, ready for downstream use again
     If function-argument (userdata) is non-NULL (the usual for direct calls)
-		or a repeat-count (via _e2_filelist_refresh_ok()) is suitable:
+		or a repeat-count (via _e2_filestore_refresh_ok()) is suitable:
       Set refresh-requested flag for the pane
 Then if either refresh-requested flag is now set (maybe from elsewhere, see below):
   If timer REFRESHBEGIN_T is active, abort it
-  Start timer REFRESHBEGIN_T with callback to _e2_filelist_refresh_manage()
+  Start timer REFRESHBEGIN_T with callback to _e2_filestore_refresh_manage()
 
-_e2_filelist_refresh_manage() polls both panes' refresh-requested flags, and, if
+_e2_filestore_refresh_manage() polls both panes' refresh-requested flags, and, if
 and when not blocked by some other process that affects the pane's content,
 initiates (and joins to) a thread to refresh the relevant filelist. This process
 iterates until all requests have been handled, so there can be > 1 refresh before
@@ -68,18 +68,18 @@ process.
 \section manual manual refreshing
 
 Either or both panes' refresh-requested flag can be set at any time via a call to
-e2_filelist_request_refresh(). If the immediate flag is not set, that request will
-be acted upon next time e2_filelist_check_dirty() is called, manually or as a
+e2_filestore_request_refresh(). If the immediate flag is not set, that request will
+be acted upon next time e2_filestore_check_dirty() is called, manually or as a
 timer callback.
 
-e2_filelist_check_dirty() can be called manually, usually with a non-NULL argument.
+e2_filestore_check_dirty() can be called manually, usually with a non-NULL argument.
 This will check for and refresh pane(s) flagged as 'dirty' or 'refresh-requested'.
 
 /section blocking refresh blocking
 
 Refreshing of either or both panes is contstrained by corresponding ref-counts,
-which can be increased or decreased by calls to e2_filelist_[dis|en]able_refresh()
-and/or to e2_filelist_[dis|en]able_one_refresh()
+which can be increased or decreased by calls to e2_filestore_[dis|en]able_refresh()
+and/or to e2_filestore_[dis|en]able_one_refresh()
 
 Refreshing of either pane is blocked while either pane is still being refreshed
 as a result of a prior update
@@ -100,7 +100,7 @@ default or as specified in a startup parameter).
 If enhanced monitoring is used, suitable polling is handled by the relevant backend.
 */
 
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include <string.h>
 #include <sys/time.h>
 #include <langinfo.h>
@@ -131,7 +131,7 @@ typedef struct _E2_RefreshInfo
 } E2_RefreshInfo;
 //#endif
 
-static gpointer _e2_filelist_refresh_store (ViewInfo *view);
+static gpointer _e2_filestore_refresh (ViewInfo *view);
 
 #ifdef E2_SELTXT_RECOLOR
 extern GDKCOLOR selectedtext;
@@ -171,11 +171,11 @@ extern volatile gint cfg_refresh_refcount;
 
 @return FALSE always, so the event will propogate
 */
-gboolean e2_filelist_repoll (GtkWidget *widget, GdkEvent *event,
+gboolean e2_filestore_repoll (GtkWidget *widget, GdkEvent *event,
 	gpointer userdata)
 {
 	g_signal_handlers_disconnect_by_func ((gpointer)widget,
-		e2_filelist_repoll, userdata);
+		e2_filestore_repoll, userdata);
 	last_work_time = time (NULL);
 	printd (DEBUG, "Resume operation of DIRTYCHECK_T timer");
 #ifdef E2_FAM_KERNEL
@@ -188,7 +188,7 @@ gboolean e2_filelist_repoll (GtkWidget *widget, GdkEvent *event,
 #else
 			g_timeout_add (E2_FILESCHECK_INTERVAL,
 #endif
-				(GSourceFunc) e2_filelist_check_dirty, NULL);
+				(GSourceFunc) e2_filestore_check_dirty, NULL);
 #ifdef E2_FAM_KERNEL
 	}
 	else
@@ -201,7 +201,7 @@ gboolean e2_filelist_repoll (GtkWidget *widget, GdkEvent *event,
 @param pane enumerator for pane to be checked
 @return TRUE if @a pane is the active one
 */
-static gboolean _e2_filelist_check_active_pane (E2_ListChoice pane)
+static gboolean _e2_filestore_check_active_pane (E2_ListChoice pane)
 {
 	gboolean active;
 	switch (pane)
@@ -228,9 +228,9 @@ working in a displayed directory
 @param pane enumerator for pane to be blocked
 @return
 */
-void e2_filelist_disable_one_refresh (E2_ListChoice pane)
+void e2_filestore_disable_one_refresh (E2_ListChoice pane)
 {
-	if (_e2_filelist_check_active_pane (pane))
+	if (_e2_filestore_check_active_pane (pane))
 		g_atomic_int_add (&curr_view->listcontrols.refresh_refcount, 1);
 	else
 		g_atomic_int_add (&other_view->listcontrols.refresh_refcount, 1);
@@ -242,9 +242,9 @@ void e2_filelist_disable_one_refresh (E2_ListChoice pane)
 
 @return
 */
-void e2_filelist_enable_one_refresh (E2_ListChoice pane)
+void e2_filestore_enable_one_refresh (E2_ListChoice pane)
 {
-	if (_e2_filelist_check_active_pane (pane))
+	if (_e2_filestore_check_active_pane (pane))
 	{
 		if (g_atomic_int_exchange_and_add (&curr_view->listcontrols.refresh_refcount, -1) < 1)
 			g_atomic_int_set (&curr_view->listcontrols.refresh_refcount, 0);
@@ -263,9 +263,9 @@ void e2_filelist_enable_one_refresh (E2_ListChoice pane)
 
 @return TRUE always
 */
-gboolean e2_filelist_disable_refresh_action (gpointer from, E2_ActionRuntime *art)
+gboolean e2_filestore_disable_refresh_action (gpointer from, E2_ActionRuntime *art)
 {
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	return TRUE;
 }
 /**
@@ -276,9 +276,9 @@ gboolean e2_filelist_disable_refresh_action (gpointer from, E2_ActionRuntime *ar
 
 @return TRUE always
 */
-gboolean e2_filelist_enable_refresh_action (gpointer from, E2_ActionRuntime *art)
+gboolean e2_filestore_enable_refresh_action (gpointer from, E2_ActionRuntime *art)
 {
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 /**
@@ -286,7 +286,7 @@ gboolean e2_filelist_enable_refresh_action (gpointer from, E2_ActionRuntime *art
 
 @return
 */
-void e2_filelist_reset_refresh (void)
+void e2_filestore_reset_refresh (void)
 {
 	g_atomic_int_set (&app.pane1.view.listcontrols.refresh_refcount, 0);
 	g_atomic_int_set (&app.pane2.view.listcontrols.refresh_refcount, 0);
@@ -301,7 +301,7 @@ middle of such an operation would free FileInfo structs as a side-effect.
 Increases all refresh ref-counts, which will prevent any refresh from happening
 @return
 */
-void e2_filelist_disable_refresh (void)
+void e2_filestore_disable_refresh (void)
 {
 	if (e2_option_bool_get ("auto-refresh"))
 	{
@@ -317,7 +317,7 @@ void e2_filelist_disable_refresh (void)
 Decreases all ref-counts, which will enable refresh for any that are now 0
 @return
 */
-void e2_filelist_enable_refresh (void)
+void e2_filestore_enable_refresh (void)
 {
 	if (e2_option_bool_get ("auto-refresh"))
 	{
@@ -342,7 +342,7 @@ So they should check for those races, and respond accordingly.
 
 @return FALSE to abort the source
 */
-static gboolean _e2_filelist_propogate_refresh (ViewInfo *view)
+static gboolean _e2_filestore_propogate_refresh (ViewInfo *view)
 {
 	e2_hook_list_run (&view->hook_refresh, view);
 	return FALSE;
@@ -354,7 +354,7 @@ static gboolean _e2_filelist_propogate_refresh (ViewInfo *view)
 
 @return
 */
-void e2_filelist_timer_shutdown (gpointer data)
+void e2_filestore_timer_shutdown (gpointer data)
 {
 	guint index = GPOINTER_TO_UINT (data);
 	app.timers[index] = 0;
@@ -371,7 +371,7 @@ If refreshing is blocked, there is no deferral
 @param view pointer to data struct for the filelist to be refreshed
 @return NULL always
 */
-static gpointer _e2_filelist_refresh_view (ViewInfo *view)
+static gpointer _e2_filestore_refresh_view (ViewInfo *view)
 {
 	e2_utils_block_thread_signals ();
 
@@ -398,7 +398,7 @@ retest:
 				printd (DEBUG, "accepted request to refresh %s", view->dir);
 #endif
 				//refresh function expects BGL open
-				if (_e2_filelist_refresh_store (view) == GINT_TO_POINTER(1))
+				if (_e2_filestore_refresh (view) == GINT_TO_POINTER(1))
 				{
 					hook = TRUE;	//send it downstream
 					//maybe again/now/still want to do this pane
@@ -416,7 +416,7 @@ retest:
 			//and in idle to avoid any UI impact
 			//(i.e. small risk of cd / another refresh starting before hook is called)
 			if (hook)
-				g_idle_add ((GSourceFunc)_e2_filelist_propogate_refresh, view);
+				g_idle_add ((GSourceFunc)_e2_filestore_propogate_refresh, view);
 		}
 	}
 
@@ -430,7 +430,7 @@ retest:
 
 @return FALSE when there's nothing left to refresh or more waiting is needed
 */
-static gboolean _e2_filelist_refresh_manage (gpointer unused_data)
+static gboolean _e2_filestore_refresh_manage (gpointer unused_data)
 {
 	ViewInfo *cv, *ov;
 	pthread_t thisID;
@@ -472,7 +472,7 @@ retestc:
 #endif
 			//refresh function expects BGL open
 			if (pthread_create (&thisID, NULL,
-				(gpointer(*)(gpointer))_e2_filelist_refresh_store, cv) == 0)
+				(gpointer(*)(gpointer))_e2_filestore_refresh, cv) == 0)
 			{
 				g_atomic_int_set (&cv->listcontrols.refresh_requested, 0); //not needed downstream
 				pthread_join (thisID, &result); //only 1 refresh at a time
@@ -510,7 +510,7 @@ retesto:
 			printd (DEBUG, "accepting request to refresh %s", ov->dir);
 #endif
 			if (pthread_create (&thisID, NULL,
-				(gpointer(*)(gpointer))_e2_filelist_refresh_store, ov) == 0)
+				(gpointer(*)(gpointer))_e2_filestore_refresh, ov) == 0)
 			{
 				g_atomic_int_set (&ov->listcontrols.refresh_requested, 0); //not needed downstream
 				pthread_join (thisID, &result); //only 1 refresh at a time
@@ -553,9 +553,9 @@ retesto:
 		printd (DEBUG, "start timer REFRESHBEGIN_T");
 #endif
 		app.timers[REFRESHBEGIN_T] = g_timeout_add_full (G_PRIORITY_HIGH, 200,
-			(GSourceFunc) _e2_filelist_refresh_manage,
+			(GSourceFunc) _e2_filestore_refresh_manage,
 			GUINT_TO_POINTER (REFRESHBEGIN_T),
-			(GDestroyNotify) e2_filelist_timer_shutdown);
+			(GDestroyNotify) e2_filestore_timer_shutdown);
 	}
 
 	LISTS_UNLOCK
@@ -563,9 +563,9 @@ retesto:
 	//and in idle to avoid any UI impact
 	//(i.e. small risk of cd / another refresh starting before hook is called)
 	if (cvhook)
-		g_idle_add ((GSourceFunc)_e2_filelist_propogate_refresh, curr_view);
+		g_idle_add ((GSourceFunc)_e2_filestore_propogate_refresh, curr_view);
 	if (ovhook)
-		g_idle_add ((GSourceFunc)_e2_filelist_propogate_refresh, other_view);
+		g_idle_add ((GSourceFunc)_e2_filestore_propogate_refresh, other_view);
 
 	return FALSE;
 }
@@ -579,7 +579,7 @@ as soon as any in-progress re-list (either or both panes) is completed
 
 @return TRUE if a refresh was initiated
 */
-gboolean e2_filelist_request_refresh (gchar *dir, gboolean immediate)
+gboolean e2_filestore_request_refresh (gchar *dir, gboolean immediate)
 {
 	gboolean matched = FALSE;
 #ifdef E2_VFSTMP
@@ -602,13 +602,13 @@ gboolean e2_filelist_request_refresh (gchar *dir, gboolean immediate)
 	if (matched && immediate)
 	{
 #ifdef E2_REFRESH_DEBUG
-		printd (DEBUG, "In e2_filelist_request_refresh, goto e2_filelist_check_dirty");
+		printd (DEBUG, "In e2_filestore_request_refresh, goto e2_filestore_check_dirty");
 #endif
-		e2_filelist_check_dirty (GINT_TO_POINTER (1));
+		e2_filestore_check_dirty (GINT_TO_POINTER (1));
 	}
 #ifdef E2_REFRESH_DEBUG
 	else
-		printd (DEBUG, "In e2_filelist_request_refresh, NO e2_filelist_check_dirty");
+		printd (DEBUG, "In e2_filestore_request_refresh, NO e2_filestore_check_dirty");
 #endif
 
 	return matched;
@@ -621,7 +621,7 @@ This is called when a 'dirty' flag has been detected
 
 @return TRUE to process the current request now
 */
-static gboolean _e2_filelist_refresh_ok (E2_ListChoice pane)
+static gboolean _e2_filestore_refresh_ok (E2_ListChoice pane)
 {
 	gboolean retval;
 	/* Ideally this would check CPU resource-usage for this app and all children,
@@ -683,7 +683,7 @@ This expects gtk's BGL to be off/open
 
 @return TRUE so the timer keeps working
 */
-gboolean e2_filelist_check_dirty (gpointer userdata)
+gboolean e2_filestore_check_dirty (gpointer userdata)
 {
 	static gboolean busy = FALSE;
 	gboolean dop1, dop2;
@@ -693,7 +693,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 		if (userdata == NULL)
 		{	//timer callback, not a specific request
 #ifdef E2_REFRESH_DEBUG
-			printd (DEBUG, "e2_filelist_check_dirty is busy, exit immediately");
+			printd (DEBUG, "e2_filestore_check_dirty is busy, exit immediately");
 #endif
 			return TRUE;	//no re-entrant usage, run the timer again
 		}
@@ -706,7 +706,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 	busy = TRUE;
 
 #ifdef E2_REFRESH_DEBUG
-	printd (DEBUG, "In e2_filelist_check_dirty()");
+	printd (DEBUG, "In e2_filestore_check_dirty()");
 #endif
 
 	if (userdata == NULL)
@@ -737,7 +737,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 	dop1 = g_atomic_int_compare_and_exchange (&p1dirty, 1, 0);
 	dop2 = g_atomic_int_compare_and_exchange (&p2dirty, 1, 0);
 
-	if (dop1 && (userdata != NULL || _e2_filelist_refresh_ok (PANE1)))
+	if (dop1 && (userdata != NULL || _e2_filestore_refresh_ok (PANE1)))
 	{
 		g_atomic_int_set (&app.pane1.view.listcontrols.refresh_requested, 1);
 #ifdef E2_REFRESH_DEBUG
@@ -757,7 +757,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 		dop1 = g_atomic_int_get (&app.pane1.view.listcontrols.refresh_requested);
 	}
 
-	if (dop2 && (userdata != NULL || _e2_filelist_refresh_ok (PANE2)))
+	if (dop2 && (userdata != NULL || _e2_filestore_refresh_ok (PANE2)))
 	{
 		g_atomic_int_set (&app.pane2.view.listcontrols.refresh_requested, 1);
 #ifdef E2_REFRESH_DEBUG
@@ -792,7 +792,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 		if (g_atomic_int_get (&curr_view->listcontrols.refresh_requested))
 		{
 			if (pthread_create (&thisID, &attr,
-				(gpointer(*)(gpointer))_e2_filelist_refresh_view, curr_view) != 0)
+				(gpointer(*)(gpointer))_e2_filestore_refresh_view, curr_view) != 0)
 			{
 				//TODO handle error
 				printd (WARN,"refresh-dir-thread-create error!");
@@ -801,7 +801,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 		if (g_atomic_int_get (&other_view->listcontrols.refresh_requested))
 		{
 			if (pthread_create (&thisID, &attr,
-				(gpointer(*)(gpointer))_e2_filelist_refresh_view, other_view) != 0)
+				(gpointer(*)(gpointer))_e2_filestore_refresh_view, other_view) != 0)
 			{
 				//TODO handle error
 				printd (WARN,"refresh-dir-thread-create error!");
@@ -824,9 +824,9 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 		printd (DEBUG, "Start timer REFRESHBEGIN_T to initiate refresh");
 #endif
 		app.timers[REFRESHBEGIN_T] = g_timeout_add_full (G_PRIORITY_HIGH, 5,
-			(GSourceFunc) _e2_filelist_refresh_manage,
+			(GSourceFunc) _e2_filestore_refresh_manage,
 			GUINT_TO_POINTER (REFRESHBEGIN_T),
-			(GDestroyNotify) e2_filelist_timer_shutdown);
+			(GDestroyNotify) e2_filestore_timer_shutdown);
 #endif
 	}
 	else
@@ -838,7 +838,7 @@ gboolean e2_filelist_check_dirty (gpointer userdata)
 			app.timers[DIRTYCHECK_T] = 0;
 			//arrange to restart upon activity
 			g_signal_connect (G_OBJECT (app.main_window), "event",
-				G_CALLBACK (e2_filelist_repoll), GUINT_TO_POINTER (DIRTYCHECK_T));
+				G_CALLBACK (e2_filestore_repoll), GUINT_TO_POINTER (DIRTYCHECK_T));
 		}
 	}
 
@@ -854,7 +854,7 @@ No check here for "auto-refresh" option status
 
 @return
 */
-void e2_filelist_stop_refresh_checks (void)
+void e2_filestore_stop_refresh_checks (void)
 {
 #ifdef E2_FAM_KERNEL
 	//stop backend working
@@ -886,7 +886,7 @@ change-monitoring is disabled i.e. suspended
 
 @return
 */
-void e2_filelist_start_refresh_checks (void)
+void e2_filestore_start_refresh_checks (void)
 {
 	g_atomic_int_set (&app.pane1.view.listcontrols.refresh_refcount, 0);
 	g_atomic_int_set (&app.pane2.view.listcontrols.refresh_refcount, 0);
@@ -906,7 +906,7 @@ void e2_filelist_start_refresh_checks (void)
 # else
 				g_timeout_add (E2_FILESCHECK_INTERVAL,
 # endif
-					(GSourceFunc) e2_filelist_check_dirty, NULL);
+					(GSourceFunc) e2_filestore_check_dirty, NULL);
 		}
 	}
 	else
@@ -928,7 +928,7 @@ void e2_filelist_start_refresh_checks (void)
 # else
 			g_timeout_add (E2_FILESCHECK_INTERVAL,
 # endif
-				(GSourceFunc) e2_filelist_check_dirty, NULL);
+				(GSourceFunc) e2_filestore_check_dirty, NULL);
 	}
 #endif
 }
@@ -939,7 +939,7 @@ void e2_filelist_start_refresh_checks (void)
 
 @return FALSE, to stop the callbacks
 */
-gboolean e2_filelist_clear_old_stores (gpointer user_data)
+gboolean e2_filestore_clear_old_stores (gpointer user_data)
 {
 	GSList *tmp;
 #ifdef DEBUG_MESSAGES
@@ -978,10 +978,10 @@ This does not attach the created store to anything.
 
 @return pointer to the liststore, or NULL if a problem occurs
 */
-GtkListStore *e2_filelist_fill_store (GList *entries, ViewInfo *view)
+GtkListStore *e2_filestore_fill (GList *entries, ViewInfo *view)
 {
 //	printd (DEBUG, "start store fill");
-	GtkListStore *store = e2_filelist_make_store ();
+	GtkListStore *store = e2_filestore_make ();
 	if (store == NULL)
 		return NULL;
 
@@ -1385,7 +1385,7 @@ GtkListStore *e2_filelist_fill_store (GList *entries, ViewInfo *view)
 
 @return
 */
-void e2_filelist_cleaninfo (FileInfo *info, gpointer data)
+void e2_filestore_cleaninfo (FileInfo *info, gpointer data)
 {
 	DEALLOCATE (FileInfo, info);
 }
@@ -1398,7 +1398,7 @@ Upon failure, the supplied list is cleared and its ptr set to relevant error cod
 
 @return TRUE if the list was converted successfully
 */
-gboolean e2_filelist_make_all_infos (gchar *parentpath, GList **list)
+gboolean e2_filestore_make_all_infos (gchar *parentpath, GList **list)
 {
 	gint len1, len2, trailer;
 	gchar *item;
@@ -1529,7 +1529,7 @@ nextmember:
 errexit:
 	//FIXME warning
 	e2_list_free_with_data (&member);	//get rid of remaining string data
-	g_list_foreach (*list, (GFunc) e2_filelist_cleaninfo, NULL);
+	g_list_foreach (*list, (GFunc) e2_filestore_cleaninfo, NULL);
 	g_list_free (*list);
 	*list = GINT_TO_POINTER (errval);
 	return FALSE;
@@ -1549,7 +1549,7 @@ Expects BGL to be open, on arrival here.
   or pointerised 2 after cd to elsewhere,
   or pointerised 3 after stat(view->dir) or some other failure
 */
-static gpointer _e2_filelist_refresh_store (ViewInfo *view)
+static gpointer _e2_filestore_refresh (ViewInfo *view)
 {
 	//no check for cd-working
 	gboolean busy =
@@ -1609,7 +1609,7 @@ static gpointer _e2_filelist_refresh_store (ViewInfo *view)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable one refresh, fileview_refresh list");
 #endif
-	e2_filelist_disable_one_refresh (pnum);
+	e2_filestore_disable_one_refresh (pnum);
 	e2_window_set_cursor (GDK_WATCH);
 	OPENBGL
 #ifndef E2_STATUS_BLOCK
@@ -1667,7 +1667,7 @@ static gpointer _e2_filelist_refresh_store (ViewInfo *view)
 			//prevent downstream stat()'s causing ACCESS reports and perpetuate the refreshes
 			e2_fs_FAM_less_monitor_dir (view->dir);
 			//FIXME rationalise this with modes creation
-			if (!e2_filelist_make_all_infos (local, &entries))
+			if (!e2_filestore_make_all_infos (local, &entries))
 			{
 				//cleanup of entries (possibly with mixed data types) done downstream
 				//don't goto accessible path until next refresh, if any
@@ -1683,7 +1683,7 @@ static gpointer _e2_filelist_refresh_store (ViewInfo *view)
 				e2_window_set_cursor (GDK_LEFT_PTR);
 				OPENBGL
 				e2_fs_FAM_more_monitor_dir (view->dir);
-				e2_filelist_enable_one_refresh (pnum);
+				e2_filestore_enable_one_refresh (pnum);
 				return NULL;
 			}
 			//even when FAM is working, some things (e.g. treedialog) must poll
@@ -1709,7 +1709,7 @@ static gpointer _e2_filelist_refresh_store (ViewInfo *view)
 				e2_window_set_cursor (GDK_LEFT_PTR);
 				OPENBGL
 				e2_fs_FAM_more_monitor_dir (view->dir);
-				e2_filelist_enable_one_refresh (pnum);
+				e2_filestore_enable_one_refresh (pnum);
 				return GINT_TO_POINTER (3);	//no more refresh needed
 			}
 			view->dir_mtime = sb.st_mtime;
@@ -1803,7 +1803,7 @@ loopstart:
 			{
 //		printd (DEBUG, "create new filelist liststore with additions & replacements");
 				//make store just with update information
-				GtkListStore *newstore = e2_filelist_fill_store (updates, view);
+				GtkListStore *newstore = e2_filestore_fill (updates, view);
 				if (newstore != NULL)
 				{
 					//remember the current sorting arrangements
@@ -1945,7 +1945,7 @@ loopstart:
 					if (newtimer)
 					{
 						printd (DEBUG, "setup to clear stores later");
-						g_idle_add (e2_filelist_clear_old_stores, NULL);
+						g_idle_add (e2_filestore_clear_old_stores, NULL);
 					}
 				}
 				else //newstore = NULL
@@ -1986,7 +1986,7 @@ loopstart:
 
 			if (gone)
 			{
-				g_list_foreach (gone, (GFunc) e2_filelist_cleaninfo, NULL);
+				g_list_foreach (gone, (GFunc) e2_filestore_cleaninfo, NULL);
 				g_list_free (gone);
 			}
 		}
@@ -2043,7 +2043,7 @@ loopstart:
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, fileview_refresh list");
 #endif
-	e2_filelist_enable_one_refresh (pnum);
+	e2_filestore_enable_one_refresh (pnum);
 //	printd (DEBUG, "finish refresh filelist for %s", view->dir);
 	return GINT_TO_POINTER (retval);	//non-NULL exit if no more refresh
 }
@@ -2055,7 +2055,7 @@ No rows or data are added.
 
 @return the new liststore
 */
-GtkListStore *e2_filelist_make_store (void)
+GtkListStore *e2_filestore_make (void)
 {
 	GtkListStore *store = gtk_list_store_new (MODEL_COLUMNS,
 		G_TYPE_STRING,  //FILENAME
@@ -2095,7 +2095,7 @@ GtkListStore *e2_filelist_make_store (void)
 
 @return FALSE if the process can continue
 */
-static gboolean _e2_filelist_copy_storeinfos (GtkTreeModel *model,
+static gboolean _e2_filestore_copyinfos (GtkTreeModel *model,
 	GtkTreePath *tpath, GtkTreeIter *iter, gpointer user_data)
 {
 	FileInfo *info;
@@ -2120,12 +2120,12 @@ static gboolean _e2_filelist_copy_storeinfos (GtkTreeModel *model,
 
 @return the new liststore
 */
-GtkListStore *e2_filelist_copy_store (GtkListStore *original)
+GtkListStore *e2_filestore_copy (GtkListStore *original)
 {
 	gpointer copied;
 	e2_tree_store_copy (GTK_TREE_MODEL (original), FALSE, &copied);
 	gtk_tree_model_foreach (GTK_TREE_MODEL ((GtkListStore *)copied),
-		(GtkTreeModelForeachFunc) _e2_filelist_copy_storeinfos, NULL);
+		(GtkTreeModelForeachFunc) _e2_filestore_copyinfos, NULL);
 	return ((GtkListStore *)copied);
 }
 #endif

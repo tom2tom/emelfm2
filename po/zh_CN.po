@@ -2287,15 +2287,15 @@ msgid ""
 "Pattern provided to strftime() to format date/time strings in the dialog"
 msgstr "由 strftime() 解释的用于显示对话框中日期/时间的格式字符串"
 
-#: e2_filelist.c:1195 e2_toolbar.c:2037
+#: e2_filestore.c:1195 e2_toolbar.c:2037
 msgid "k"
 msgstr ""
 
-#: e2_filelist.c:1200 e2_toolbar.c:2042
+#: e2_filestore.c:1200 e2_toolbar.c:2042
 msgid "M"
 msgstr ""
 
-#: e2_filelist.c:1602 e2_pane.c:613
+#: e2_filestore.c:1602 e2_pane.c:613
 #, c-format
 msgid "Cannot access %s, going to %s instead"
 msgstr "无法访问 %s, 用 %s 代替"

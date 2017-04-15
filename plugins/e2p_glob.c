@@ -29,7 +29,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include <math.h>
 #include "e2_plugins.h"
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
 #define ANAME "glob"
@@ -107,7 +107,7 @@ gchar *date_format [6] =
 	"%x"		//custom, NOT value of custom-format option, which may have something odd
 };
 
-//these functions are essentially the same as the filtering functions in e2_filelist.c
+//these functions are essentially the same as the filtering functions in e2_filestore.c
 /**
 @brief decide whether an item should be selected, on the basis of its name
 
@@ -445,7 +445,7 @@ static void _e2p_glob_response_cb (GtkDialog *dialog, gint response,
 					else
 						state = 0;
 
-					e2_filelist_disable_refresh ();
+					e2_filestore_disable_refresh ();
 					e2_window_set_cursor (GDK_WATCH);
 					//wait until any current re-creation is finished
 					WAIT_FOR_REFRESH(curr_view)
@@ -470,7 +470,7 @@ static void _e2p_glob_response_cb (GtkDialog *dialog, gint response,
 					} while (gtk_tree_model_iter_next (model, &iter));
 
 					e2_window_set_cursor (GDK_LEFT_PTR);
-					e2_filelist_enable_refresh ();
+					e2_filestore_enable_refresh ();
 				}
 			}
 			NEEDOPENBGL
@@ -498,7 +498,7 @@ static gboolean _e2p_glob (gpointer from, E2_ActionRuntime *art)
 
 	E2_PaneRuntime *rt = e2_pane_get_runtime (from, art->data, NULL);
 	//we check for selected item here, so prevent disruption
-	e2_filelist_disable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
+	e2_filestore_disable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
 
 	dialog = e2_dialog_create (NULL, _("Select items:"), _("selection filter"),
 		(ResponseFunc)_e2p_glob_response_cb, &data);
@@ -535,7 +535,7 @@ static gboolean _e2p_glob (gpointer from, E2_ActionRuntime *art)
 		gtk_entry_set_text (GTK_ENTRY(data.pattern_entry), previous_pattern);
 	data.example_label = e2_widget_add_mid_label (hbox, _("example: *~,*.?"), 0.0, FALSE, 0);
 
-	e2_filelist_enable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
+	e2_filestore_enable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
 
 	hbox = e2_widget_add_box (dialog_vbox, TRUE, 0, FALSE, FALSE, 0);
 	data.invert_check = e2_button_add_toggle (hbox, TRUE, FALSE,

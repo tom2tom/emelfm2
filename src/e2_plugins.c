@@ -132,7 +132,7 @@ PluginActions' configuration data are in part loaded into the corresponding conf
 #include "e2_action.h"
 #include "e2_output.h"
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //show plugin file path and name in plugins GUI
 //#define SHOW_PLUGPATHS

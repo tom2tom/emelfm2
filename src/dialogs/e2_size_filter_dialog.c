@@ -20,7 +20,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "emelfm2.h"
 #include <math.h>
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 typedef struct _E2_SzFltDlgData
 {

@@ -21,7 +21,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 //#define _XOPEN_SOURCE // required for strptime in glibc-2
 #include <time.h>
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 enum
 {

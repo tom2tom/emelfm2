@@ -29,7 +29,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_dialog.h"
 #include "e2_command.h"
 #include "e2_task.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
 #define ANAME "pack"
@@ -157,14 +157,14 @@ decompress UNICODE: 7za x archive.7z -odirname -aoa
 			gchar *qp = e2_utils_quote_string (full_name);
 			gchar *command = g_strdup_printf (cmd_str [pkg_type], qp);
 			g_free (qp);
-//			e2_filelist_disable_one_refresh (PANEACTIVE);	//prevent changes to selected item data
+//			e2_filestore_disable_one_refresh (PANEACTIVE);	//prevent changes to selected item data
 //			gint res =
 			e2_command_run (command, E2_COMMAND_RANGE_DEFAULT, rt->dialog
 #ifdef E2_COMMANDQ
 			, FALSE
 #endif
 			);
-//			e2_filelist_enable_one_refresh (PANEACTIVE); //probably nothing reported yet, to trigger a refresh
+//			e2_filestore_enable_one_refresh (PANEACTIVE); //probably nothing reported yet, to trigger a refresh
 //			flag = (res == 0);
 			g_free (full_name);
 			g_free (command);

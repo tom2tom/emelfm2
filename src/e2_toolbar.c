@@ -46,7 +46,7 @@ ToDo
 #include "e2_toolbar.h"
 #include "e2_dialog.h"
 #include "e2_menu.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_complete.h"
 #include "e2_icons.h"
 

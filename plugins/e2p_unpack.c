@@ -28,7 +28,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_plugins.h"
 #include "e2_dialog.h"
 #include "e2_task.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_icons.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
@@ -343,10 +343,10 @@ static gint _e2p_unpack_decompress (gpointer from, const gchar *localpath)
 	g_free (cmd);
 
 #ifdef E2_FAM
-	e2_filelist_request_refresh (curr_view->dir, FALSE);
-//	e2_filelist_request_refresh (other_view->dir, TRUE);
+	e2_filestore_request_refresh (curr_view->dir, FALSE);
+//	e2_filestore_request_refresh (other_view->dir, TRUE);
 #else
-	e2_filelist_check_dirty (GINT_TO_POINTER (1));
+	e2_filestore_check_dirty (GINT_TO_POINTER (1));
 #endif
 
 	return retval;
@@ -438,7 +438,7 @@ static gboolean _e2p_unpack_delete_dir (E2P_Unpackdata *data)
 //	else
 //		while (g_source_remove_by_user_data (data)) {}
 	//now we're ready for cleanup
-	e2_filelist_disable_refresh ();
+	e2_filestore_disable_refresh ();
 	gchar *local = F_FILENAME_TO_LOCALE (data->workdir);
 #ifdef E2_VFS
 	VPATH ddata = { local, NULL };	//local unpacking only
@@ -477,16 +477,16 @@ static gboolean _e2p_unpack_delete_dir (E2P_Unpackdata *data)
 	}
 #endif
 
-	e2_filelist_enable_refresh ();
+	e2_filestore_enable_refresh ();
 	F_FREE (local, data->workdir);
 	_e2p_unpack_cleanup (data);
 	//FIXME different refresh approach with E2_ASYNC
 	//in case a pane shows parent of temp dir
 #ifdef E2_FAM
-	e2_filelist_request_refresh (curr_view->dir, FALSE);
-	e2_filelist_request_refresh (other_view->dir, TRUE);
+	e2_filestore_request_refresh (curr_view->dir, FALSE);
+	e2_filestore_request_refresh (other_view->dir, TRUE);
 #else
-	e2_filelist_check_dirty (GINT_TO_POINTER (1));
+	e2_filestore_check_dirty (GINT_TO_POINTER (1));
 #endif
 	return FALSE;
 }
@@ -836,11 +836,11 @@ static gboolean _e2p_unpack (gpointer from, E2_ActionRuntime *art)
 		"mount -o loop %s ." //auto-detect FS-type, option -o loop needs superuser
 	};
 
-	//CHECKME 	e2_filelist_disable_refresh ();
+	//CHECKME 	e2_filestore_disable_refresh ();
 	FileInfo *info = e2_fileview_get_selected_first_local (curr_view, FALSE);
 	if (info == NULL)
 	{
-//		e2_filelist_enable_refresh ();
+//		e2_filestore_enable_refresh ();
 		return FALSE;	//nothing selected
 	}
 
@@ -858,7 +858,7 @@ static gboolean _e2p_unpack (gpointer from, E2_ActionRuntime *art)
 	if (uptype == UPTYPENONE)
 	{
 		e2_output_print_error (_("Selected item is not a supported archive"), FALSE);
-//		e2_filelist_enable_refresh ();
+//		e2_filestore_enable_refresh ();
 		return FALSE;
 	}
 
@@ -875,7 +875,7 @@ static gboolean _e2p_unpack (gpointer from, E2_ActionRuntime *art)
 #endif
 	{
 		e2_output_print_error (_("Recursive unpack is not supported"), FALSE);
-//		e2_filelist_enable_refresh ();
+//		e2_filestore_enable_refresh ();
 		return FALSE;
 	}
 
@@ -898,7 +898,7 @@ static gboolean _e2p_unpack (gpointer from, E2_ActionRuntime *art)
 		e2_output_print_error (msg, TRUE);
 		F_FREE (converted, workdir);
 		g_free (workdir);
-//		e2_filelist_enable_refresh ();
+//		e2_filestore_enable_refresh ();
 		return FALSE;
 	}
 
@@ -940,7 +940,7 @@ static gboolean _e2p_unpack (gpointer from, E2_ActionRuntime *art)
 #endif
 		F_FREE (workdir, data->workdir);
 		_e2p_unpack_cleanup (data);
-//		e2_filelist_enable_refresh ();
+//		e2_filestore_enable_refresh ();
 		e2_window_set_cursor (GDK_LEFT_PTR);
 		return FALSE;
 	}
@@ -962,7 +962,7 @@ static gboolean _e2p_unpack (gpointer from, E2_ActionRuntime *art)
 	e2_hook_register (&app.pane2.hook_change_dir,
 		(HookFunc)_e2p_unpack_change_dir_hook, data);
 
-//	e2_filelist_enable_refresh ();
+//	e2_filestore_enable_refresh ();
 	return TRUE;
 }
 

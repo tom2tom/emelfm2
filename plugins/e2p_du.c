@@ -29,7 +29,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include <dirent.h>
 #include <string.h>
 #include <fnmatch.h>
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_plugins.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name 
@@ -133,7 +133,7 @@ static gpointer _e2p_du_all (gchar *localpattern)
 	E2_Du *cbdata = ALLOCATE0 (E2_Du);
 	CHECKALLOCATEDWARN (cbdata, return NULL;)
 
-	e2_filelist_disable_one_refresh (PANEACTIVE);
+	e2_filestore_disable_one_refresh (PANEACTIVE);
 
 #ifdef E2_VFS
 	ddata.spacedata = curr_view->spacedata;
@@ -204,7 +204,7 @@ static gpointer _e2p_du_all (gchar *localpattern)
 		}
 	}
 
-	e2_filelist_enable_one_refresh (PANEACTIVE);
+	e2_filestore_enable_one_refresh (PANEACTIVE);
 	g_free (curr_local);
 	total = cbdata->total;
 	files = cbdata->files;

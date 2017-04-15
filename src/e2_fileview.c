@@ -39,7 +39,7 @@ ToDo
 #include <time.h>
 #include <pthread.h>
 #include "e2_dnd.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_context_menu.h"
 #include "e2_option.h"
 //#include "e2_tree_dialog.h"
@@ -1498,7 +1498,7 @@ static void _e2_fileview_edit_start_cb (GtkCellRenderer *renderer,
 {
 	printd (DEBUG, "start cell edit cb");
 //	NEEDCLOSEBGL
-	e2_filelist_disable_one_refresh ((view == curr_view) ? PANEACTIVE : PANEINACTIVE);
+	e2_filestore_disable_one_refresh ((view == curr_view) ? PANEACTIVE : PANEINACTIVE);
 	//disable keypressed that will interfere
 	g_signal_handlers_block_by_func (G_OBJECT (view->treeview),
 		_e2_fileview_key_press_cb, view);
@@ -1519,7 +1519,7 @@ static void _e2_fileview_edit_cancel_cb (GtkCellRenderer *renderer,
 //	NEEDCLOSEBGL
 	g_signal_handlers_unblock_by_func (G_OBJECT (view->treeview),
 		_e2_fileview_key_press_cb, view);
-	e2_filelist_enable_one_refresh ((view == curr_view) ? PANEACTIVE : PANEINACTIVE);
+	e2_filestore_enable_one_refresh ((view == curr_view) ? PANEACTIVE : PANEINACTIVE);
 //	NEEDOPENBGL
 }
 /**
@@ -1625,7 +1625,7 @@ static void _e2_fileview_name_edited_cb (GtkCellRendererText *cell,
 					//doesn't stay selected after the next refresh
 //					gtk_tree_selection_select_iter (view->selection, &iter);
 //					if (success)
-//						e2_filelist_request_refresh (view->dir, TRUE); CHECKME ok without E2_FAM ?
+//						e2_filestore_request_refresh (view->dir, TRUE); CHECKME ok without E2_FAM ?
 				}
 				g_free (utfold);
 				F_FREE (old, utfold);
@@ -1638,7 +1638,7 @@ static void _e2_fileview_name_edited_cb (GtkCellRendererText *cell,
 	NEEDOPENBGL
 	g_signal_handlers_unblock_by_func (G_OBJECT (view->treeview),
 		_e2_fileview_key_press_cb, view);
-	e2_filelist_enable_one_refresh ((view == curr_view) ? PANEACTIVE : PANEINACTIVE);
+	e2_filestore_enable_one_refresh ((view == curr_view) ? PANEACTIVE : PANEINACTIVE);
 }
 #endif //def EDIT_INPLACE
 /* *
@@ -2324,7 +2324,7 @@ model content update is suspended while this is performed
 	GtkTreeIter iter;
 	GtkTreeModel *model = view->model;
 	gchar *thisname;
-	e2_filelist_disable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
+	e2_filestore_disable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
 	// search from after the current row to the end of the store
 	for (i = 0; i < n; i++)
 	{
@@ -2342,7 +2342,7 @@ model content update is suspended while this is performed
 		else
 			g_free (thisname);
 	}
-	e2_filelist_enable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
+	e2_filestore_enable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
 } */
 /**
 @brief get file info for 1st selected row
@@ -3151,7 +3151,7 @@ void e2_fileview_adjust_name (ViewInfo *view, const gchar *oldname,
 			CLOSEBGL
 			gtk_list_store_remove (view->store, &iter);
 			OPENBGL
-			e2_filelist_cleaninfo (info, NULL);
+			e2_filestore_cleaninfo (info, NULL);
 		}
 		if (isdir)
 			g_free (newfull);
@@ -3264,7 +3264,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, prepare list");
 #endif
-	e2_filelist_disable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
+	e2_filestore_disable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
 	//if dir is already monitored, prevent downstream stat()'s causing ACCESS
 	//reports and hence a refresh
 	e2_fs_FAM_less_monitor_dir (view->dir);
@@ -3292,7 +3292,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 //			if (view->refreshtype == E2_CHANGE || otherview->dir_mtime < time (NULL))
 //			{
 				printd (DEBUG, "copy other store");
-				GtkListStore *newstore = e2_filelist_copy_store (otherview->store);
+				GtkListStore *newstore = e2_filestore_copy (otherview->store);
 				g_object_ref (G_OBJECT (view->store));
 				//this has same effect as unref existing filtermodel
 				gtk_tree_view_set_model (GTK_TREE_VIEW (view->treeview), NULL);
@@ -3302,7 +3302,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 				if (newtimer)
 				{
 					printd (DEBUG, "setup to clear stores later");
-					g_idle_add (e2_filelist_clear_old_stores, NULL);
+					g_idle_add (e2_filestore_clear_old_stores, NULL);
 				}
 
 				view->store = newstore;
@@ -3349,7 +3349,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 				e2_window_set_cursor (GDK_LEFT_PTR);
 				//reinstate standard FAM
 				e2_fs_FAM_more_monitor_dir (view->dir);
-				e2_filelist_enable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
+				e2_filestore_enable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
 				return TRUE;
 //			}
 //			printd (DEBUG, "time-test failed");
@@ -3377,7 +3377,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 //			printd (DEBUG, "Read dir function returned list @ %x", entries);
 			CLOSEBGL
 
-			if (E2DREAD_FAILED (entries) || !e2_filelist_make_all_infos (local, &entries))
+			if (E2DREAD_FAILED (entries) || !e2_filestore_make_all_infos (local, &entries))
 			{
 				g_free (local);
 				//any cleanup of entries (possibly with mixed data types) done downstream
@@ -3479,7 +3479,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 	}
 
 	gboolean retval;
-	GtkListStore *store = e2_filelist_fill_store (entries, view);
+	GtkListStore *store = e2_filestore_fill (entries, view);
 	if (store != NULL)
 	{	//there was a valid store created
 //	printd (DEBUG, "new liststore ready");
@@ -3496,7 +3496,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 		if (newtimer)
 		{
 			printd (DEBUG, "setup to clear stores later");
-			g_idle_add (e2_filelist_clear_old_stores, NULL);
+			g_idle_add (e2_filestore_clear_old_stores, NULL);
 		}
 		view->store = store;
 		sortable = GTK_TREE_SORTABLE (store);
@@ -3591,7 +3591,7 @@ gboolean e2_fileview_prepare_list (ViewInfo *view)
 		printd (WARN, "liststore creation failed for %s", view->dir);
 cleanup:
 		if ((gpointer)entries >= GUINT_TO_POINTER (E2DREAD_ELAST))
-			g_list_foreach (entries, (GFunc) e2_filelist_cleaninfo, NULL);
+			g_list_foreach (entries, (GFunc) e2_filestore_cleaninfo, NULL);
 cleanup2:
 		retval = FALSE;
 	}
@@ -3604,7 +3604,7 @@ cleanup2:
 #endif
 	//reinstate standard FAM
 	e2_fs_FAM_more_monitor_dir (view->dir);
-	e2_filelist_enable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
+	e2_filestore_enable_one_refresh ((view==curr_view)?PANEACTIVE:PANEINACTIVE);
 //	printd (DEBUG, "end prepare list for %s", view->dir);
 	return retval;
 }
@@ -3848,7 +3848,7 @@ static gpointer _e2_fileview_change_dir (E2_Listman *cddata)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "disable refresh, _e2_fileview_change_dir");
 #endif
-	e2_filelist_disable_one_refresh ((cddata == &app.pane1.view.listcontrols) ?
+	e2_filestore_disable_one_refresh ((cddata == &app.pane1.view.listcontrols) ?
 		PANE1:PANE2); //suspend overlapping refreshes ASAP
 	e2_utils_block_thread_signals ();	//block all allowed signals to this thread
 	LISTS_LOCK
@@ -3857,7 +3857,7 @@ static gpointer _e2_fileview_change_dir (E2_Listman *cddata)
 	if (newpath == NULL)
 	{
 		LISTS_UNLOCK
-		e2_filelist_enable_one_refresh ((cddata == &app.pane1.view.listcontrols) ?
+		e2_filestore_enable_one_refresh ((cddata == &app.pane1.view.listcontrols) ?
 			PANE1:PANE2);
 		return NULL;
 	}
@@ -3899,7 +3899,7 @@ static gpointer _e2_fileview_change_dir (E2_Listman *cddata)
 //		LISTS_LOCK
 		g_atomic_int_set (&cddata->cd_working, 0);
 //		LISTS_UNLOCK
-		e2_filelist_enable_one_refresh ((view == &app.pane1.view) ? PANE1:PANE2);
+		e2_filestore_enable_one_refresh ((view == &app.pane1.view) ? PANE1:PANE2);
 //		e2_pane_flag_history (rt, FALSE); //zap any history update request
 		return NULL;
 	}
@@ -4434,7 +4434,7 @@ static gpointer _e2_fileview_change_dir (E2_Listman *cddata)
 #ifdef E2_REFRESH_DEBUG
 	printd (DEBUG, "enable refresh, change-dir");
 #endif
-	e2_filelist_enable_one_refresh ((view == &app.pane1.view) ? PANE1:PANE2);
+	e2_filestore_enable_one_refresh ((view == &app.pane1.view) ? PANE1:PANE2);
 
 	printd (DEBUG, "_e2_fileview_change_dir ends");
 	return NULL;
@@ -4487,7 +4487,7 @@ containing a treeview associated with the store
 GtkWidget *e2_fileview_create_list (ViewInfo *view)
 {
 	//create liststore framework for the pane
-	view->store = e2_filelist_make_store ();
+	view->store = e2_filestore_make ();
 	//setup column-order array
 	gint array_row = (view == &app.pane1.view) ? 0 : 1;
 	e2_fileview_translate_cols_array (stored_col_order[array_row],

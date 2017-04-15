@@ -26,7 +26,7 @@ to be applied to a filelist
 #include "emelfm2.h"
 #include <string.h>
 #include "e2_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 typedef struct _E2_NmFltDlgData
 {

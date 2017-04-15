@@ -37,7 +37,7 @@ ToDo
 #include "e2_action.h"
 #include "e2_action_option.h"
 #include "e2_task.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_plugins.h"
 #include "e2_filetype.h"
 #include "e2_dialog.h"

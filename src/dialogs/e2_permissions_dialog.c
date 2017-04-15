@@ -24,7 +24,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "e2_dialog.h"
 #include "e2_permissions_dialog.h"
 #include "e2_ownership_dialog.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //order of these determines order of chmod_buttons[] in dialog data
 enum { USR_READ, USR_WRITE, USR_EXEC, GRP_READ, GRP_WRITE, GRP_EXEC,

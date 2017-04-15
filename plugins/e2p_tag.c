@@ -25,7 +25,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "emelfm2.h"
 #include "e2_plugins.h"
 #include "e2_fileview.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
 #define ANAME "tag"
@@ -80,13 +80,13 @@ static gboolean _e2p_tag_selected (gpointer from, E2_ActionRuntime *art)
 #endif
 
 	p = (rt == curr_pane) ? PANEACTIVE : PANEINACTIVE;
-	e2_filelist_disable_one_refresh (p);
+	e2_filestore_disable_one_refresh (p);
 	WAIT_FOR_REFRESH(view)
 
 	selpaths = gtk_tree_selection_get_selected_rows (view->selection, &model);
 	if (selpaths == NULL)
 	{
-		e2_filelist_enable_one_refresh (p);
+		e2_filestore_enable_one_refresh (p);
 		return FALSE;
 	}
 
@@ -117,7 +117,7 @@ static gboolean _e2p_tag_selected (gpointer from, E2_ActionRuntime *art)
 	}
 	g_list_free (selpaths);
 
-	e2_filelist_enable_one_refresh (p);
+	e2_filestore_enable_one_refresh (p);
 
 	return TRUE;
 }
@@ -155,7 +155,7 @@ static gboolean _e2p_retag (gpointer from, E2_ActionRuntime *art)
 		return FALSE;	//should never happen
 
 	p = (rt == curr_pane) ? PANEACTIVE : PANEINACTIVE;
-	e2_filelist_disable_one_refresh (p);
+	e2_filestore_disable_one_refresh (p);
 	WAIT_FOR_REFRESH(view)
 
 	model = view->model;
@@ -178,7 +178,7 @@ static gboolean _e2p_retag (gpointer from, E2_ActionRuntime *art)
 		} while (gtk_tree_model_iter_next (model, &iter));
 	}
 
-	e2_filelist_enable_one_refresh (p);
+	e2_filestore_enable_one_refresh (p);
 
 	return TRUE;
 }

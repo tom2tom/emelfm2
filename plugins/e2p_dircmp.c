@@ -26,7 +26,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include <fcntl.h>
 #include "e2_plugins.h"
 #include "e2_fileview.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 #include "e2_task.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
@@ -765,7 +765,7 @@ static gpointer _e2p_diff_all (gpointer thread_data)
 	GtkTreeModel *model = curr_view->model;
 	if (gtk_tree_model_get_iter_first (model, &iter));
 	{	//it's not empty
-		e2_filelist_disable_refresh ();
+		e2_filestore_disable_refresh ();
 		CLOSEBGL //prevent thread-related hang!
 		e2_window_set_cursor (GDK_WATCH);
 		OPENBGL
@@ -853,7 +853,7 @@ static gpointer _e2p_diff_all (gpointer thread_data)
 		CLOSEBGL
 		e2_window_set_cursor (GDK_LEFT_PTR);
 		OPENBGL
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 	}
 	return NULL;
 }

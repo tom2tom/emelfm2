@@ -25,7 +25,7 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #include "emelfm2.h"
 #include "e2_plugins.h"
 #include "e2_fileview.h"
-#include "e2_filelist.h"
+#include "e2_filestore.h"
 
 //signature component, must match 'core' of this file name and likewise for corresponding icon file name
 #define ANAME "selmatch"
@@ -67,14 +67,14 @@ static gboolean _e2p_select_same (gpointer from, E2_ActionRuntime *art)
 		gboolean fullmatch, forward;
 		const gchar *seps;
 
-		e2_filelist_disable_refresh ();
+		e2_filestore_disable_refresh ();
 
 		othview = (rt == curr_pane) ? &other_pane->view : &curr_pane->view;
 		WAIT_FOR_REFRESH(othview)
 		selpaths = gtk_tree_selection_get_selected_rows (othview->selection, &modelo);
 		if (selpaths == NULL)
 		{
-			e2_filelist_enable_refresh ();
+			e2_filestore_enable_refresh ();
 			return FALSE;
 		}
 		// art->action->data is NULL for full name-scan, non-NULL for partial
@@ -217,7 +217,7 @@ static gboolean _e2p_select_same (gpointer from, E2_ActionRuntime *art)
 			gtk_tree_path_free (tpath);
 		}
 
-		e2_filelist_enable_refresh ();
+		e2_filestore_enable_refresh ();
 
 		return TRUE;
 	}
