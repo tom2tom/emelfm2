@@ -44,9 +44,6 @@ ToDo
 #include "e2_option.h"
 //#include "e2_tree_dialog.h"
 #include "e2_dialog.h"
-#ifdef USE_GTK3_14
-# include "e2_icons.h"
-#endif
 #include "e2_task.h"
 #ifdef E2_MOUSECUSTOM
 # include "e2_mousebinding.h"
@@ -4472,7 +4469,7 @@ void e2_fileview_set_arrow (ViewInfo *view, GtkArrowType arrow)
 	GtkBox *headerbox;
 	g_object_get (G_OBJECT (col), "widget", &headerbox, NULL);
 
-	view->sort_arrow = e2_icons_get_arrow (arrow);
+	view->sort_arrow = e2_widget_get_arrow (arrow);
 	gtk_box_pack_end (headerbox, view->sort_arrow, FALSE, FALSE, 0);
 	gtk_widget_show (view->sort_arrow);
 }
