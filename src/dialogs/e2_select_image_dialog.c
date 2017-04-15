@@ -306,7 +306,7 @@ static gchar *_e2_sidlg_get_icon_dir (E2_SID_Runtime *rt)
 }
 
 /**
-@brief
+@brief treewalk callback
 @param localpath filename data
 @param statptr pointer to statbuf for the file
 @param status tree-walker status code
