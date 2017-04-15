@@ -133,6 +133,11 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #define STOCK_NAME_ZOOM_IN          "gtk-zoom-in"
 #define STOCK_NAME_ZOOM_OUT         "gtk-zoom-out"
 
+#ifdef USE_GTK3_14
+//GdkPixbufs array, ordered: up,down,left,right per GtkArrowType enum
+GdkPixbuf *cached_arrows[4];
+#endif
+
 #ifdef E2_ADD_STOCKS
 
 typedef struct _E2_Stock
@@ -161,10 +166,5 @@ GtkIconSize e2_icons_get_size (gint psize);
 #endif
 
 gchar *e2_icons_get_custom_path (gboolean withtrailer) G_GNUC_MALLOC;
-gchar *e2_icons_get_full_path (const gchar *base, const gchar *iname, gint psize, gboolean withtrailer) G_GNUC_MALLOC;
-
-#ifdef USE_GTK3_14
-GtkWidget *e2_icons_get_arrow (GtkArrowType direction);
-#endif
 
 #endif //ndef __E2_ICONS_H__
