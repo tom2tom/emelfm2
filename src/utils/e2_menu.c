@@ -293,18 +293,29 @@ GtkWidget *e2_menu_add (GtkWidget *menu, const gchar *labeltext, const gchar *ic
 	}
 	if (choice == 1 && icon != NULL && *icon != '\0') //show icon
 	{
-#ifdef USE_GTK3_10
-#warning GTK 3.10 deprecates menu-items that include an icon. No reasonable workaround is available.
-#endif
 		GtkWidget *image = e2_widget_get_icon (icon, GTK_ICON_SIZE_MENU);	//e2_option_int_get ("menu-isize") + 1);
 		if (image != NULL)
 		{
 			printd (DEBUG, "Create imaged menu item using icon %s and label %s", icon, labeltext);
+#ifdef USE_GTK3_10
+			menu_item = gtk_menu_item_new ();
+			if (labeltext)
+			{
+				GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+				GtkWidget *label = gtk_label_new_with_mnemonic (labeltext);
+				gtk_container_add (GTK_CONTAINER (box), image);
+				gtk_container_add (GTK_CONTAINER (box), label);
+				gtk_container_add (GTK_CONTAINER (menu_item), box);
+			}
+			else
+			{
+				gtk_container_add (GTK_CONTAINER (menu_item), image);
+			}
+			gtk_widget_show_all (menu_item);
+#else
 			menu_item = gtk_image_menu_item_new_with_mnemonic
 				(labeltext != NULL ? labeltext : "");
 			gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item), image);
-#ifdef USE_GTK3_10
-			gtk_image_menu_item_set_always_show_image ((GtkImageMenuItem*)menu_item, TRUE);
 #endif
 		}
 		else
