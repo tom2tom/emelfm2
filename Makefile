@@ -340,6 +340,7 @@ install: all install_plugins
 	@echo "installing $(TARGET) to prefix '$(PREFIX)'"
 	@install -d -m 755 $(BIN_DIR)
 	@install -m 755 $(TARGET) $(BIN_DIR)
+	@rm -f $(ICON_DIR)/*.png
 	@for dir in `ls -rA1 -I*.png $(ICONS)`; do \
 		install -d -m 755 $(ICON_DIR)/$$dir; \
 		for file in `ls $(ICONS)/$$dir |grep png`; do \
