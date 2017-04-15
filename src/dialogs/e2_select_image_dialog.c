@@ -38,6 +38,14 @@ enum
 	PIXBUF_COL, TEXT_COL, PATH_COL
 };
 
+typedef struct _E2_IconMatch
+{
+	gshort size;
+	gchar *displayname;
+	gchar *iconpath;
+	GdkPixbuf *pxb;
+} E2_IconMatch;
+
 static gchar *_e2_sidlg_get_icon_dir (E2_SID_Runtime *rt);
 static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt);
 static gint _e2_sidlg_show_current (gboolean checkboth, E2_SID_Runtime *rt);
@@ -298,6 +306,55 @@ static gchar *_e2_sidlg_get_icon_dir (E2_SID_Runtime *rt)
 }
 
 /**
+@brief
+@param localpath filename data
+@param statptr pointer to statbuf for the file
+@param status tree-walker status code
+@param entries pointer to filepaths list
+
+@return E2TW_CONTINUE
+*/
+static E2_TwResult _e2_sidlg_icon_files_tw (VPATH *localpath, const struct stat *statptr,
+	E2_TwStatus status, GSList **entries)
+{
+	switch (status)
+	{
+		case E2TW_F:	//not-directory or link
+		case E2TW_SL:	//symbolic link to a non-directory
+			if (strstr (VPSTR(localpath), "stock") == NULL)
+			{
+				*entries = g_slist_prepend (*entries, g_strdup(VPSTR(localpath)));
+			}
+			break;
+		default:
+			break;
+	}
+	return E2TW_CONTINUE;
+}
+/**
+@brief pointer-array population function, for getting data from hashtable
+@param key UNUSED hash table key
+@param data data to be migrated
+@param array to be updated
+
+@return
+*/
+static void _e2_sidlg_get_icons (gchar *key, E2_IconMatch *data, GPtrArray *array)
+{
+	g_ptr_array_add (array, data);
+}
+/**
+@brief pointer-array value comparison function, for sorting
+@param a pointer to data
+@param b pointer to data
+
+@return <0, 0 or >0 according to whether a belongs before, with or after b
+*/
+static gint _e2_sidlg_compare_icons (const E2_IconMatch **a, const E2_IconMatch **b)
+{
+	return strcmp ((*a)->displayname, (*b)->displayname);
+}
+/**
 @brief fill liststore for custom icons
 
 @param localpath pointer to icons-directory path data
@@ -307,53 +364,163 @@ static gchar *_e2_sidlg_get_icon_dir (E2_SID_Runtime *rt)
 */
 static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 {
-	GList *entries;
-	//get all files
-	entries = (GList *)e2_fs_dir_foreach (localpath,
-					E2_DIRWATCH_NO,	//assume local icons, so fast read
-					NULL, NULL, NULL E2_ERR_NONE());
+	GSList *entries = NULL;
+	OPENBGL
+	e2_fs_tw (localpath, _e2_sidlg_icon_files_tw, &entries, -1, E2TW_FIXDIR|E2TW_XQT E2_ERR_NONE());
+	CLOSEBGL
+
 	if (!E2DREAD_FAILED (entries))
 	{
-		GList *member;
+		//remove duplicates, favour fixed size as displayed, or scalable
+		gshort got, want;
 		gint w, h;
+		guint indx;
+		gchar *pointer;
+		E2_IconMatch *data;
+		GSList *member;
+		GHashTable *icon_hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+#if 0	//glib regex too buggy!! def USE_GLIB2_14
+		gchar *freeme;
+		GMatchInfo *matches;
+		GRegex *matcher = g_regex_new ("[/\\]([1-9]\\d+)[xX/\\]",
+			G_REGEX_EXTENDED | G_REGEX_RAW | G_REGEX_OPTIMIZE,
+			G_REGEX_MATCH_NOTEMPTY,
+			NULL);
+#else
+		regmatch_t matches[2];
+		regex_t matcher;
+		regcomp (&matcher, "[/\\]([1-9][0-9]+)[xX/\\]", REG_EXTENDED);
+#endif
 #ifdef USE_GTK3_10
-		if (!gtk_icon_size_lookup (GTK_ICON_SIZE_LARGE_TOOLBAR, &w, &h))
+		if (gtk_icon_size_lookup (GTK_ICON_SIZE_LARGE_TOOLBAR, &w, &h))
 #else
 		GtkSettings *s = gtk_settings_get_default ();
-		if (!gtk_icon_size_lookup_for_settings (s, GTK_ICON_SIZE_LARGE_TOOLBAR, &w, &h))
+		if (gtk_icon_size_lookup_for_settings (s, GTK_ICON_SIZE_LARGE_TOOLBAR, &w, &h))
 #endif
 		{
-			w = h = 24;	//can't find useful size, use this default
+			want = MAX (w, h);
 		}
-
-		entries = g_list_sort (entries, (GCompareFunc) strcmp);
-
-		GtkListStore *store = GTK_LIST_STORE (rt->custommodel);
-		for (member = entries; member != NULL; member = g_list_next (member))
+		else
 		{
-			GtkTreeIter iter;
-			gchar *fullpath, *utf;
-			GdkPixbuf *pix;
-			 //CHECKME want all localised encoding
-			fullpath = g_build_filename (VPSTR(localpath), (gchar*) member->data, NULL);
-			pix = gdk_pixbuf_new_from_file_at_scale (fullpath, w, h, TRUE, NULL);
-			if (pix != NULL)
-			{
-				utf = g_filename_to_utf8 ((gchar*) member->data, -1, NULL, NULL, NULL);
-				if (utf == NULL)
-					utf = g_strdup ("Name-error"); //don't bother translating
-				gtk_list_store_insert_with_values (store, &iter, -1,
-						PIXBUF_COL, pix,
-						TEXT_COL, utf,
-						PATH_COL, fullpath, //CHECKME localised encoding
-						-1);
-				g_object_unref (G_OBJECT (pix));
-				g_free (utf);
-			}
-			g_free (fullpath);
-			g_free (member->data);
+			want = w = h = 24;	//can't find useful size, use this default
 		}
-		g_list_free (entries);
+
+		for (member = entries; member != NULL; member = g_slist_next (member))
+		{
+			GdkPixbuf *pxb;
+			gchar *base, *fullpath = (gchar*) member->data;
+
+			base = g_path_get_basename (fullpath);
+			if (strncmp (base, "arrow", 5) == 0 || strcmp (base, "emelfm2") == 0)
+			{
+				g_free (base);
+				g_free (fullpath);
+				continue;
+			}
+
+			if (strcasestr (fullpath, "scalable") != NULL)
+			{
+				got = 0;
+			}
+#if 0 	//def USE_GLIB2_14
+			else if (!g_regex_match (matcher, fullpath, 0, &matches))
+#else
+			else if (regexec (&matcher, fullpath, 2, matches, 0))
+#endif
+			{
+				got = 0;
+			}
+			else
+			{
+				gulong size;
+#if 0 	//def USE_GLIB2_14
+				freeme = g_match_info_fetch (matches, 1);
+				size = strtoul (freeme, NULL, 10);
+				g_free (freeme);
+#else
+				pointer = fullpath+matches[1].rm_eo;
+				gchar c = *pointer;
+				*pointer = 0;
+				size = strtoul (fullpath+matches[1].rm_so, NULL, 10);
+				*pointer = c;
+#endif
+				got = (gint) size;
+			}
+
+			pointer = strrchr (base, '.');
+			if (pointer != NULL)
+				*pointer = 0;
+			data = (E2_IconMatch*) g_hash_table_lookup (icon_hash, base);
+			if (data == NULL)
+			{
+				pxb = gdk_pixbuf_new_from_file_at_scale (fullpath, w, h, TRUE, NULL);
+				if (pxb != NULL)
+				{
+					data = ALLOCATE (E2_IconMatch);
+					data->size = got;
+					data->displayname = base;
+					data->iconpath = fullpath;
+					data->pxb = pxb;
+					g_hash_table_insert (icon_hash, base, data);
+					continue;
+				}
+			}
+			else //this one already present
+				if (data->size != want)
+			{
+				pxb = gdk_pixbuf_new_from_file_at_scale (fullpath, w, h, TRUE, NULL);
+				if (pxb != NULL)
+				{
+					data->size = got;
+					g_free (base);
+					g_free (data->iconpath);
+					data->iconpath = fullpath;
+					g_object_unref (G_OBJECT(data->pxb));
+					data->pxb = pxb;
+					continue;
+				}
+			}
+			g_free (base);
+			g_free (fullpath);
+		}
+
+#if 0	//def USE_GLIB2_14
+		g_match_info_free (matches);
+		g_regex_unref (matcher);
+#else
+		regfree (&matcher);
+#endif
+		g_slist_free (entries);
+
+		guint count = g_hash_table_size (icon_hash);
+		if (count > 0)
+		{
+			gpointer *dp;
+			GtkListStore *store = GTK_LIST_STORE (rt->custommodel);
+			GPtrArray *icon_table = g_ptr_array_sized_new (count);
+			g_hash_table_foreach (icon_hash, (GHFunc)_e2_sidlg_get_icons, icon_table);
+			g_ptr_array_sort (icon_table, (GCompareFunc)_e2_sidlg_compare_icons);
+
+			for (indx = 0, dp = icon_table->pdata; indx < count; indx++, dp++)
+			{
+				GtkTreeIter iter;
+
+				data = *((E2_IconMatch **)dp);
+				gtk_list_store_insert_with_values (store, &iter, -1,
+					PIXBUF_COL, data->pxb,
+					TEXT_COL, data->displayname,
+					PATH_COL, data->iconpath, //localised encoding
+					-1);
+				g_object_unref (G_OBJECT (data->pxb));
+				g_free (data->displayname);
+				g_free (data->iconpath);
+				DEALLOCATE(E2_IconMatch, data);
+			}
+
+			g_ptr_array_free (icon_table, TRUE);
+		}
+
+		g_hash_table_destroy (icon_hash);
 	}
 }
 /**
@@ -775,7 +942,7 @@ static GtkWidget *_e2_sidlg_create_stock_icon_browser (E2_SID_Runtime *rt)
 	}
 #endif
 
-	g_signal_connect (G_OBJECT(rt->stockview), "item-activated",
+	g_signal_connect (G_OBJECT (rt->stockview), "item-activated",
 		G_CALLBACK (_e2_sidlg_activated_cb), rt->dialog);
 
 	GtkWidget *sw = e2_widget_get_sw_plain (GTK_POLICY_AUTOMATIC,
@@ -833,7 +1000,7 @@ static GtkWidget *_e2_sidlg_create_custom_icon_browser (E2_SID_Runtime *rt)
 	}
 #endif
 
-	g_signal_connect (G_OBJECT(rt->customview), "item-activated",
+	g_signal_connect (G_OBJECT (rt->customview), "item-activated",
 		G_CALLBACK (_e2_sidlg_activated_cb), rt->dialog);
 
 	GtkWidget *sw = e2_widget_get_sw_plain (GTK_POLICY_AUTOMATIC,
@@ -1065,6 +1232,7 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 #else
 	GtkWidget *bbox = gtk_hbox_new (FALSE, 0);
 	GtkWidget *bbox2 = gtk_vbox_new (FALSE, 0);
+//#ifdef USE_GTK3_12 TODO deprecated action area use
 #endif
 	GtkWidget *action_area =
 #ifdef USE_GTK2_14
