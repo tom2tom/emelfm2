@@ -29,7 +29,7 @@ typedef struct _E2_CommandLineOptions
 	gchar *config_dir;	//UTF-8 string, no trailing /
 	gchar *sharedconfig_dir;	//UTF-8 string, no trailing /
 	gchar *trash_dir;	//UTF-8 string, no trailing /, typically trailing "Trash"
-	gchar *config_lang:	//ASCII string (suffix of config-file name)
+	gchar *config_lang;	//ASCII string (suffix of config-file name)
 	gchar *encoding;
 	gchar *fallback_encoding;
 #ifdef DEBUG_MESSAGES
