@@ -906,11 +906,11 @@ msgid "set debug level from 1 (low) to 5 (high)"
 msgstr ""
 
 #: e2_cl_option.c:90
-msgid "set filesystem character encoding to TYPE"
+msgid "set filesystem character encoding to ENC"
 msgstr ""
 
 #: e2_cl_option.c:91
-msgid "set fallback encoding (default: ISO-8859-1)"
+msgid "set fallback encoding to ENC (default: ISO-8859-1)"
 msgstr ""
 
 #: e2_cl_option.c:92
@@ -7339,8 +7339,10 @@ msgstr "view_with_plugin"
 #~ "-2,--two=DIR           set 2nd pane's start directory to DIR\n"
 #~ "-c,--config=DIR        set config directory to DIR (default: ~/.config/"
 #~ "emelfm2)\n"
-#~ "-e,--encoding=TYPE     set filesystem character encoding to TYPE\n"
-#~ "-f,--fallback-encoding set fallback encoding (default: ISO-8859-1)\n"
+#~ "-e,--encoding=ENC      set filesystem character encoding to ENC\n"
+#~ "-f,--fallback-encoding=ENC set fallback encoding to ENC (default: ISO-8859-1)\n"
+#~ "-g,--lang=LANG         set config-file language to LANG (default: "
+#~ "from environment variable)\n"
 #~ "-i,--ignore-problems   ignore encoding/locale problems (at your own "
 #~ "risk!)\n"
 #~ "-l,--log-all           maximise scope of error logging\n"

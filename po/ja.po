@@ -889,11 +889,11 @@ msgid "set debug level from 1 (low) to 5 (high)"
 msgstr "デバッグレベルを1(低)から5(高)まで指定"
 
 #: e2_cl_option.c:90
-msgid "set filesystem character encoding to TYPE"
+msgid "set filesystem character encoding to ENC"
 msgstr "ファイルシステムの文字エンコーディングをTYPEに指定"
 
 #: e2_cl_option.c:91
-msgid "set fallback encoding (default: ISO-8859-1)"
+msgid "set fallback encoding to ENC (default: ISO-8859-1)"
 msgstr "フォールバック時のエンコーディング (デフォルト: ISO-8859-1)"
 
 #: e2_cl_option.c:92

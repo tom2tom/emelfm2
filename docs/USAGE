@@ -17,8 +17,10 @@ Program options:
 -2,--two=DIR           set 2nd pane's start directory to DIR
 -a,--share-config=DIR  load config data from DIR, after any data from default location or -c option. No data is saved to DIR
 -c,--config=DIR        set config directory to DIR (default: ~/.config/emelfm2)
--e,--encoding=TYPE     set filesystem character encoding to TYPE (include "ascii" or "ASCII" in this, to omit file path/name conversions)
--f,--fallback-encoding set fallback encoding (default: ISO-8859-1)
+-e,--encoding=ENC      set filesystem character encoding to ENC (include "ascii" or "ASCII" in this, to omit file path/name conversions)
+-f,--fallback-encoding=ENC set fallback encoding to ENC (default: ISO-8859-1)
+-g,--lang=LANG         set config-file language to LANG (default: from environment variable)
+
 -i,--ignore-problems   ignore encoding/locale problems (at your own risk!)
 -l,--log-all           maximise scope of error logging (relevant only when built without debugging-support)
 
