@@ -781,7 +781,6 @@ void e2_option_file_write (const gchar *utfpath)
 	VPATH tdata;
 #endif
 	gboolean freepath = (utfpath == NULL);
-	//reportedly, rogue distro(s) can change on-the-fly the case of the trailing encoding in default_config_file!
 	gchar *cfg_file = (freepath) ?
 		g_build_filename (e2_cl_options.config_dir, default_config_file, NULL):
 		(gchar *)utfpath;
@@ -1049,7 +1048,6 @@ If the file is read successfully, log the post-read config dir timestamp
 static gboolean _e2_option_config_file_read (const gchar *config_dir, gpointer *contents)
 {
 	//find absolute path to config file
-	//reportedly, rogue distro(s) can change on-the-fly the case of the trailing encoding in default_config_file!
 	gchar *cfg_file = g_build_filename (config_dir, default_config_file, NULL);
 	gchar *local = F_FILENAME_TO_LOCALE (cfg_file);
 #ifdef E2_VFS
@@ -1249,7 +1247,9 @@ file. Hence tree-options are multi-lined. Installation requires parsing.
 Writing a config file finishes with the then-current contents of the
 unknown-list. The listed strings do not need to be reformatted before
 writing */
-	const gchar *lang = g_getenv ("LC_MESSAGES");
+	const gchar *lang = e2_cl_options.config_lang;
+	if (lang == NULL)
+		lang = g_getenv ("LC_MESSAGES");
 	if (lang == NULL)
 		lang = g_getenv ("LANG");
 	if (lang == NULL)

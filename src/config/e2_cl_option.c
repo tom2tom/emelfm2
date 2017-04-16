@@ -86,10 +86,11 @@ static void _e2_cl_option_print_help (void)
 		"-b,--build             ", N_("display build-time parameters"),
 		"-c,--config=DIR        ", N_("set config directory to DIR (default: ~/.config/emelfm2)"),
 #ifdef DEBUG_MESSAGES
-	    "-d,--debug=[1-5]       ", N_("set debug level from 1 (low) to 5 (high)"),
+		"-d,--debug=[1-5]       ", N_("set debug level from 1 (low) to 5 (high)"),
 #endif
-		"-e,--encoding=TYPE     ", N_("set filesystem character encoding to TYPE"),
-		"-f,--fallback-encoding ", N_("set fallback encoding (default: ISO-8859-1)"),
+		"-e,--encoding=ENC      ", N_("set filesystem character encoding to ENC"),
+		"-f,--fallback-encoding=ENC", N_("set fallback encoding to ENC (default: ISO-8859-1)"),
+		"-g,--lang=LANG         ", N_("set config-file language to LANG (default: from environment variable)"),
 		"-h,--help              ", N_("show this help message"),
 		"-i,--ignore-problems   ", N_("ignore encoding/locale problems (at your own risk!)"),
 		"-l,--log-all           ", N_("maximise scope of error logging"),
@@ -171,6 +172,7 @@ void e2_cl_option_process (gint argc, gchar *argv[])
 #ifdef DEBUG_MESSAGES
 		{"debug", required_argument, NULL, 'd'},
 #endif
+		{"lang", required_argument, NULL, 'g'},
 		{"encoding", required_argument, NULL, 'e'},
 		{"fallback-encoding", required_argument, NULL, 'f'},
 		{"trash", required_argument, NULL, 't'},
@@ -252,6 +254,10 @@ void e2_cl_option_process (gint argc, gchar *argv[])
 					}
 					break;
 #endif
+				case 'g':
+					g_free (e2_cl_options.config_lang);
+					e2_cl_options.config_lang = g_strdup (optarg);
+					break;
 				case 'e':
 					g_free (e2_cl_options.encoding);
 					e2_cl_options.encoding = g_strdup (optarg);
@@ -514,6 +520,7 @@ void e2_cl_option_clear (void)
 	g_free (e2_cl_options.trash_dir);
 	g_free (e2_cl_options.encoding);
 	g_free (e2_cl_options.fallback_encoding);
+	g_free (e2_cl_options.config_lang);
 	if (e2_cl_options.option_overrides)
 	{
 		g_list_foreach (e2_cl_options.option_overrides, (GFunc)g_free, NULL);
