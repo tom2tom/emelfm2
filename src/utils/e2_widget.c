@@ -30,6 +30,9 @@ This file contains various miscelleanous GtkWidget utility functions.
 #include "e2_widget.h"
 #include "e2_dialog.h"
 #include "e2_icons.h"
+#ifdef USE_GTK3_14
+extern GdkPixbuf *cached_arrows[4];
+#endif
 
 #ifdef USE_GTK2_12TIPS
 typedef struct
@@ -285,6 +288,7 @@ GtkWidget *e2_widget_get_icon (const gchar *icon, GtkIconSize size)
 */
 GtkWidget *e2_widget_get_arrow (GtkArrowType direction)
 {
+	
 	GtkWidget *arrow;
 	if (cached_arrows[direction] != NULL)
 		arrow = gtk_image_new_from_pixbuf (cached_arrows[direction]);
