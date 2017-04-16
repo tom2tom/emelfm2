@@ -42,7 +42,7 @@ typedef struct _E2_IconMatch
 {
 	gshort size;
 	gchar *displayname;
-	gchar *iconpath;
+	const gchar *iconpath; //GStringChunk'd
 	GdkPixbuf *pxb;
 } E2_IconMatch;
 
@@ -195,6 +195,7 @@ static void _e2_sidlg_destroy_cb (GtkWidget *dialog, E2_SID_Runtime *rt)
 	g_object_set_data (G_OBJECT (rt->parent), rt->name, NULL);
 	g_free (rt->name);
 	g_free (rt->icon);
+	g_string_chunk_free (rt->cache);
 	DEALLOCATE (E2_SID_Runtime, rt);
 }
 /**
@@ -306,16 +307,16 @@ static gchar *_e2_sidlg_get_icon_dir (E2_SID_Runtime *rt)
 }
 
 /**
-@brief treewalk callback
+@brief treewalk callback to collect custom-icon filepaths
 @param localpath filename data
 @param statptr pointer to statbuf for the file
 @param status tree-walker status code
-@param entries pointer to filepaths list
+@param data pointer to E2_IPopulator
 
 @return E2TW_CONTINUE
 */
 static E2_TwResult _e2_sidlg_icon_files_tw (VPATH *localpath, const struct stat *statptr,
-	E2_TwStatus status, GSList **entries)
+	E2_TwStatus status, E2_IPopulator *data)
 {
 	switch (status)
 	{
@@ -323,7 +324,8 @@ static E2_TwResult _e2_sidlg_icon_files_tw (VPATH *localpath, const struct stat 
 		case E2TW_SL:	//symbolic link to a non-directory
 			if (strstr (VPSTR(localpath), "stock") == NULL)
 			{
-				*entries = g_slist_prepend (*entries, g_strdup(VPSTR(localpath)));
+				g_ptr_array_add (data->iconpaths,
+					g_string_chunk_insert_const (data->chunkedpaths, VPSTR(localpath)));
 			}
 			break;
 		default:
@@ -364,20 +366,20 @@ static gint _e2_sidlg_compare_icons (const E2_IconMatch **a, const E2_IconMatch 
 */
 static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 {
-	GSList *entries = NULL;
+	GPtrArray *iconpaths = g_ptr_array_sized_new (60); //about this many icons to find
+	E2_IPopulator walkdata = { iconpaths, rt->cache };
 	OPENBGL
-	e2_fs_tw (localpath, _e2_sidlg_icon_files_tw, &entries, -1, E2TW_FIXDIR|E2TW_XQT E2_ERR_NONE());
-	CLOSEBGL
+	e2_fs_tw (localpath, _e2_sidlg_icon_files_tw, &walkdata, -1, E2TW_FIXDIR|E2TW_XQT E2_ERR_NONE());
+       	CLOSEBGL
 
-	if (!E2DREAD_FAILED (entries))
+	if (iconpaths->len > 0)
 	{
 		//remove duplicates, favour fixed size as displayed, or scalable
 		gshort got, want;
 		gint w, h;
-		guint indx;
-		gchar *pointer;
+		guint indx, count;
+		gpointer *dp;
 		E2_IconMatch *data;
-		GSList *member;
 		GHashTable *icon_hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
 #if 0	//glib regex too buggy!! def USE_GLIB2_14
 		gchar *freeme;
@@ -405,16 +407,18 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 			want = w = h = 24;	//can't find useful size, use this default
 		}
 
-		for (member = entries; member != NULL; member = g_slist_next (member))
+		count = iconpaths->len;
+		for (indx = 0, dp = iconpaths->pdata; indx < count; indx++, dp++)
 		{
 			GdkPixbuf *pxb;
-			gchar *base, *fullpath = (gchar*) member->data;
+			gchar *fullpath, *base, *instring; //fullpath is GStringChunk'd, sorta const
 
+			fullpath = *((gchar **)dp);
 			base = g_path_get_basename (fullpath);
+			//ignore some ...
 			if (strncmp (base, "arrow", 5) == 0 || strcmp (base, "emelfm2") == 0)
 			{
 				g_free (base);
-				g_free (fullpath);
 				continue;
 			}
 
@@ -438,18 +442,18 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 				size = strtoul (freeme, NULL, 10);
 				g_free (freeme);
 #else
-				pointer = fullpath+matches[1].rm_eo;
-				gchar c = *pointer;
-				*pointer = 0;
+				instring = fullpath+matches[1].rm_eo;
+				gchar c = *instring;
+				*instring = 0;
 				size = strtoul (fullpath+matches[1].rm_so, NULL, 10);
-				*pointer = c;
+				*instring = c;
 #endif
-				got = (gint) size;
+				got = (gshort) size;
 			}
 
-			pointer = strrchr (base, '.');
-			if (pointer != NULL)
-				*pointer = 0;
+			instring = strrchr (base, '.');
+			if (instring != NULL)
+				*instring = 0;
 			data = (E2_IconMatch*) g_hash_table_lookup (icon_hash, base);
 			if (data == NULL)
 			{
@@ -459,7 +463,7 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 					data = ALLOCATE (E2_IconMatch);
 					data->size = got;
 					data->displayname = base;
-					data->iconpath = fullpath;
+					data->iconpath = (const gchar*)fullpath; //GStringChunk'd
 					data->pxb = pxb;
 					g_hash_table_insert (icon_hash, base, data);
 					continue;
@@ -473,15 +477,13 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 				{
 					data->size = got;
 					g_free (base);
-					g_free (data->iconpath);
-					data->iconpath = fullpath;
+					data->iconpath = (const gchar*)fullpath; //GStringChunk'd
 					g_object_unref (G_OBJECT(data->pxb));
 					data->pxb = pxb;
 					continue;
 				}
 			}
 			g_free (base);
-			g_free (fullpath);
 		}
 
 #if 0	//def USE_GLIB2_14
@@ -490,18 +492,15 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 #else
 		regfree (&matcher);
 #endif
-		g_slist_free (entries);
-
-		guint count = g_hash_table_size (icon_hash);
+		count = g_hash_table_size (icon_hash);
 		if (count > 0)
 		{
-			gpointer *dp;
 			GtkListStore *store = GTK_LIST_STORE (rt->custommodel);
-			GPtrArray *icon_table = g_ptr_array_sized_new (count);
-			g_hash_table_foreach (icon_hash, (GHFunc)_e2_sidlg_get_icons, icon_table);
-			g_ptr_array_sort (icon_table, (GCompareFunc)_e2_sidlg_compare_icons);
+			GPtrArray *iconsorter = g_ptr_array_sized_new (count);
+			g_hash_table_foreach (icon_hash, (GHFunc)_e2_sidlg_get_icons, iconsorter);
+			g_ptr_array_sort (iconsorter, (GCompareFunc)_e2_sidlg_compare_icons);
 
-			for (indx = 0, dp = icon_table->pdata; indx < count; indx++, dp++)
+			for (indx = 0, dp = iconsorter->pdata; indx < count; indx++, dp++)
 			{
 				GtkTreeIter iter;
 
@@ -513,15 +512,14 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 					-1);
 				g_object_unref (G_OBJECT (data->pxb));
 				g_free (data->displayname);
-				g_free (data->iconpath);
 				DEALLOCATE(E2_IconMatch, data);
 			}
 
-			g_ptr_array_free (icon_table, TRUE);
+			g_ptr_array_free (iconsorter, TRUE);
 		}
-
 		g_hash_table_destroy (icon_hash);
 	}
+	g_ptr_array_free (iconpaths, TRUE);
 }
 /**
 @brief create and fill liststore for custom icons
@@ -813,7 +811,7 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 	};
 	gint psize = 24;
 	gtk_icon_size_lookup (GTK_ICON_SIZE_LARGE_TOOLBAR, &psize, NULL);
-	GtkIconTheme *thm =	gtk_icon_theme_get_for_screen
+	GtkIconTheme *thm = gtk_icon_theme_get_for_screen
 		(gtk_widget_get_screen (app.main_window));
 
 	gint i, c = sizeof (stocks) / sizeof (stocks[0]);
@@ -1095,9 +1093,9 @@ Assumes BGL closed
 */
 GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, GdkEventButton *event)
 {
-	//get or create and inititialize select image dialog runtime object and
-	//ensure that only one runtime object (and only one dialog) exists
-	//for every parent widget
+	//get or create and initialize select-image-dialog runtime object and
+	//ensure that only one such object (and only one dialog) exists for the
+        //parent widget
 	E2_SID_Runtime *rt = g_object_get_data (G_OBJECT (parent), name);
 	//the user may have double-clicked on an icon, or ...
 	if (rt != NULL && rt->dialog != NULL &&
@@ -1111,6 +1109,16 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 		if (rt->icon != NULL)
 			g_free (rt->icon);
 		rt->icon = g_strdup (icon);
+/*		if (rt->cache != NULL)
+		{
+#ifdef USE_GLIB2_14
+			g_string_chunk_clear (rt->cache);
+#else
+			g_string_chunk_free (rt->cache);
+			rt->cache = g_string_chunk_new (4096); //for custom icons setup
+#endif
+		}
+*/
 		//make dialog show the icon
 		_e2_sidlg_show_current (TRUE, rt);
 		//present the window
@@ -1128,9 +1136,10 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 		rt->name = g_strdup (name);
 		//CHECKME can icon be absolute path ?
 		rt->icon = g_strdup (icon);
+		rt->cache = g_string_chunk_new (4096); //for custom icons setup
 		rt->parent = parent;
 	}
-
+/*
 #ifdef USE_GTK3_10
 	//icons population can take a while!
 	GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
@@ -1138,7 +1147,7 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 	g_object_unref (G_OBJECT (cursor));
 	gdk_flush ();
 #endif
-
+*/
 	//create dialog widgets
 	rt->dialog = e2_dialog_create (NULL, NULL, rt->name,
 		(ResponseFunc)_e2_sidlg_response_cb, rt);
@@ -1227,7 +1236,7 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 						"action-area-border", &action_area_border,
 						NULL);
 #ifdef USE_GTK3_12
-# warning gtk 3.12 deprecates dialog action-area use, but there is no practical alternative
+WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
 #endif
 #ifdef USE_GTK3_0
 	GtkWidget *bbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -1246,6 +1255,15 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 		GTK_DIALOG (rt->dialog)->action_area;
 #endif
 	g_object_ref (G_OBJECT (action_area));
+
+	GtkWidget *dbg = gtk_widget_get_parent(action_area);
+	printd (DEBUG, "action area parent %x is %s", dbg, IS_A(dbg));
+	dbg = gtk_widget_get_parent(dbg);
+	printd (DEBUG, "action area grand-parent %x is %s", dbg, IS_A(dbg));
+	printd (DEBUG, "dialog vbox %x is %s", dialog_vbox, IS_A(dialog_vbox));
+
+	gtk_container_remove (GTK_CONTAINER (dialog_vbox), action_area);
+
 	gtk_container_remove (GTK_CONTAINER (dialog_vbox), action_area);
 	gtk_box_pack_start (GTK_BOX (bbox), action_area, FALSE, FALSE, 0);
 	g_object_unref (G_OBJECT (action_area));
