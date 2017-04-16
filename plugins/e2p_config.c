@@ -1475,7 +1475,7 @@ Plugin *init_plugin (E2PInit mode)
 	PLUGINIT_ONEACTION_SIMPLE (_A(3),_("manage"),_e2p_config_dialog_create,
 		_("_Configure.."),
 		_("Export or import configuration data"),
-		"plugin_"ANAME E2ICONTB)
+		"plugin-"ANAME E2ICONTB)
 }
 /**
 @brief cleanup transient things for this plugin
