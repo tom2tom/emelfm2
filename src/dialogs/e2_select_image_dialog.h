@@ -26,6 +26,7 @@ typedef struct _E2_SID_Runtime
 {
 	gchar *name;
 	gchar *icon; //gtk-stock-icon name, or path to icon file, taken from tree-option store
+	GStringChunk *cache; //allocation for collecting all iconpaths
 	GtkWidget *dialog;
 	GtkWidget *parent;
 	GtkNotebook *notebook;
