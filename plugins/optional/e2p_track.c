@@ -220,7 +220,7 @@ static void _e2p_track_choose_rdf_cb (GtkButton *button, E2_TrackDlgData *rt)
 
 /*	//hide the dialog's standard 'open' button
 #ifdef USE_GTK3_12
-# warning gtk 3.12 deprecated action-area use, but there is no practical alternative
+WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
 #endif
 	GtkContainer *bbox = GTK_CONTAINER (
 #ifdef USE_GTK2_14

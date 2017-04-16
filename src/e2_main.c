@@ -679,7 +679,7 @@ gint main (gint argc, gchar *argv[])
 	e2_main_init_uilock (FALSE);
 # ifndef LOCAL_BGL
 #  ifdef USE_GTK3_6
-#   warning GTK 3.6 deprecates use of an application-specific display mutex. No reasonable workaround is available.
+WARNING(GTK 3.6 deprecates use of an application-specific display mutex. No reasonable workaround is available.)
 #  endif
 	//these are deprecated for gtk 3.6+
 	gdk_threads_set_lock_functions (e2_main_close_uilock, e2_main_open_uilock);

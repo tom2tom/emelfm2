@@ -731,7 +731,7 @@ E2_Action* e2_action_check (gchar *command)
 {
 	if (command == NULL)	//this should never happen, but ...
 		return NULL;
-//#warning ignore compiler warning about unitialized usage of c
+//WARNING(ignore compiler warning about unitialized usage of c)
 	gchar c;
 	gchar *gap = e2_utils_find_whitespace (command);
 	if (gap != NULL)
@@ -1237,7 +1237,7 @@ void e2_action_setup_labels (void)
 }
 #define LAST_NAME_INDEX 129
 #if LAST_NAME_INDEX > ALLOCATED_NAMES - 1
-# warning must increase size of action names array
+TODO(increase size of action names array)
 #endif
 #undef LAST_NAME_INDEX
 

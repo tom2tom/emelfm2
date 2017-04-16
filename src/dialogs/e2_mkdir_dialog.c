@@ -70,8 +70,8 @@ static gchar *_e2_mkdirdlg_find_dir (const gchar *dir, const gchar *parent_dir)
 		g_free (part2);
 		part2 = g_strdup ("");
 	}
-//#warning ignore compiler warning about unitialized usage of digit_end
-//#warning ignore compiler warning about unitialized usage of part4
+//WARNING(ignore compiler warning about unitialized usage of digit_end)
+//WARNING(ignore compiler warning about unitialized usage of part4)
 	//the base name of the dir
 	gchar *part3 = g_path_get_basename (dir);
 	//last part to hold the rest of part 3 after we find a number, if any

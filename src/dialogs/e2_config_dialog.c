@@ -2319,7 +2319,7 @@ void e2_config_dialog_create (gchar *page)
 
 	//prepare all the buttons for mnemonic-blocking during any keybinding config
 #ifdef USE_GTK3_12
-# warning gtk 3.12 deprecates dialog action-area use, but there is no practical alternative
+WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
 #endif
 	e2_option_tree_connect_mnemonics (
 #ifdef USE_GTK2_14

@@ -3262,7 +3262,7 @@ gchar *e2_fs_get_perm_string (mode_t mode)
 			i = 0;
 			break;
 #else
-# warning "SYMLINK type not supported"
+WARNING(SYMLINK type not supported)
 #endif
 		case S_IFDIR:
 			i = 1;
@@ -3278,14 +3278,14 @@ gchar *e2_fs_get_perm_string (mode_t mode)
 			i = 4;
 			break;
 #else
-# warning "FIFO type not supported"
+WARNING(FIFO type not supported)
 #endif
 #ifdef S_IFSOCK
 		case S_IFSOCK:
 			i = 5;
 			break;
 #else
-# warning "SOCKET type not supported"
+WARNING(SOCKET type not supported)
 #endif
 		default:
 			i = -1;

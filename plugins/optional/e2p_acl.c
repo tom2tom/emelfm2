@@ -883,7 +883,7 @@ static acl_entry_t _e2p_acl_find_entry (acl_t acl, acl_tag_t type, id_t id)
 	}
 #endif //defined () ....
 #ifdef E2ACL_POSIX_RESTRICTED
-# warning _e2p_acl_find_entry() is inoperative
+WARNING(_e2p_acl_find_entry() is inoperative)
 #endif
 	return NULL;
 }
@@ -942,7 +942,7 @@ static gboolean _e2p_acl_create_entry (acl_t *aclptr, acl_entry_t *entryptr,
 	}
 #endif //defined () ....
 #ifdef E2ACL_POSIX_RESTRICTED
-# warning _e2p_acl_create_entry() is inoperative
+WARNING(_e2p_acl_create_entry() is inoperative)
 	return FALSE;
 #endif
 }
@@ -1120,7 +1120,7 @@ failed3:
 # endif
 #endif //defined () ....
 #ifdef E2ACL_POSIX_RESTRICTED
-# warning _e2p_acl_get_for_mode() is inoperative
+WARNING(_e2p_acl_get_for_mode() is inoperative)
 	return NULL;
 #endif
 }
@@ -1401,7 +1401,7 @@ static gboolean _e2p_acl_apply_shown (gchar *localpath, const struct stat *statp
 						}
 #endif //defined () ....
 #ifdef E2ACL_POSIX_RESTRICTED
-# warning _e2p_acl_apply_shown() is disfunctional
+WARNING(_e2p_acl_apply_shown() is disfunctional)
 #endif
 					}
 					else	//no matching entry now
@@ -1543,7 +1543,7 @@ static gboolean _e2p_acl_apply_modified (gchar *localpath, const struct stat *st
 						}
 #endif //defined () ....
 #ifdef E2ACL_POSIX_RESTRICTED
-# warning _e2p_acl_apply_modified() is disfunctional
+WARNING(_e2p_acl_apply_modified() is disfunctional)
 #endif
 					}
 					else	//no existing entry
