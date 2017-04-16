@@ -294,6 +294,10 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #define E2_STATUS_BLOCK
 #endif
 
+#define DO_PRAGMA(x) _Pragma (#x)
+#define TODO(x) DO_PRAGMA(message ("TODO - " #x))
+#define WARNING(x) DO_PRAGMA(message (#x))
+
 //include error-message code regardless of debug state
 //#define DEBUG_MESSAGES_ALWAYS
 
