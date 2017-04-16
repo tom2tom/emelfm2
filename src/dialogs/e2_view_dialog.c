@@ -1769,14 +1769,16 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 	gtk_container_add (GTK_CONTAINER (hndlbox), hbox);
 	//add things to the action-area
 #ifdef USE_GTK3_12
-# warning gtk 3.12 deprecates dialog action-area use, but there is no practical alternative
-	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
-	gchar *labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
-		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
-	rt->info_label = gtk_label_new (labeltext);
+	rt->info_label = gtk_label_new (_("not found"));
+	gtk_widget_override_color (rt->info_label, 0, e2_option_color_get ("color-negative"));
+//TODO make this show at LHS by styling only
 	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
 		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
+WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
+	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
 	gtk_container_add (GTK_CONTAINER(hbbox), rt->info_label);
+	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (hbbox), rt->info_label, TRUE);
+	gchar *labeltext;
 #else
 	GtkWidget *hbbox =
 # ifdef USE_GTK2_14
