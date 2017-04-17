@@ -1770,9 +1770,7 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 	//setup for cursor management
 	GtkSettings *defs = gtk_widget_get_settings (rt->textview);
 	if (defs != NULL)
-	{
-	  g_object_get (defs, "gtk-cursor-blink-time", &blinkmsec, NULL);
-	}
+		g_object_get (defs, "gtk-cursor-blink-time", &blinkmsec, NULL);
 	else
 		blinkmsec = 1200;	//gtk default
 	blinkmsec *= OVERWR_CURSOR_MULTIPLIER;
