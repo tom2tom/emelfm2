@@ -4475,14 +4475,14 @@ void e2_fileview_set_arrow (ViewInfo *view, GtkArrowType arrow)
 }
 #endif
 /**
-@brief create filelist for the pane related to @a view
+@brief create the files display for the pane related to @a view
 
-This creates the backend list store, and scrolled window
-containing a treeview associated with the store
+This creates the backend list store, and a scrolled window containing a treeview
+associated with the store
 
 @param view runtime data for view being processed
 
-@return the 'parent' scrolled-window widget
+@return a scrolled-window widget, the parent of a files treeview 
 */
 GtkWidget *e2_fileview_create_list (ViewInfo *view)
 {
