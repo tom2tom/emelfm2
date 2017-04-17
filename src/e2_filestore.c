@@ -52,9 +52,9 @@ for filelist(s), as appropriate. Then for both panes:
       Set refresh-requested flag for the pane
 Then if either refresh-requested flag is now set (maybe from elsewhere, see below):
   If timer REFRESHBEGIN_T is active, abort it
-  Start timer REFRESHBEGIN_T with callback to _e2_filestore_refresh_manage()
+  Start timer REFRESHBEGIN_T with callback to _e2_filestore_update_manage()
 
-_e2_filestore_refresh_manage() polls both panes' refresh-requested flags, and, if
+_e2_filestore_update_manage() polls both panes' refresh-requested flags, and, if
 and when not blocked by some other process that affects the pane's content,
 initiates (and joins to) a thread to refresh the relevant filelist. This process
 iterates until all requests have been handled, so there can be > 1 refresh before
@@ -131,7 +131,7 @@ typedef struct _E2_RefreshInfo
 } E2_RefreshInfo;
 //#endif
 
-static gpointer _e2_filestore_refresh (ViewInfo *view);
+static gpointer _e2_filestore_update (ViewInfo *view);
 
 #ifdef E2_SELTXT_RECOLOR
 extern GDKCOLOR selectedtext;
@@ -366,12 +366,12 @@ void e2_filestore_timer_shutdown (gpointer data)
 
 #if 1
 /**
-@brief thread-function which performs filelist refresh if it can
+@brief thread-function which updates a filelist if possible
 If refreshing is blocked, there is no deferral
-@param view pointer to data struct for the filelist to be refreshed
+@param view pointer to data struct related to the filelist to be refreshed
 @return NULL always
 */
-static gpointer _e2_filestore_refresh_view (ViewInfo *view)
+static gpointer _e2_filestore_update_view (ViewInfo *view)
 {
 	e2_utils_block_thread_signals ();
 
@@ -398,7 +398,7 @@ retest:
 				printd (DEBUG, "accepted request to refresh %s", view->dir);
 #endif
 				//refresh function expects BGL open
-				if (_e2_filestore_refresh (view) == GINT_TO_POINTER(1))
+				if (_e2_filestore_update (view) == GINT_TO_POINTER(1))
 				{
 					hook = TRUE;	//send it downstream
 					//maybe again/now/still want to do this pane
@@ -422,7 +422,7 @@ retest:
 
 	return NULL;
 }
-#else //original approach to refreshing
+#else //original approach to updating
 /**
 @brief timer callback function which refreshes filelist(s) as appropriate, as soon as any block is gone
 
@@ -430,7 +430,7 @@ retest:
 
 @return FALSE when there's nothing left to refresh or more waiting is needed
 */
-static gboolean _e2_filestore_refresh_manage (gpointer unused_data)
+static gboolean _e2_filestore_update_manage (gpointer unused_data)
 {
 	ViewInfo *cv, *ov;
 	pthread_t thisID;
@@ -472,7 +472,7 @@ retestc:
 #endif
 			//refresh function expects BGL open
 			if (pthread_create (&thisID, NULL,
-				(gpointer(*)(gpointer))_e2_filestore_refresh, cv) == 0)
+				(gpointer(*)(gpointer))_e2_filestore_update, cv) == 0)
 			{
 				g_atomic_int_set (&cv->listcontrols.refresh_requested, 0); //not needed downstream
 				pthread_join (thisID, &result); //only 1 refresh at a time
@@ -510,7 +510,7 @@ retesto:
 			printd (DEBUG, "accepting request to refresh %s", ov->dir);
 #endif
 			if (pthread_create (&thisID, NULL,
-				(gpointer(*)(gpointer))_e2_filestore_refresh, ov) == 0)
+				(gpointer(*)(gpointer))_e2_filestore_update, ov) == 0)
 			{
 				g_atomic_int_set (&ov->listcontrols.refresh_requested, 0); //not needed downstream
 				pthread_join (thisID, &result); //only 1 refresh at a time
@@ -553,7 +553,7 @@ retesto:
 		printd (DEBUG, "start timer REFRESHBEGIN_T");
 #endif
 		app.timers[REFRESHBEGIN_T] = g_timeout_add_full (G_PRIORITY_HIGH, 200,
-			(GSourceFunc) _e2_filestore_refresh_manage,
+			(GSourceFunc) _e2_filestore_update_manage,
 			GUINT_TO_POINTER (REFRESHBEGIN_T),
 			(GDestroyNotify) e2_filestore_timer_shutdown);
 	}
@@ -663,7 +663,7 @@ static gboolean _e2_filestore_refresh_ok (E2_ListChoice pane)
 	return retval;
 }
 /**
-@brief initiate refresh of filepane(s) contents if requested (elsewhere)
+@brief initiate update of filepane(s) content if requested (elsewhere)
  or if changed content has been, or is now, detected
 
 Among other uses, this is the timer callback function for filelists auto refresh
@@ -792,7 +792,7 @@ gboolean e2_filestore_check_dirty (gpointer userdata)
 		if (g_atomic_int_get (&curr_view->listcontrols.refresh_requested))
 		{
 			if (pthread_create (&thisID, &attr,
-				(gpointer(*)(gpointer))_e2_filestore_refresh_view, curr_view) != 0)
+				(gpointer(*)(gpointer))_e2_filestore_update_view, curr_view) != 0)
 			{
 				//TODO handle error
 				printd (WARN,"refresh-dir-thread-create error!");
@@ -801,7 +801,7 @@ gboolean e2_filestore_check_dirty (gpointer userdata)
 		if (g_atomic_int_get (&other_view->listcontrols.refresh_requested))
 		{
 			if (pthread_create (&thisID, &attr,
-				(gpointer(*)(gpointer))_e2_filestore_refresh_view, other_view) != 0)
+				(gpointer(*)(gpointer))_e2_filestore_update_view, other_view) != 0)
 			{
 				//TODO handle error
 				printd (WARN,"refresh-dir-thread-create error!");
@@ -824,7 +824,7 @@ gboolean e2_filestore_check_dirty (gpointer userdata)
 		printd (DEBUG, "Start timer REFRESHBEGIN_T to initiate refresh");
 #endif
 		app.timers[REFRESHBEGIN_T] = g_timeout_add_full (G_PRIORITY_HIGH, 5,
-			(GSourceFunc) _e2_filestore_refresh_manage,
+			(GSourceFunc) _e2_filestore_update_manage,
 			GUINT_TO_POINTER (REFRESHBEGIN_T),
 			(GDestroyNotify) e2_filestore_timer_shutdown);
 #endif
@@ -1394,7 +1394,7 @@ void e2_filestore_cleaninfo (FileInfo *info, gpointer data)
 Some 'custom' flags (dirlinks etc) are set if appropriate.
 Upon failure, the supplied list is cleared and its ptr set to relevant error code
 @param parentpath absolute path of dir containing items in @a list, localised string
-@param list store for ptr to Glist of heaped item names
+@param list store for ptr to GList of heaped item names
 
 @return TRUE if the list was converted successfully
 */
@@ -1535,7 +1535,7 @@ errexit:
 	return FALSE;
 }
 /**
-@brief incrementally refresh list store for @a view
+@brief incrementally update the list store for @a view
 
 If the directory associated with @a view is no longer accessible, a suitable
 alternative is found and displayed.
@@ -1544,12 +1544,12 @@ Expects BGL to be open, on arrival here.
 
 @param view data structure for view being processed
 
-@return NULL (FALSE) if the refresh fails for some unspecified reason,
+@return NULL (FALSE) if the update fails for some unspecified reason,
   or pointerised 1 if it succeeds,
   or pointerised 2 after cd to elsewhere,
   or pointerised 3 after stat(view->dir) or some other failure
 */
-static gpointer _e2_filestore_refresh (ViewInfo *view)
+static gpointer _e2_filestore_update (ViewInfo *view)
 {
 	//no check for cd-working
 	gboolean busy =
@@ -1710,7 +1710,7 @@ static gpointer _e2_filestore_refresh (ViewInfo *view)
 				OPENBGL
 				e2_fs_FAM_more_monitor_dir (view->dir);
 				e2_filestore_enable_one_refresh (pnum);
-				return GINT_TO_POINTER (3);	//no more refresh needed
+				return GINT_TO_POINTER (3);	//no more update needed
 			}
 			view->dir_mtime = sb.st_mtime;
 			view->dir_ctime = sb.st_ctime;
@@ -1992,7 +1992,7 @@ loopstart:
 		}
 		else //modes = NULL
 		{
-			printd (WARN, "Memory allocation problem, can't refresh %s", view->dir);
+			printd (WARN, "Memory allocation problem, can't update %s", view->dir);
 			e2_list_free_with_data (&entries);
 			retval = 3; //error code CHECKME 4?
 		}
@@ -2035,17 +2035,17 @@ loopstart:
 
 #ifdef DEBUG_MESSAGES
 	if (app.reconvert_requested)
-		printd (DEBUG, "repoint encoding conversion funcs if necessary, after frefresh");
+		printd (DEBUG, "repoint encoding conversion funcs if necessary, after files store update");
 	else
-		printd (DEBUG, "NO need for encoding conversion change after refresh");
+		printd (DEBUG, "NO need for encoding conversion change after files store update");
 #endif
 
 #ifdef E2_REFRESH_DEBUG
-	printd (DEBUG, "enable refresh, fileview_refresh list");
+	printd (DEBUG, "enable refresh, _e2_filestore_update");
 #endif
 	e2_filestore_enable_one_refresh (pnum);
-//	printd (DEBUG, "finish refresh filelist for %s", view->dir);
-	return GINT_TO_POINTER (retval);	//non-NULL exit if no more refresh
+//	printd (DEBUG, "finish update filelist for %s", view->dir);
+	return GINT_TO_POINTER (retval);	//non-NULL exit if no more update
 }
 /**
 @brief create list store structure
