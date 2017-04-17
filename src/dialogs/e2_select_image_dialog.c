@@ -1224,6 +1224,19 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 	//set to 0 in page-switch cb triggered in gtk_widget_show_all()
 	gint page = _e2_sidlg_show_current (TRUE, rt);
 
+#ifdef USE_GTK3_12
+WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
+#endif
+	GtkWidget *action_area =
+#ifdef USE_GTK2_14
+		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
+#else
+		GTK_DIALOG (rt->dialog)->action_area;
+#endif
+#ifdef USE_GTK3_0
+	gtk_container_add (GTK_CONTAINER (action_area), rt->dir_chooser);
+	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (action_area), rt->dir_chooser, TRUE);
+#else
 	//we don't put the chooser-button in dialog action-area, that's always homogenous
 	//but we do make it look quite like it's in there
 //	gint content_area_border;
@@ -1235,35 +1248,12 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 //						"button-spacing", &button_spacing,
 						"action-area-border", &action_area_border,
 						NULL);
-#ifdef USE_GTK3_12
-WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
-#endif
-#ifdef USE_GTK3_0
-	GtkWidget *bbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-	GtkWidget *bbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-#else
 	GtkWidget *bbox = gtk_hbox_new (FALSE, 0);
 	GtkWidget *bbox2 = gtk_vbox_new (FALSE, 0);
-#endif
 	gtk_box_pack_start (GTK_BOX (bbox), bbox2, FALSE, TRUE, action_area_border);
 	gtk_box_pack_start (GTK_BOX (bbox2), rt->dir_chooser, TRUE, TRUE, action_area_border);
 
-	GtkWidget *action_area =
-#ifdef USE_GTK2_14
-		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
-#else
-		GTK_DIALOG (rt->dialog)->action_area;
-#endif
 	g_object_ref (G_OBJECT (action_area));
-
-	GtkWidget *dbg = gtk_widget_get_parent(action_area);
-	printd (DEBUG, "action area parent %x is %s", dbg, IS_A(dbg));
-	dbg = gtk_widget_get_parent(dbg);
-	printd (DEBUG, "action area grand-parent %x is %s", dbg, IS_A(dbg));
-	printd (DEBUG, "dialog vbox %x is %s", dialog_vbox, IS_A(dialog_vbox));
-
-	gtk_container_remove (GTK_CONTAINER (dialog_vbox), action_area);
-
 	gtk_container_remove (GTK_CONTAINER (dialog_vbox), action_area);
 	gtk_box_pack_start (GTK_BOX (bbox), action_area, FALSE, FALSE, 0);
 	g_object_unref (G_OBJECT (action_area));
@@ -1271,6 +1261,7 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 	gtk_box_pack_end (GTK_BOX (dialog_vbox), bbox, FALSE, FALSE, 0);
 	//move the replacement buttons-box below the separator
 	gtk_box_reorder_child (GTK_BOX (dialog_vbox), bbox, 0);
+#endif
 
 	rt->rem_btn = e2_dialog_add_defined_button (rt->dialog, &E2_BUTTON_REMOVE);
 	e2_widget_set_safetip (rt->rem_btn, _("Remove the current icon"));
@@ -1286,14 +1277,14 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 
 	if (page != 0)
 		gtk_notebook_set_current_page (rt->notebook, page);
-
-#if 0 //def USE_GTK3_10
+/*
+#ifdef USE_GTK3_10
 	//icons population can take a while!
 	cursor = gdk_cursor_new (GDK_LEFT_PTR);
 	gdk_window_set_cursor (gtk_widget_get_window (parent), cursor);
 	g_object_unref (G_OBJECT (cursor));
 	gdk_flush ();
 #endif
-
+*/
 	return rt->dialog;
 }
