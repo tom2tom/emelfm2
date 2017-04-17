@@ -416,7 +416,7 @@ static void	_e2_sidlg_fill_custom_store (VPATH *localpath, E2_SID_Runtime *rt)
 			fullpath = *((gchar **)dp);
 			base = g_path_get_basename (fullpath);
 			//ignore some ...
-			if (strncmp (base, "arrow", 5) == 0 || strcmp (base, "emelfm2") == 0)
+			if (strncmp (base, "arrow", 5) == 0 || strcmp (base, BINNAME) == 0)
 			{
 				g_free (base);
 				continue;
@@ -1237,25 +1237,20 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 	gtk_container_add (GTK_CONTAINER (action_area), rt->dir_chooser);
 	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (action_area), rt->dir_chooser, TRUE);
 #else
-	//we don't put the chooser-button in dialog action-area, that's always homogenous
+	//we don't put the chooser-button in dialog action-area (buttons there are all homogenous)
 	//but we do make it look quite like it's in there
-//	gint content_area_border;
-//	gint button_spacing;
 	gint action_area_border;
+	gtk_widget_style_get (rt->dialog, "action-area-border", &action_area_border, NULL);
 
-	gtk_widget_style_get (rt->dialog,
-//						"content-area-border", &content_area_border,
-//						"button-spacing", &button_spacing,
-						"action-area-border", &action_area_border,
-						NULL);
-	GtkWidget *bbox = gtk_hbox_new (FALSE, 0);
 	GtkWidget *bbox2 = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (bbox), bbox2, FALSE, TRUE, action_area_border);
 	gtk_box_pack_start (GTK_BOX (bbox2), rt->dir_chooser, TRUE, TRUE, action_area_border);
+
+	GtkWidget *bbox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (bbox), bbox2, FALSE, FALSE, action_area_border);
 
 	g_object_ref (G_OBJECT (action_area));
 	gtk_container_remove (GTK_CONTAINER (dialog_vbox), action_area);
-	gtk_box_pack_start (GTK_BOX (bbox), action_area, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (bbox), action_area, TRUE, FALSE, 0);
 	g_object_unref (G_OBJECT (action_area));
 
 	gtk_box_pack_end (GTK_BOX (dialog_vbox), bbox, FALSE, FALSE, 0);
