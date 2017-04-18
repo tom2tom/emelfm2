@@ -74,7 +74,7 @@ static void _e2_icons_create_arrows (void)
 	{
 		//TODO any size, dark/light colors
 		//const gchar *shade = "dark";
-		gchar *fullpath = g_strconcat (topdir, "16x16", G_DIR_SEPARATOR_S, "arrow-", dirs[i], ".png", NULL);
+		gchar *fullpath = g_strconcat (topdir, "16x16" G_DIR_SEPARATOR_S "arrow-", dirs[i], ".png", NULL);
 		cached_arrows[i] = gdk_pixbuf_new_from_file (fullpath, NULL);
 		g_free (fullpath);
 	}
@@ -94,6 +94,26 @@ static void _e2_icons_destroy_arrows (void)
 	}
 }
 #endif
+
+/**
+*/
+GList *e2_icons_get_application()
+{
+	GList *pixbufs = NULL;
+	GArray *allidata = g_hash_table_lookup (cached_icons, BINNAME);
+	if (allidata != NULL)
+	{
+		E2_Image *dp;
+		guint indx, count = allidata->len;
+		for (indx=0, dp=(E2_Image*)allidata->data; indx<count; indx++, dp++)
+		{
+			GdkPixbuf *pxb = gdk_pixbuf_new_from_file (dp->fullpath, NULL);
+			if (pxb != NULL)
+				pixbufs = g_list_append (pixbufs, pxb);
+		}
+	}
+	return pixbufs;
+}
 
 #ifdef E2_ICONCACHE
 
@@ -677,7 +697,7 @@ void e2_icons_register_stocks (void)
 		GList *member;
 		for (member = stockfiles; member != NULL; member = member->next)
 		{
-			gchar *iconname = (gchar *) member->data; //iconname is like dialog-error_48.png
+			gchar *iconname = (gchar *) member->data; //iconname is like dialog-error.png
 			gchar *s1 = strchr (iconname, '_');
 			if (s1 != NULL)
 			{
@@ -726,7 +746,7 @@ void e2_icons_register_stocks (void)
 	if (iset == NULL)
 	{
 		GtkIconSource *isrc = gtk_icon_source_new ();
-		gtk_icon_source_set_filename (isrc, ICON_DIR G_DIR_SEPARATOR_S "stock" G_DIR_SEPARATOR_S STOCK_NAME_DISCARD "_20.png"); //or ".svg");
+		gtk_icon_source_set_filename (isrc, ICON_DIR G_DIR_SEPARATOR_S "stock" G_DIR_SEPARATOR_S "20x20" G_DIR_SEPARATOR_S STOCK_NAME_DISCARD ".png"); //or ".svg");
 		gtk_icon_source_set_direction_wildcarded (isrc, TRUE);
 		gtk_icon_source_set_size_wildcarded (isrc, TRUE);
 
