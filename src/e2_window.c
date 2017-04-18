@@ -339,63 +339,22 @@ void e2_window_adjust_pane_ratio (const gchar *arg)
 /**
 @brief set default window icon list
 
-Set default window icon list from files in configured icon_dir.
-That dir is assumed native
-Each with name starts with "emelfm2_", and has trailing 'xx.png' where xx are digits
-
-@param base filename base of the icon files
+Set default window icon list from custom icon files
 
 @return
 */
 static void _e2_window_set_icon (void)
 {
-	gchar *icons_dir = e2_icons_get_custom_path (FALSE);
-	DIR *d = e2_fs_dir_open (icons_dir);
-	if (d == NULL)
-	{
-		printd (WARN, "could not open window icon directory '%s' (%s)",
-			icons_dir, g_strerror (errno));
-		g_free (icons_dir);
-		gtk_window_set_default_icon_name (BINNAME);
-		return;
-	}
-	GList *list = NULL;
-	const gchar *name;	//name is like "emelfm2_24.png"
-	gchar *base = BINNAME"_";	//this is the 'prefix' for window icon filenames
-	guint len = strlen (base) + 6;	//assuming ascii, +6 allows for xx.png, filters out the 'alternates'
-	struct dirent entry;
-	struct dirent *entryptr;
-	while (TRUE)
-	{
-		if (e2_fs_dir_read (d, &entry, &entryptr) || entryptr == NULL)
-				break;
-		name = entry.d_name;
-		if (g_str_has_prefix (name, base) && g_str_has_suffix (name, ".png") &&
-			strlen (name) == len)
-		{
-			gchar *file = g_build_filename (icons_dir, name, NULL);
-			GError *error = NULL;
-			GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (file, &error);
-			if (error != NULL)
-			{
-				printd (WARN, "could not open image file '%s' (%s)", file, error->message);
-				g_free (file);
-				g_error_free (error);
-				continue;
-			}
-			g_free (file);
-			list = g_list_append (list, pixbuf);
-		}
-	}
+	GList *list = e2_icons_get_application ();
 	if (list != NULL)
 	{
 		gtk_window_set_default_icon_list (list);
-		//gtk copies list and ref's its items, so cleanup here
+		//gtk copies list and ref's its members, so cleanup here
 		g_list_foreach (list, (GFunc) g_object_unref, NULL);
 		g_list_free (list);
 	}
-	g_free (icons_dir);
-	e2_fs_dir_close (d);
+	else
+		gtk_window_set_default_icon_name (BINNAME);
 }
 
   /*********************/

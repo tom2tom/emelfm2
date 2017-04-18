@@ -279,10 +279,10 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 
 //default build with horizontal panes - see Makefile
 //#define E2_PANES_HORIZONTAL
-//default pointsize and file-extension for custom toolbar-icon files
-#define E2ICONTB ".png"
-//default pointsize and file-extension for custom dialog-button-icon files
-#define E2ICOND ".png"
+//default pointsize and file-extension for custom toolbar-icon files //"_24.png"
+#define E2ICONTB
+//default pointsize and file-extension for custom dialog-button-icon files //"_16.png"
+#define E2ICOND
 
 //tag for development of on-demand status-bar updates
 //NOTE need to check all BGL effects

@@ -135,17 +135,14 @@ static GtkWidget *_e2_about_dialog_create (void)
 	E2_Sextet *dialog_data = e2_utils_sextet_new ();
 	if (dialog_data == NULL)
 		return NULL;
-	gchar *localiconsdir = e2_icons_get_custom_path (FALSE);
-	gchar *localpath = g_build_filename (localiconsdir, BINNAME"_48.png", NULL);
-	GtkWidget *dialog = e2_dialog_create (localpath,
+//TODO gtk3 label styling vis CSS
+	GtkWidget *dialog = e2_dialog_create (BINNAME,
 		"<span size=\"x-large\" weight=\"bold\">" PROGNAME " " VERSION RELEASE "</span>",
 		_("help"), (ResponseFunc)_e2_about_dialog_response_cb, dialog_data);
 	e2_dialog_set_negative_response (dialog, GTK_RESPONSE_CLOSE);
 #ifndef USE_GTK3_0
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);	//looks better, with notebook
 #endif
-	g_free (localiconsdir);
-	g_free (localpath);
 
 	GtkWidget *notebook = e2_widget_add_notebook (
 #ifdef USE_GTK2_14
