@@ -380,31 +380,21 @@ GtkWidget *e2_widget_add_label (GtkWidget *box, const gchar *text,
 	gtk_label_set_markup (GTK_LABEL (label), text);
 //	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
 #ifdef USE_GTK3_0
-	gint h, v;
-	switch ((int)xalign)
-	{
-		case 0:
-			h = GTK_ALIGN_START;
-			break;
-		case 1:
-			h = GTK_ALIGN_END;
-			break;
-		default:
-			h = GTK_ALIGN_CENTER;
-			break;
-	}
-	switch ((int)yalign)
-	{
-		case 0:
-			v = GTK_ALIGN_START;
-			break;
-		case 1:
-			v = GTK_ALIGN_END;
-			break;
-		default:
-			v = GTK_ALIGN_CENTER;
-			break;
-	}
+	gint x, h, v;
+	x = (int)(xalign * 10);
+	if (x < 1)
+		h = GTK_ALIGN_START;
+	else if (x > 9)
+		h = GTK_ALIGN_END;
+	else
+		h = GTK_ALIGN_CENTER;
+	x = (int)(yalign * 10);
+	if (x < 1)
+		v = GTK_ALIGN_START;
+	else if (x > 9)
+		v = GTK_ALIGN_END;
+	else
+		v = GTK_ALIGN_CENTER;
 	g_object_set(G_OBJECT (label), "halign", h, "valign", v, NULL);
 #else
 	gtk_misc_set_alignment (GTK_MISC (label), xalign, yalign);
