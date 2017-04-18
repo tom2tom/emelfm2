@@ -375,22 +375,16 @@ static void _e2_bookmark_delete_cb (GtkMenuItem *widget, GtkTreePath *path)
 			|| ((children > 0) && (e2_option_bool_get ("bookmarks-confirm-multi-delete")))
 		)
 		{
+			GtkWidget *dialog;
 			gchar *name;
 			gtk_tree_model_get (bookmarks_set->ex.tree.model, &iter, 0, &name, -1);
+			gpointer data = gtk_tree_row_reference_new (bookmarks_set->ex.tree.model, path);
 
-			gchar *question;
 			gchar *prompt = _("Are you sure that you want to delete the bookmark");
-			//we fudge here on translating the trailing '?'
 			if (children > 0)
-				question = g_strdup_printf ("%s '<b>%s</b>' %s <b>%d %s</b> ?",
-					prompt, name, _("and"), children, (children == 1) ? _("child") : _("children"));
+				dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, (ResponseFunc)_e2_bookmark_confirm_response_cb, data, "%s '<b>%s</b>' %s <b>%d %s</b> ?", prompt, name, _("and"), children, (children == 1) ? _("child") : _("children"));
 			else
-				question = g_strdup_printf ("%s '<b>%s</b>' ?", prompt, name);
-
-			GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION, question,
-				_("confirm bookmark delete"),
-				(ResponseFunc)_e2_bookmark_confirm_response_cb,
-				gtk_tree_row_reference_new (bookmarks_set->ex.tree.model, path));
+				dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, (ResponseFunc)_e2_bookmark_confirm_response_cb, data, "%s '<b>%s</b>' ?", prompt, name);
 			e2_dialog_set_negative_response (dialog, GTK_RESPONSE_NO);
 
 			E2_Button no_btn;
@@ -400,7 +394,6 @@ static void _e2_bookmark_delete_cb (GtkMenuItem *widget, GtkTreePath *path)
 			e2_button_derive (&yes_btn, &E2_BUTTON_YES, BTN_YES_DELETE);
 
 			e2_dialog_show (dialog, app.main_window, 0, &no_btn, &yes_btn, NULL);
-			g_free (question);
 			g_free (name);
 		}
 		else	//no confirmation

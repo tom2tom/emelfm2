@@ -500,8 +500,7 @@ static gboolean _e2p_glob (gpointer from, E2_ActionRuntime *art)
 	//we check for selected item here, so prevent disruption
 	e2_filestore_disable_one_refresh ((rt==curr_pane)?PANEACTIVE:PANEINACTIVE);
 
-	dialog = e2_dialog_create (NULL, _("Select items:"), _("selection filter"),
-		(ResponseFunc)_e2p_glob_response_cb, &data);
+	dialog = e2_dialog_create (_("selection filter"), NULL, (ResponseFunc)_e2p_glob_response_cb, &data, _("Select items:"));
 	dialog_vbox =
 #ifdef USE_GTK2_14
 		gtk_dialog_get_content_area (GTK_DIALOG (dialog));

@@ -3761,8 +3761,7 @@ static DialogButtons _e2p_acl_dialog_run (VPATH *localpath, GPtrArray **axs_ret,
 	rt.thisis_dir = e2_fs_is_dir3 (localpath E2_ERR_NONE());	//CHECKME abort on error ?
 
 	CLOSEBGL
-	rt.dialog = e2_dialog_create (NULL, NULL, _("extended permissions"),
-		(ResponseFunc)_e2p_acl_dialog_response_cb, &rt);
+	rt.dialog = e2_dialog_create (_("extended permissions"), NULL, (ResponseFunc)_e2p_acl_dialog_response_cb, &rt, NULL);
 	OPENBGL
 	dialog_vbox =
 #ifdef USE_GTK2_14

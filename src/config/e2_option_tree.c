@@ -1493,8 +1493,8 @@ static void e2_option_tree_del_direct_cb (GtkButton *button, E2_OptionSet *set)
 	{
 		gint children;
 		DialogButtons choice;
+		GtkWidget *dialog = NULL;
 		gboolean do_plugin = (e2_option_get_simple ("plugins") == set);
-		gchar *question;
 
 		if (do_plugin)
 		{
@@ -1507,40 +1507,31 @@ static void e2_option_tree_del_direct_cb (GtkButton *button, E2_OptionSet *set)
 			else
 			{
 				--children;
-				question = g_strdup_printf (
-					_("Are you sure that you want to delete this row and <b>%d</b> other related %s ?"),
-					children, children == 1 ? _("action") : _("actions"));
-				goto setdialog;
+				dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL, _("Are you sure that you want to delete this row and <b>%d</b> other related %s ?"), children, children == 1 ? _("action") : _("actions"));
 			}
 		}
 		else
 		{
 			children = gtk_tree_model_iter_n_children (set->ex.tree.model, &iter);
 			if (children > 0)
-			{
-				GtkWidget *dialog;
-				question = g_strdup_printf (
-					_("Are you sure that you want to delete this row and <b>%d</b> %s?"),
-					children, children == 1 ? _("child") : _("children"));
-setdialog:
-				dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION, question,
-					_("confirm row delete"), DUMMY_RESPONSE_CB, NULL);
-				g_free (question);
-
-				e2_dialog_set_negative_response (dialog, GTK_RESPONSE_NO);
-
-				E2_Button no_btn;
-				e2_button_derive (&no_btn, &E2_BUTTON_NO, BTN_NO_KEEP);
-
-				E2_Button yes_btn;
-				e2_button_derive (&yes_btn, &E2_BUTTON_YES, BTN_YES_DELETE);
-				yes_btn.name = STOCK_NAME_DELETE;
-
-				choice = e2_dialog_show (dialog, config_dialog,	//de-sensitize main dialog
-					E2_DIALOG_MODAL | E2_DIALOG_FREE, &no_btn, &yes_btn, NULL);
-			}
+				dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL, _("Are you sure that you want to delete this row and <b>%d</b> %s?"), children, children == 1 ? _("child") : _("children"));
 			else
 				choice = OK;
+		}
+
+		if (dialog != NULL)
+		{
+			e2_dialog_set_negative_response (dialog, GTK_RESPONSE_NO);
+
+			E2_Button no_btn;
+			e2_button_derive (&no_btn, &E2_BUTTON_NO, BTN_NO_KEEP);
+
+			E2_Button yes_btn;
+			e2_button_derive (&yes_btn, &E2_BUTTON_YES, BTN_YES_DELETE);
+			yes_btn.name = STOCK_NAME_DELETE;
+
+			choice = e2_dialog_show (dialog, config_dialog,	//de-sensitize main dialog
+				E2_DIALOG_MODAL | E2_DIALOG_FREE, &no_btn, &yes_btn, NULL);
 		}
 
 		if (choice == OK)

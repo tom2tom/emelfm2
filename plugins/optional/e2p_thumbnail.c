@@ -1665,8 +1665,7 @@ static gpointer _e2p_thumbs_dialog_run (ViewInfo *view)
 
 	gchar *title = (view == &app.pane1.view) ? _("pane 1 images") : _("pane 2 images") ;
 	CLOSEBGL
-	rt->dialog = e2_dialog_create (NULL, NULL, title,
-		(ResponseFunc)_e2p_thumbs_response_cb, rt);
+	rt->dialog = e2_dialog_create (title, NULL, (ResponseFunc)_e2p_thumbs_response_cb, rt, NULL);
 	OPENBGL
 
 	e2_dialog_set_negative_response (rt->dialog, GTK_RESPONSE_CLOSE); //override default

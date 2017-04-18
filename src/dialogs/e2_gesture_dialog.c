@@ -522,8 +522,7 @@ GtkWidget *e2_gesture_dialog_create (GtkWidget *parent,
 	E2_GestureDialogRuntime *rt = ALLOCATE0 (E2_GestureDialogRuntime);
 	CHECKALLOCATEDWARN (rt, return NULL;)
 
-	rt->dialog = e2_dialog_create (NULL, NULL, _("gesture"),
-		(ResponseFunc)_e2_gesture_dialog_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("gesture"), NULL, (ResponseFunc)_e2_gesture_dialog_response_cb, rt, NULL);
 
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14

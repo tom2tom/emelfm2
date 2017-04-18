@@ -231,8 +231,7 @@ static gboolean _e2p_packQ (E2_ActionTaskData *qed)
 	CHECKALLOCATEDWARNT (rt, return FALSE;)
 
 	CLOSEBGL
-	rt->dialog = e2_dialog_create (NULL, _("Filename:"), _("archive creation"),
-		(ResponseFunc)_e2p_pack_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("archive creation"), NULL, (ResponseFunc)_e2p_pack_response_cb, rt, _("Filename:"));
 
 	GtkWidget *hbox = g_object_get_data (G_OBJECT (rt->dialog), "e2-dialog-hbox");
 

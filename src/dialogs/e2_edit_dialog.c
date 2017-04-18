@@ -778,8 +778,7 @@ static void _e2_edit_dialog_replace_cb (GtkWidget *menuitem,
 			DialogButtons choice;
 			if (confirm_before)
 			{
-				dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION,
-					_("Replace this one ?"), _("confirm"), DUMMY_RESPONSE_CB, NULL);
+				dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL, _("Replace this one ?"));
 				e2_dialog_add_defined_button (dialog, &E2_BUTTON_CANCEL);
 
 				E2_Button local_btn;
@@ -1001,8 +1000,7 @@ static void _e2_edit_dialog_destroy (E2_ViewDialogRuntime *rt, gboolean forced)
 	if (rt->is_dirty)
 	{
 		NEEDCLOSEBGL
-		GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION,
-			_("Save modified file ?"), _("confirm"), DUMMY_RESPONSE_CB, NULL);
+		GtkWidget *dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL, _("Save modified file ?"));
 
 		//arrange for a specific retval if the user presses <Esc>
 //default setting is sufficient e2_dialog_set_negative_response (dialog, GTK_RESPONSE_USER1);
@@ -1548,8 +1546,7 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 	findnext_keycode = GDK_g;
 
 	gchar *utf = F_FILENAME_FROM_LOCALE (rt->localpath);
-	rt->dialog = e2_dialog_create (NULL, utf, _("editing file"),
-		(ResponseFunc)_e2_edit_dialog_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("editing file"), NULL, (ResponseFunc)_e2_edit_dialog_response_cb, rt, utf);
 	F_FREE (utf, rt->localpath);
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14

@@ -185,8 +185,7 @@ E2_SpecificConfDialogRuntime *e2_config_dialog_single (gchar *set_name,
 	rt->apply_function = (apply_function != NULL) ? apply_function : _e2_cd1_no_application;
   //set config_dialog too, so that list-cell-renderer can access the dialog
 	config_dialog =
-	rt->dialog = e2_dialog_create (NULL, NULL, _("configuration"),
-		(ResponseFunc)_e2_cd1_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("configuration"), NULL, (ResponseFunc)_e2_cd1_response_cb, rt, NULL);
 	gtk_widget_set_size_request (rt->dialog, 150, 50);
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14
@@ -1962,8 +1961,7 @@ void e2_config_dialog_create (gchar *page)
 	rt->openpage = 0;
 	rt->openpath = NULL;
 
-	config_dialog = e2_dialog_create (NULL, NULL, _("configuration"),
-		(ResponseFunc)_e2_confdlg_response_cb, rt);
+	config_dialog = e2_dialog_create (_("configuration"), NULL, (ResponseFunc)_e2_confdlg_response_cb, rt, NULL);
 
 	e2_option_connect (config_dialog, FALSE);
 

@@ -627,8 +627,7 @@ _e2p_mvbarQ (E2_ActionTaskData *qed)
 	windowdata.dialog = NULL;	//setup for abort
 	pthread_cleanup_push ((gpointer)_e2p_mvbar_abort_clean_dialog, &windowdata.dialog);
 	CLOSEBGL
-	windowdata.dialog = e2_dialog_create (NULL, NULL, _("moving"),
-		(ResponseFunc)_e2p_mvbar_response_cb, &windowdata);
+	windowdata.dialog = e2_dialog_create (_("moving"), NULL, (ResponseFunc)_e2p_mvbar_response_cb, &windowdata, NULL);
 	e2_dialog_setup (windowdata.dialog, app.main_window);
 	OPENBGL
 

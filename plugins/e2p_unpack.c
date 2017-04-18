@@ -761,9 +761,7 @@ static gboolean _e2p_unpack_change_dir_hook (gchar *path, E2P_Unpackdata *data)
 
 	//ask user what to do with the unpacked items
 	CLOSEBGL
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION,
-		_("What do you want to do with the unpacked items ?"), NULL,
-		(ResponseFunc)_e2p_unpack_response_decode_cb, data);
+	GtkWidget *dialog = e2_dialog_create (NULL, STOCK_NAME_DIALOG_QUESTION, (ResponseFunc)_e2p_unpack_response_decode_cb, data, _("What do you want to do with the unpacked items ?"));
 	OPENBGL
 
 	//re-pack button for types that allow it

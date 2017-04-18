@@ -783,7 +783,7 @@ static DialogButtons _e2p_times_dialog_run (gchar *local_dir,
 	rt.recurse = recurse_ret;
 
 	CLOSEBGL
-	times_dialog = e2_dialog_create (NULL, NULL, _("times"), DUMMY_RESPONSE_CB, NULL);
+	times_dialog = e2_dialog_create (_("times"), NULL, DUMMY_RESPONSE_CB, NULL, NULL);
 	OPENBGL
 	dialog_vbox =
 #ifdef USE_GTK2_14

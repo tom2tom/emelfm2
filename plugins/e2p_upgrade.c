@@ -104,6 +104,7 @@ static gboolean _e2p_upgrade_backup (const gchar *localcfg)
 }
 
 //expects BGL closed, or running in main thread, returns gtk enum GTK_RESPONSE_YES etc
+//msg is processed as-is (no formatting)
 static gint _e2p_upgrade_dialog (const gchar *msg)
 {
 	//main button structs not created yet
@@ -126,14 +127,14 @@ static gint _e2p_upgrade_dialog (const gchar *msg)
 #endif
 		NULL, E2_BTN_DEFAULT, E2_BTN_DEFAULT, GTK_RESPONSE_NO };
 
-	GtkWidget *dialog = e2_dialog_create (
+	GtkWidget *dialog = e2_dialog_create (_("update information"),
 #ifdef E2_ICONCACHE
 	//FIXME gtk images not yet available
 		NULL,
 #else
 		STOCK_NAME_DIALOG_INFO,
 #endif
-		msg, _("update information"), DEFAULT_RESPONSE_CB, NULL);
+		DEFAULT_RESPONSE_CB, NULL, msg);
 	e2_dialog_show (dialog, NULL, 0, &yes_btn, &no_btn, NULL);
 	//can't run the dialog in a local loop, as main-window (for fake event) & options not yet available
 	gint choice = gtk_dialog_run (GTK_DIALOG (dialog));

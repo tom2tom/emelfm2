@@ -344,9 +344,7 @@ void e2_date_filter_dialog_create_cb (GtkCheckMenuItem *item, ViewInfo *view)
 
 	NEEDCLOSEBGL
 
-	rt->dialog = e2_dialog_create (NULL, _("Display only the items:"),
-		_("date filter"),
-		(ResponseFunc)_e2_date_filter_dialog_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("date filter"), NULL, (ResponseFunc)_e2_date_filter_dialog_response_cb, rt, _("Display only the items:"));
 	hbox = e2_widget_add_box (
 #ifdef USE_GTK2_14
 		gtk_dialog_get_content_area (GTK_DIALOG (rt->dialog)),

@@ -339,8 +339,7 @@ gboolean e2_password_dialog_confirm (E2_PWDataRuntime *rt)
 		{
 			gtk_widget_grab_focus (rt->pwentry2);
 
-			GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_ERROR,
-			_("Entered passwords are different"), NULL, DUMMY_RESPONSE_CB, NULL);
+			GtkWidget *dialog = e2_dialog_create (NULL, STOCK_NAME_DIALOG_ERROR, DUMMY_RESPONSE_CB, NULL, _("Entered passwords are different"));
 			GtkWidget *parent = gtk_widget_get_toplevel (rt->pwentry1);
 			if (parent == NULL)
 				parent = app.main_window;

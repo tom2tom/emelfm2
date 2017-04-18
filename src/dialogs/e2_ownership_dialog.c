@@ -327,8 +327,7 @@ DialogButtons e2_ownership_dialog_run (VPATH *localpath,
 	gboolean thisis_dir = e2_fs_is_dir3 (localpath E2_ERR_NONE());
 
 	CLOSEBGL
-	ownership_dialog = e2_dialog_create (NULL, NULL, _("ownership"),
-		DUMMY_RESPONSE_CB, NULL);
+	ownership_dialog = e2_dialog_create (_("ownership"), NULL, DUMMY_RESPONSE_CB, NULL, NULL);
 	OPENBGL
 
 	dialog_vbox =

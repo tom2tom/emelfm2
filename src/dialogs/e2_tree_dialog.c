@@ -1550,8 +1550,7 @@ static gpointer _e2_tree_dialog_run (ViewInfo *view)
 
 	gchar *title = (view == &app.pane1.view) ? _("pane 1 navigator") : _("pane 2 navigator") ;
 	CLOSEBGL
-	rt->dialog = e2_dialog_create (NULL, NULL, title,
-		(ResponseFunc)_e2_treedlg_response_cb, rt);
+	rt->dialog = e2_dialog_create (title, NULL, (ResponseFunc)_e2_treedlg_response_cb, rt, NULL);
 	OPENBGL
 	//scrolled window for the treeview
 	GtkWidget *sw = e2_widget_add_sw (

@@ -1043,9 +1043,7 @@ static gboolean _e2_task_mkdirQ (E2_ActionTaskData *qed)
 
 	//create dialog
 	CLOSEBGL
-	rt.dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION,
-		_("What is the new directory's name?"), _("create directory"),
-		(ResponseFunc)_e2_mkdirdlg_response_cb, &rt);
+	rt.dialog = e2_dialog_create (_("create directory"), STOCK_NAME_DIALOG_QUESTION, (ResponseFunc)_e2_mkdirdlg_response_cb, &rt, _("What is the new directory's name?"));
 
 	GtkWidget *vbox = e2_dialog_add_sw (rt.dialog);
 

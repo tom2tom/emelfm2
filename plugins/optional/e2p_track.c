@@ -421,8 +421,7 @@ static gboolean _e2p_track (gpointer from, E2_ActionRuntime *art)
 	E2_TrackDlgData *rt = ALLOCATE (E2_TrackDlgData);
 	CHECKALLOCATEDWARN (rt, return FALSE; );
 
-	rt->dialog = e2_dialog_create (NULL, NULL, _("tracker query"),
-		(ResponseFunc)_e2p_track_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("tracker query"), NULL, (ResponseFunc)_e2p_track_response_cb, rt, NULL);
 
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14

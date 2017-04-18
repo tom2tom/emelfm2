@@ -136,8 +136,8 @@ gint e2_dialog_show (GtkWidget *dialog, GtkWidget *parent, E2_DialogFlags flags,
 	E2_Button *button, ...);
 gint e2_dialog_run (GtkWidget *dialog, GtkWidget *parent, E2_DialogFlags flags);
 //GtkWidget *get_dialog (GtkWidget *parent, GtkMessageType type, gchar *label_text);
-GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
-	const gchar *title,	void (*callback) (GtkDialog*,gint,gpointer), gpointer data) G_GNUC_MALLOC;
+GtkWidget *e2_dialog_create (const gchar *title, const gchar *stock,
+	void (*callback) (GtkDialog*,gint,gpointer), gpointer callbackdata, const gchar *label_data, ...) G_GNUC_MALLOC;
 GtkWidget *e2_dialog_add_sw (GtkWidget *dialog);
 GtkWidget *e2_dialog_add_defined_button (GtkWidget *dialog, E2_Button *button) G_GNUC_MALLOC;
 GtkWidget *e2_dialog_add_simple_button (GtkWidget *dialog, const gchar *stock,

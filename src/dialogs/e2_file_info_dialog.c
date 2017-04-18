@@ -506,8 +506,7 @@ DialogButtons e2_file_info_dialog_run (VPATH *localpath, gboolean multi)
 
 	//must prevent the default dialog response, it stuffs up Q cleanups
 	CLOSEBGL
-	rt.dialog = e2_dialog_create (NULL, NULL, _("file info"),
-		DUMMY_RESPONSE_CB, NULL);
+	rt.dialog = e2_dialog_create (_("file info"), NULL, DUMMY_RESPONSE_CB, NULL, NULL);
 	OPENBGL
 	dialog_vbox =
 #ifdef USE_GTK2_14

@@ -579,8 +579,7 @@ _e2p_cpbarQ (E2_ActionTaskData *qed)
 	windowdata.dialog = NULL;	//setup for abort
 	pthread_cleanup_push ((gpointer)_e2p_cpbar_abort_clean_dialog, &windowdata.dialog);
 	CLOSEBGL
-	windowdata.dialog = e2_dialog_create (NULL, NULL, _("copying"),
-		(ResponseFunc)_e2p_cpbar_response_cb, &windowdata);
+	windowdata.dialog = e2_dialog_create (_("copying"), NULL, (ResponseFunc)_e2p_cpbar_response_cb, &windowdata, NULL);
 	e2_dialog_setup (windowdata.dialog, app.main_window);
 	OPENBGL
 

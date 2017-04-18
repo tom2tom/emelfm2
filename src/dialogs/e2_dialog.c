@@ -493,18 +493,18 @@ if anything special is needed for that.
 If @a label contains any text which looks like "bad" pango-markup, then the
 label must have been escaped before calling here.
 Expects BGL closed.
-@param stock name of gtk-stock-icon, or absolute localised path of icon file, to be shown near the top of the dialog, or NULL
-@param label_text text to be shown near the top of the dialog, or NULL
 @param title title string for the dialog, or NULL for PROGNAME
+@param stock name of gtk-stock-icon or e2-custom-icon, to be shown near the top of the dialog, or NULL
 @param callback response function for the dialog,
   or DEFAULT_RESPONSE_CB (to apply _e2_dialog_response_cb)
   or DUMMY_RESPONSE_CB (to apply no response cb at all)
-@param data pointer to data to be provided to @a callback
+@param callbackdata pointer to data to be provided to @a callback
+@param label_data string (possibly a template to be processed varargs) specifying text to be shown near the top of the dialog, or NULL
 
 @return the dialog widget
 */
-GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
-	const gchar *title, void (*callback) (GtkDialog*,gint,gpointer), gpointer data)
+GtkWidget *e2_dialog_create (const gchar *title, const gchar *stock,
+	void (*callback) (GtkDialog*,gint,gpointer), gpointer callbackdata, const gchar *label_data, ...)
 {
 	GtkWidget *dialog = gtk_dialog_new ();
 	e2_window_set_title (dialog, title);
@@ -544,7 +544,7 @@ GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
 	GtkWidget *img = (stock != NULL ) ?
 		e2_widget_get_icon (stock, GTK_ICON_SIZE_DIALOG) : NULL;
 
-	if (img != NULL || label_text != NULL)
+	if (img != NULL || label_data != NULL)
 	{
 #ifdef USE_GTK3_0
 		GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, E2_PADDING);
@@ -553,15 +553,18 @@ GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
 #endif
 		gtk_container_set_border_width (GTK_CONTAINER (hbox), E2_PADDING);
 		g_object_set_data (G_OBJECT (dialog), "e2-dialog-hbox", hbox);
+
 		if (img != NULL)
 		{
-//			gtk_misc_set_alignment (GTK_MISC (img), 0.5, 0.0);	//no effect
-//			gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, E2_PADDING);
 			gint isize = e2_icons_get_pixsize (GTK_ICON_SIZE_DIALOG);
+			printd (DEBUG, "dialog icon size %d", isize);
 #ifdef USE_GTK3_0
 			//TODO set img's style properties
-//			gtk_widget_set_size_request (align, isize*1.2, isize);
-			g_object_set (G_OBJECT (img), "halign", GTK_ALIGN_END, "height-request", isize, "width-request", isize*1.2, NULL);
+# ifdef USE_GTK3_12
+			g_object_set (G_OBJECT (img), "margin-start", isize/4, "margin-end", isize/2, "valign", GTK_ALIGN_CENTER, NULL);
+# else
+			g_object_set (G_OBJECT (img), "margin-left", isize/4, "margin-right", isize/2, NULL);
+# endif
 			gtk_box_pack_start (GTK_BOX (hbox), img, FALSE, FALSE, 0);
 #else
 			GtkWidget *align = gtk_alignment_new (1.0, 0.0, 0.0, 0.0);
@@ -570,10 +573,16 @@ GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
 			gtk_box_pack_start (GTK_BOX (hbox), align, FALSE, FALSE, 0);
 #endif
 		}
-		if (label_text != NULL)
+
+		if (label_data != NULL)
 		{
-			GtkWidget *label = e2_widget_add_mid_label (hbox, label_text, 0.5, TRUE,
+			va_list args;
+			va_start (args, label_data);
+			gchar *label_text = g_strdup_vprintf (label_data, args);
+			gfloat xalign = (img != NULL) ? 0.0 : 0.5;
+			GtkWidget *label = e2_widget_add_mid_label (hbox, label_text, xalign, FALSE,
 				(img != NULL) ? 2 : E2_PADDING);
+			g_free (label_text);
 			g_object_set_data (G_OBJECT (dialog), "e2-dialog-label", label);
 		}
 		gtk_box_pack_start (GTK_BOX (
@@ -597,7 +606,7 @@ GtkWidget *e2_dialog_create (const gchar *stock, const gchar *label_text,
 	{
 		if (callback != DUMMY_RESPONSE_CB)
 			g_signal_connect (G_OBJECT (dialog), "response",
-				G_CALLBACK (callback), data);
+				G_CALLBACK (callback), callbackdata);
 	}
 	else
 		g_signal_connect (G_OBJECT (dialog), "response",
@@ -1060,7 +1069,7 @@ void e2_dialog_setup_chooser (GtkWidget *dialog, const gchar *title,
 @brief setup generic "question" dialog for line-input by user
 Assumes BGL closed
 @param window_title window title string
-@param prompt prompt string
+@param prompt 'simple-format' prompt string
 @param suggestion suggested answer string
 @param extras button-related flags
 @param select_text TRUE to select the displayed @a suggestion
@@ -1088,13 +1097,13 @@ static GtkWidget *_e2_dialog_setup_line (gchar* window_title, gchar *prompt,
 	e2_dialog_set_title (dialog, title);
 */
 	gchar *title = (window_title != NULL) ? window_title : _("user input");
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION,
+	GtkWidget *dialog = e2_dialog_create (title, STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL,
 #ifdef LATESHOW
-		"",
+		NULL
 #else
-		prompt,
+		prompt
 #endif
-		title, DUMMY_RESPONSE_CB, NULL);
+		);
 
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14
@@ -1451,13 +1460,10 @@ DialogButtons e2_dialog_delete_check (VPATH *localpath, gboolean multi,
 	s3 = g_markup_escape_text (s2, -1);
 	g_free (s1);
 	F_FREE (s2, s1);
-	s1 = g_strdup_printf(_("Are you sure you want to delete <b>%s</b>?"), s3);
-	g_free (s3);
 	CLOSEBGL
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION, s1,
-		_("confirm"), DUMMY_RESPONSE_CB, NULL);
+	GtkWidget *dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL, _("Are you sure you want to delete <b>%s</b>?"), s3);
 	OPENBGL
-	g_free (s1);
+	g_free (s3);
 
 	E2_DialogFlags flags = 0;
 
@@ -1540,14 +1546,14 @@ DialogButtons e2_dialog_ow_check (VPATH *slocal, VPATH *dlocal, OW_ButtonFlags e
 {
 //	printd (DEBUG, "overwrite check");
 	struct stat sb;
+	GtkWidget *dialog;
 
 //tag gboolean DEBUGfreeze;
 	//maybe this helps with gtk 2.16 flakiness
 //	CLOSEBGL
 
-	GString *dialog_prompt = g_string_sized_new (NAME_MAX + 64);	//pick a reasonable initial size
 	gchar *utf = F_DISPLAYNAME_FROM_LOCALE (VPSTR(dlocal));
-	//before applying bold markup, escape any pango-annoying component of the item name
+	//before applying markup to the label, escape any pango-annoying component of the item name
 	gchar *public = g_markup_escape_text (utf, -1);
 	gchar *type = NULL;
 
@@ -1579,29 +1585,27 @@ DialogButtons e2_dialog_ow_check (VPATH *slocal, VPATH *dlocal, OW_ButtonFlags e
 	if (type == NULL)
 		type = _("existing");
 
+	CLOSEBGL
+
 	if (!e2_fs_lstat (dlocal, &sb E2_ERR_NONE())	//should never fail
 		&& S_ISDIR (sb.st_mode)
 		&& !S_ISLNK (sb.st_mode))
-			g_string_printf (dialog_prompt,
-				_("Remove all contents of %s\n<b>%s</b> ?"), type, public);
+	{
+		dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_WARNING, DUMMY_RESPONSE_CB, NULL, _("Remove all contents of %s\n<b>%s</b> ?"), type, public);
+	}
 	else
 	{
 		gchar *dbase = g_path_get_basename (public);
 		gchar *dpath = g_path_get_dirname (public);
-		g_string_printf (dialog_prompt, _("Overwrite %s <b>%s</b>\nin %s ?"),
-			type, dbase, dpath);
+		dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_WARNING, DUMMY_RESPONSE_CB, NULL, _("Overwrite %s <b>%s</b>\nin %s ?"), type, dbase, dpath);
 		g_free (dbase);
 		g_free (dpath);
 	}
 
-	CLOSEBGL
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_WARNING,
-		dialog_prompt->str, _("confirm"), DUMMY_RESPONSE_CB, NULL);
 	OPENBGL
 
 	F_FREE (utf, VPSTR(dlocal));
 	g_free (public);
-	g_string_free (dialog_prompt, TRUE);
 //FIXME adjust this to suit single-setup when multi is TRUE
 	E2_Button all_btn;
 	E2_Button stop_btn;
@@ -1657,15 +1661,14 @@ DialogButtons e2_dialog_ow_check (VPATH *slocal, VPATH *dlocal, OW_ButtonFlags e
 /**
 @brief run warning dialog for confirmation
 Assumes BGL is on/closed
-@param prompt prompt string
+@param prompt simple-format prompt string
 @param yes_label translated label to use for yes-button, or NULL for "Commi_t"
 
 @return button code returned by the dialog
 */
 DialogButtons e2_dialog_warning (gchar *prompt, const gchar *yes_label)
 {
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_WARNING, prompt,
-		_("confirm"), DUMMY_RESPONSE_CB, NULL);
+	GtkWidget *dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_WARNING, DUMMY_RESPONSE_CB, NULL, prompt);
 
 	E2_Button no_btn;
 	e2_button_derive (&no_btn, &E2_BUTTON_NO, BTN_NO_CANCEL);
@@ -1706,11 +1709,7 @@ dialog display code and response cb.
 GtkWidget *e2_dialog_slow (gchar *prompt_type, gchar *tip_type,
 	void(*response_func) (GtkDialog*,gint,gpointer), gpointer data)
 {
-	gchar *prompt = g_strdup_printf (
-		_("%s is taking a long time. Continue waiting ?"), prompt_type);
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION, prompt,
-		_("confirm"), response_func, data);
-	g_free (prompt);
+	GtkWidget *dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, response_func, data, _("%s is taking a long time. Continue waiting ?"), prompt_type);
 
 	E2_Button local_button;
 	local_button.label = _("_Quiet");

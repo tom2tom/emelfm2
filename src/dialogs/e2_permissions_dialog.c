@@ -311,8 +311,7 @@ DialogButtons e2_permissions_dialog_run (VPATH *localpath,
 	GString *label_text = g_string_sized_new (NAME_MAX+20);
 	gboolean thisis_dir = e2_fs_is_dir3 (localpath E2_ERR_NONE());
 	CLOSEBGL
-	permissions_dialog = e2_dialog_create (NULL, NULL, _("permissions"),
-		DUMMY_RESPONSE_CB, NULL);
+	permissions_dialog = e2_dialog_create (_("permissions"), NULL, DUMMY_RESPONSE_CB, NULL, NULL);
 	OPENBGL
 
 	dialog_vbox =

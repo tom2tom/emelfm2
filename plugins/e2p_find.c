@@ -4182,8 +4182,7 @@ static gboolean _e2p_find_dialog_create (gpointer from, E2_ActionRuntime *art)
 
 	gint startpage = page_store;	//preserve this
 	//create dialog
-	find_rt->dialog = e2_dialog_create (NULL, NULL, _("find"),
-		(ResponseFunc)_e2p_find_response_cb, find_rt);
+	find_rt->dialog = e2_dialog_create (_("find"), NULL, (ResponseFunc)_e2p_find_response_cb, find_rt, NULL);
 	OPENBGL
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14

@@ -136,9 +136,7 @@ static GtkWidget *_e2_about_dialog_create (void)
 	if (dialog_data == NULL)
 		return NULL;
 //TODO gtk3 label styling vis CSS
-	GtkWidget *dialog = e2_dialog_create (BINNAME,
-		"<span size=\"x-large\" weight=\"bold\">" PROGNAME " " VERSION RELEASE "</span>",
-		_("help"), (ResponseFunc)_e2_about_dialog_response_cb, dialog_data);
+	GtkWidget *dialog = e2_dialog_create (_("help"), BINNAME, (ResponseFunc)_e2_about_dialog_response_cb, dialog_data, "<span size=\"x-large\" weight=\"bold\">%s</span>", PROGNAME" "VERSION" "RELEASE);
 	e2_dialog_set_negative_response (dialog, GTK_RESPONSE_CLOSE);
 #ifndef USE_GTK3_0
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);	//looks better, with notebook

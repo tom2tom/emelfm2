@@ -841,7 +841,7 @@ static DialogButtons _e2pcr_ow_check (VPATH *localpath, gboolean multisrc)
 }
 /**
 @brief run warning dialog for confirmation
-@param prompt prompt string
+@param prompt simple prompt string (no formatting)
 @param multi this is part of a multi-file task
 @return button code returned by the dialog
 */
@@ -849,8 +849,7 @@ static DialogButtons _e2pcr_dialog_warning (gchar *prompt, gboolean multi)
 {
 	DialogButtons retval;
 	CLOSEBGL
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_WARNING, prompt,
-		_("confirm"), DUMMY_RESPONSE_CB, NULL);
+	GtkWidget *dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_WARNING, DUMMY_RESPONSE_CB, NULL, prompt);
 	OPENBGL
 
 	E2_Button no_btn;
@@ -3996,8 +3995,7 @@ static DialogButtons _e2pcr_crypt_dialog_run (E2P_CryptOpts *options)
 	crt.opts = options;
 
 	CLOSEBGL
-	crt.dialog = e2_dialog_create (NULL, NULL, _("en/decrypt file"),
-		(ResponseFunc)_e2pcr_response_cb, &crt);
+	crt.dialog = e2_dialog_create (_("en/decrypt file"), NULL, (ResponseFunc)_e2pcr_response_cb, &crt, NULL);
 	OPENBGL
 
 	GtkWidget *dialog_vbox =

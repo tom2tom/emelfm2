@@ -1434,8 +1434,7 @@ static gboolean _e2p_config_dialog_create (gpointer from, E2_ActionRuntime *art)
 
 		srt = &rt; //toggle-callback needs extra data
 
-		rt.dialog = e2_dialog_create (NULL, NULL, _("manage configuration data"),
-			DUMMY_RESPONSE_CB, NULL);
+		rt.dialog = e2_dialog_create (_("manage configuration data"), NULL, DUMMY_RESPONSE_CB, NULL, NULL);
 		GtkWidget *vbox =
 #ifdef USE_GTK2_14
 			gtk_dialog_get_content_area (GTK_DIALOG (rt.dialog));

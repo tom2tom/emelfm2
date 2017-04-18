@@ -662,8 +662,7 @@ gboolean e2_view_dialog_read_text (VPATH *localfile, E2_ViewDialogRuntime *rt)
 					memset (&drt, 0, sizeof (E2CodeDlgRuntime));
 					//dialog that allows user to choose encoding(s) to test
 					DialogButtons choice;
-					GtkWidget *dialog = e2_dialog_create (NULL, NULL, _("choose file encoding"),
-							DUMMY_RESPONSE_CB, NULL);
+					GtkWidget *dialog = e2_dialog_create (_("choose file encoding"), NULL, DUMMY_RESPONSE_CB, NULL, NULL);
 					GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14
 						gtk_dialog_get_content_area (GTK_DIALOG (dialog));
@@ -1708,8 +1707,7 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 	e2_view_dialog_init_hilites (rt);
 #endif
 	gchar *utfpath = F_FILENAME_FROM_LOCALE (rt->localpath);
-	rt->dialog = e2_dialog_create (NULL, utfpath, _("displaying file"),
-		(ResponseFunc)_e2_view_dialog_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("displaying file"), NULL, (ResponseFunc)_e2_view_dialog_response_cb, rt, utfpath);
 	F_FREE (utfpath, rt->localpath);
 //	gtk_window_set_type_hint (GTK_WINDOW (rt->dialog),
 //			    GDK_WINDOW_TYPE_HINT_NORMAL);

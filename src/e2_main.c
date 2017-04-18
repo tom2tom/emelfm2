@@ -944,10 +944,7 @@ gboolean e2_main_closedown (gboolean compulsory, gboolean saveconfig, gboolean d
 			if (running > 0)
 			{
 				//can't use standard warning dialog, both its labels are unsuitable
-				gchar *prompt = g_strdup_printf (_("%u process(es) are running"), running);
-				GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_WARNING,
-					prompt, _("confirm"), DUMMY_RESPONSE_CB, NULL);
-				g_free (prompt);
+				GtkWidget *dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_WARNING, DUMMY_RESPONSE_CB, NULL, _("%u process(es) are running"), running);
 
 				E2_Button yes_btn = { _("_Continue"), STOCK_NAME_EXECUTE,
 					_("Continue working"), E2_BTN_DEFAULT | E2_BTN_TIPPED, 0,

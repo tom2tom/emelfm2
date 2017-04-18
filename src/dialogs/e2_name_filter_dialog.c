@@ -208,8 +208,7 @@ void e2_name_filter_dialog_create_cb (GtkCheckMenuItem *item, ViewInfo *view)
 //	rt->menu_item = item;
 //	rt->itemstate = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM (item));
 	NEEDCLOSEBGL
-	rt->dialog = e2_dialog_create (NULL, _("Display only the items named like:"),
-		_("name filter"), (ResponseFunc)_e2_name_filter_dialog_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("name filter"), NULL, (ResponseFunc)_e2_name_filter_dialog_response_cb, rt, _("Display only the items named like:"));
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14
 		gtk_dialog_get_content_area (GTK_DIALOG (rt->dialog));

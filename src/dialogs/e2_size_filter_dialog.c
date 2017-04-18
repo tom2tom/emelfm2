@@ -177,9 +177,7 @@ void e2_size_filter_dialog_create_cb (GtkCheckMenuItem *item, ViewInfo *view)
 
 	NEEDCLOSEBGL
 
-	rt->dialog = e2_dialog_create (NULL, _("Display only the items which are:"),
-		_("size filter"),
-		(ResponseFunc)_e2_size_filter_dialog_response_cb, rt);
+	rt->dialog = e2_dialog_create (_("size filter"), NULL, (ResponseFunc)_e2_size_filter_dialog_response_cb, rt, _("Display only the items which are:"));
 	hbox = e2_widget_add_box (
 #ifdef USE_GTK2_14
 		gtk_dialog_get_content_area (GTK_DIALOG (rt->dialog)),

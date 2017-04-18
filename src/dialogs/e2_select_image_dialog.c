@@ -1149,8 +1149,7 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 #endif
 */
 	//create dialog widgets
-	rt->dialog = e2_dialog_create (NULL, NULL, rt->name,
-		(ResponseFunc)_e2_sidlg_response_cb, rt);
+	rt->dialog = e2_dialog_create (rt->name, NULL, (ResponseFunc)_e2_sidlg_response_cb, rt, NULL);
 	GtkWidget *dialog_vbox =
 #ifdef USE_GTK2_14
 		gtk_dialog_get_content_area (GTK_DIALOG (rt->dialog));

@@ -885,8 +885,7 @@ void e2_filetype_dialog_edit_create (gchar *open_category)
 	rt->buffer_hash = g_hash_table_new_full (g_str_hash, g_str_equal,
 		g_free, (GDestroyNotify) e2_option_tree_menu_hash_clean);
 
-	filetypes_dialog = e2_dialog_create (NULL, NULL, _("edit filetypes"),
-		(ResponseFunc)_e2_edftdlg_response_cb, rt);
+	filetypes_dialog = e2_dialog_create (_("edit filetypes"), NULL, (ResponseFunc)_e2_edftdlg_response_cb, rt, NULL);
 
 	e2_option_connect (filetypes_dialog, FALSE);
 
@@ -1136,7 +1135,7 @@ gint e2_filetype_dialog_create (VPATH *localpath, gboolean text, gboolean ambig,
 	gint response;
 	gint retval;
 	gboolean addpath;
-	gchar *usepath, *dir, *base, *title, *public, *message;
+	gchar *usepath, *dir, *base, *title, *public;
 	struct stat sb;
 
 	E2_FileTypeDlg2Runtime rt;
@@ -1160,14 +1159,10 @@ gint e2_filetype_dialog_create (VPATH *localpath, gboolean text, gboolean ambig,
 	public = g_markup_escape_text (rt.utfpath, -1);
 	dir = g_path_get_dirname (public);
 	base = g_path_get_basename (public);
-	message = g_strdup_printf (
-		_("What would you like to do with\n<b>%s</b>\nin %s ?"), base, dir);
-	GtkWidget *dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION, message, title,
-		(ResponseFunc)_e2_filetype_dialog_response_cb, &response);
+	GtkWidget *dialog = e2_dialog_create (title, STOCK_NAME_DIALOG_QUESTION, (ResponseFunc)_e2_filetype_dialog_response_cb, &response, _("What would you like to do with\n<b>%s</b>\nin %s ?"), base, dir);
 	g_free (public);
 	g_free (dir);
 	g_free (base);
-	g_free (message);
 
 	//can always add to category, even if item does not presently exist
 	if (newtype && !ambig)

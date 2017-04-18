@@ -1097,8 +1097,7 @@ static void _e2p_ren_rename (E2_RenDialogRuntime *rt)
 
 	if (_e2p_ren_get_flag (CONFIRM_P))	//, rt))
 	{ //setup for repeated non-modal dialogs
-		dialog = e2_dialog_create (STOCK_NAME_DIALOG_QUESTION, "", _("confirm"),
-			DUMMY_RESPONSE_CB, NULL);
+		dialog = e2_dialog_create (_("confirm"), STOCK_NAME_DIALOG_QUESTION, DUMMY_RESPONSE_CB, NULL, NULL);
 		//set default button to 'no'
 		if (multi)
 		{
@@ -1761,8 +1760,7 @@ static gboolean _e2p_renameQ (E2_ActionTaskData *qed)
 	*qed->status = E2_TASK_PAUSED;
 	//create dialog
 	CLOSEBGL
-	rt.dialog = e2_dialog_create (NULL, NULL, _("rename items"),
-		(ResponseFunc)_e2p_ren_response_cb, &rt);
+	rt.dialog = e2_dialog_create (_("rename items"), NULL, (ResponseFunc)_e2p_ren_response_cb, &rt, NULL);
 	OPENBGL
 	//populate it with widgets
 	GtkWidget *dialog_vbox, *hbox;
