@@ -30,24 +30,70 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 typedef enum
 {
 	E2_IMAGE_BMP,
+	E2_IMAGE_PNG,
+	E2_IMAGE_XCM,
 	E2_IMAGE_SVG
 } E2Imagetype;
 */
 typedef struct _E2_Image
 {
-	GdkPixbuf *pixbuf;
-	gint size;	//pixel size
+	gshort psize;	//pixel size, or 0 (unknown) or -1 (scalable)
+//	guchar refcount;
 //	E2Imagetype type;
-//	gint refcount;
+	const gchar *fullpath; //GSringChunk'd, or NULL
+	GdkPixbuf *pixbuf; //often NULL
 } E2_Image;
 
-static gint iconsizes [GTK_ICON_SIZE_DIALOG+1];
-//table of E2_Image's, keyed by allocated string like name|pxsize
-static GHashTable *cached_icons = NULL;
-#endif
+typedef struct _E2_IMatcher
+{
+	const gchar *target;
+	GSList *entries;
+} E2_IMatcher;
 
-//table of E2_Stock's keyed by constant stock string e.g. "gtk-about"
+//for checking whether to refresh cached icons
+//static time_t icons_mtime;
+static gint iconsizes [GTK_ICON_SIZE_DIALOG+1];
+ //collected icon names and filepaths
+GStringChunk *icon_strings;
+//table of GArray's of E2_Image's, keyed by (allocated) icon name
+static GHashTable *cached_icons = NULL;
+//table of E2_Stock's keyed by (constant) stock name e.g. "gtk-about"
 GHashTable *cached_stocks = NULL;
+#endif //def E2_ICONCACHE
+
+#ifdef USE_GTK3_14
+//GdkPixbufs array, ordered: up,down,left,right per GtkArrowType enum
+GdkPixbuf *cached_arrows[4];
+
+static void _e2_icons_create_arrows (void)
+{
+	gint i;
+	const gchar *dirs[4] = {"up", "down", "extup", "extdown"};
+	gchar *topdir = e2_icons_get_custom_path (TRUE);
+	for (i=0; i<4; i++)
+	{
+		//TODO any size, dark/light colors
+		//const gchar *shade = "dark";
+		gchar *fullpath = g_strconcat (topdir, "16x16", G_DIR_SEPARATOR_S, "arrow-", dirs[i], ".png", NULL);
+		cached_arrows[i] = gdk_pixbuf_new_from_file (fullpath, NULL);
+		g_free (fullpath);
+	}
+	g_free (topdir);
+}
+
+static void _e2_icons_destroy_arrows (void)
+{
+	gint i;
+	for (i=0; i<4; i++)
+	{
+		if (G_IS_OBJECT(cached_arrows[i]))
+		{
+			g_object_unref(G_OBJECT (cached_arrows[i]));
+			cached_arrows[i] = NULL;
+		}
+	}
+}
+#endif
 
 #ifdef E2_ICONCACHE
 
@@ -180,31 +226,190 @@ GtkIconSize e2_icons_get_size (gint psize)
 	return isz;
 }
 /**
-@brief cleanup helper for icon hash
-
-@param data pointer to E2_Image struct for an icon
+@brief treewalk callback to collect custom-icon filepaths
+@param localpath filename data
+@param statptr pointer to statbuf for the file
+@param status tree-walker status code
+@param data pointer to E2_IPopulator
+@return E2TW_CONTINUE
 */
-static void _e2_icons_cache_remove (E2_Image *data)
+static E2_TwResult _e2_icons_customfiles_tw (VPATH *localpath, const struct stat *statptr,
+	E2_TwStatus status, E2_IPopulator *data)
 {
-	g_object_unref (G_OBJECT (data->pixbuf));
-	DEMALLOCATE (E2_Image, data);
+	switch (status)
+	{
+		case E2TW_F:	//not-directory or link
+		case E2TW_SL:	//symbolic link to a non-directory
+			if (strcasestr (VPSTR(localpath), "stock") == NULL)
+			{
+				g_ptr_array_add (data->iconpaths,
+					g_string_chunk_insert_const (data->chunkedpaths, VPSTR(localpath)));
+			}
+			break;
+		default:
+			break;
+	}
+	return E2TW_CONTINUE;
 }
 /**
-@brief setup for icon caching
-The destroy func assumes that tabled pixbufs have refcount 1 when
-this is called
+@brief setup various icon-related stuff for the session
+Called during session commencement, before BGL is closed
+@return
 */
 void e2_icons_cache_init (void)
 {
-	if (cached_icons == NULL)
-		cached_icons = g_hash_table_new_full (g_str_hash, g_str_equal,
-			g_free, (GDestroyNotify) _e2_icons_cache_remove);
+/*	struct stat sb;
+	gchar *local = e2_icons_get_custom_path (FALSE);
+#ifdef E2_VFS
+	VPATH data = { local, curr_view->spacedata };
+	if (e2_fs_stat (&data, &sb E2_ERR_NONE()))	//through links
+#else
+	if (e2_fs_stat (local, &sb E2_ERR_NONE()))	//through links
+#endif
+	{
+		icons_mtime = 0; //TODO set to never check again
+	}
+	else
+	{
+		icons_mtime = sb.st_mtime;
+	}
+	g_free (local);
+*/
 	_e2_icons_sizes_init ();
+
+	if (cached_icons == NULL)
+	{
+		//NB not auto-data-cleanup, that buggers setup for multi-icons with same name
+		cached_icons = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+
+		//populate a 'menu' of custom icons, sizes and filepaths only
+		//no pixbufs unless/until actually wanted
+		icon_strings = g_string_chunk_new (2048); //sized about 1/3 of eventual total, (full-paths ~ 60 each)
+		GPtrArray *iconpaths = g_ptr_array_sized_new (60); //about this many icons to find
+		gchar *topdir = e2_icons_get_custom_path (FALSE);
+
+		E2_IPopulator walkdata = { iconpaths, icon_strings };
+		e2_fs_tw (topdir, _e2_icons_customfiles_tw, &walkdata, -1, E2TW_FIXDIR|E2TW_XQT E2_ERR_NONE());
+
+		if (iconpaths->len > 0)
+		{
+			guchar got;
+			guint indx, count;
+			gpointer *dp;
+#if 0	//glib regex too buggy!! def USE_GLIB2_14
+			gchar *freeme;
+			GMatchInfo *matches;
+			GRegex *matcher = g_regex_new ("[/\\]([1-9]\\d+)[xX/\\]",
+				G_REGEX_EXTENDED | G_REGEX_RAW | G_REGEX_OPTIMIZE,
+				G_REGEX_MATCH_NOTEMPTY,
+				NULL);
+#else
+			regmatch_t matches[2];
+			regex_t matcher;
+			regcomp (&matcher, "[/\\]([1-9][0-9]+)[xX/\\]", REG_EXTENDED);
+#endif
+			count = iconpaths->len;
+			for (indx = 0, dp = iconpaths->pdata; indx < count; indx++, dp++)
+			{
+				gchar *fullpath, *base, *instring;
+				GArray *allidata;
+				E2_Image idata;
+
+				fullpath = *((gchar **)dp); //fullpath is GStringChunk'd, sorta const
+				instring = strrchr (fullpath, '.');
+				if (instring != NULL)
+					*instring = 0;
+				base = strrchr (fullpath, G_DIR_SEPARATOR);
+				if (base == NULL || base == fullpath) //shuld never happen
+					continue; //just ignore this path, for the remainder of the session
+				base = g_string_chunk_insert_const (icon_strings, base+1);
+				if (instring != NULL)
+					*instring = '.';
+
+				if (strcasestr (fullpath, "scalable") != NULL)
+				{
+					got = -1; //indicate scalable, need to size created pxb's
+				}
+#if 0 	//def USE_GLIB2_14
+				else if (!g_regex_match (matcher, fullpath, 0, &matches))
+#else
+				else if (regexec (&matcher, fullpath, 2, matches, 0))
+#endif
+				{
+					got = 0; //indicate not in a size-specific folder, need to size created pxb's
+				}
+				else
+				{
+					gulong size;
+#if 0 	//def USE_GLIB2_14
+					freeme = g_match_info_fetch (matches, 1);
+					size = strtoul (freeme, NULL, 10);
+					g_free (freeme);
+#else
+					instring = fullpath + matches[1].rm_eo;
+					gchar c = *instring;
+					*instring = 0;
+					size = strtoul (fullpath + matches[1].rm_so, NULL, 10);
+					*instring = c;
+#endif
+					got = (guchar) size;
+				}
+
+				idata.psize = got;
+				idata.fullpath = fullpath;
+				idata.pixbuf = NULL;
+
+				allidata = g_hash_table_lookup (cached_icons, base);
+				if (allidata == NULL)
+				{
+					allidata = g_array_new (FALSE, FALSE, sizeof (E2_Image));
+					allidata = g_array_append_vals (allidata, &idata, 1);
+					g_hash_table_insert (cached_icons, base, allidata);
+				} else {
+					GArray *allidata2 = g_array_append_vals (allidata, &idata, 1);
+					if (allidata2 != allidata) //unlikely at least, or maybe never
+						g_hash_table_replace (cached_icons, base, allidata2);
+				}
+			}
+#if 0	//def USE_GLIB2_14
+			g_match_info_free (matches);
+			g_regex_unref (matcher);
+#else
+			regfree (&matcher);
+#endif
+		} // else OOPS! no custom icons !
+
+		g_ptr_array_free (iconpaths, TRUE);
+		g_free (topdir);
+	}
+
 //	cached_stocks = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
-//		(GDestroyNotify)_e2_icons_stock_clear);
+//		(GDestroyNotify)_e2_icons_stock_clear); //CHECKME cleanup ok
+#ifdef USE_GTK3_14
+	_e2_icons_create_arrows ();
+#endif
 }
 /**
-@brief helper func to clear cached icon pixbuf
+@brief data cleanup helper for the custom-icons hash
+NB @key is auto-cleaned, so ignored here
+@param key hash table key, UNUSED here
+@param icondata pointer to GArray of E2_Image structs for an icon
+@param userdata UNUSED
+@return
+*/
+static void _e2_icons_cache_remove (gchar *key, GArray *icondata, gpointer userdata)
+{
+	guint indx, count = icondata->len;
+	E2_Image *dp;
+	for (indx=0, dp=(E2_Image*)icondata->data; indx<count; indx++, dp++)
+	{
+		if (dp->pixbuf != NULL)
+			g_object_unref (G_OBJECT (dp->pixbuf));
+	}
+	g_array_free (icondata, TRUE);
+}
+/* *
+@brief cleanup helper clear cached icon pixbuf
 @param key UNUSED key of hash table item being processed
 @param value value of hash table item being processed
 @param user_data UNUSED data specified when foreach was initiated
@@ -217,14 +422,19 @@ void e2_icons_cache_init (void)
 //	g_object_unref (G_OBJECT (value->pixbuf));
 } */
 /**
-@brief clear all cached icon pixbufs from X memory
+@brief clear all icon-related stuff used during the session
 @return
 */
 void e2_icons_cache_clear (void)
 {
-//	g_hash_table_foreach (cached_icons, (GHFunc) _e2_icons_cache_remove, NULL);
+//	icons_mtime = 0;
+	g_hash_table_foreach (cached_icons, (GHFunc) _e2_icons_cache_remove, NULL); //manual cleanup necessary
 	g_hash_table_destroy (cached_icons);
+	g_string_chunk_free (icon_strings);
 //	g_hash_table_destroy (cached_stocks);
+#ifdef USE_GTK3_14
+	_e2_icons_destroy_arrows ();
+#endif
 }
 /**
 @brief get current gtk theme
@@ -234,8 +444,7 @@ This may be called before main-window is created
 static GtkIconTheme *_e2_icons_get_current_theme (void)
 {
 	GtkIconTheme *thm = (app.main_window) ?
-		gtk_icon_theme_get_for_screen
-			(gtk_widget_get_screen (app.main_window)) :
+		gtk_icon_theme_get_for_screen(gtk_widget_get_screen (app.main_window)) :
 		gtk_icon_theme_get_default ();
 	return thm;
 }
@@ -245,49 +454,122 @@ static GtkIconTheme *_e2_icons_get_current_theme (void)
 If not already cached, the relevant image will be created and added to the cache.
 
 @param name gtk-stock-item name, or NULL for missing image icon, or localised custom-icon filename with or without path
-@param size icon size enumerator
+@param psize icon size, pixels (> GTK_ICON_SIZE_DIALOG) or enumerator
 @param missing TRUE to return missing-image icon if no pixbuf available for @a name
 @return pointer to cached GdkPixbuf (no extra refcount) for the image, or NULL if problem occurred
 */
-GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, GtkIconSize size, gboolean missing)
+GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, gint psize, gboolean missing)
 {
-	const gchar *check;
-	GdkPixbuf *pxb;
-
-	gint psize = e2_icons_get_pixsize (size);
-
 	if (name == NULL)
 		name = STOCK_NAME_MISSING_IMAGE;	//revert to default icon image
-	check = name;
+	if (psize >= 0 && psize <= GTK_ICON_SIZE_DIALOG)
+		psize = e2_icons_get_pixsize ((GtkIconSize)psize);
 
-	while (1)
+	GArray *allidata = g_hash_table_lookup (cached_icons, name);
+	if (allidata != NULL)
 	{
-		//make a unique cache key, with separator for easier updates
-		gchar *cachename = g_strdup_printf ("%s|%d", check, psize);
-		E2_Image *cached = g_hash_table_lookup (cached_icons, cachename);
-		if (cached != NULL)
+		//find 'best' in the cache
+		E2_Image *dp;
+		gboolean scale;
+		gshort this, min = 0, max = G_MAXSHORT;
+		gushort indx, iscale = G_MAXUSHORT, inone = G_MAXUSHORT, imin = 0, imax = G_MAXUSHORT, count = allidata->len;
+		for (indx=0, dp=(E2_Image*)allidata->data; indx<count; indx++, dp++)
 		{
-			g_free (cachename);
-//			cached->refcount++;
-//			g_object_ref (G_OBJECT (cached->pixbuf));
-			return cached->pixbuf;
+			this = dp->psize;
+			if (this == psize)
+				break;
+			switch (this)
+			{
+				case -1:
+					iscale = indx;
+					break;
+				case 0:
+					inone = indx;
+					break;
+				default:
+					if (this > min && this < psize)
+					{
+						min = this;
+						imin = indx;
+					}
+					else if (this > psize && this < max)
+					{
+						max = this;
+						imax = indx;
+					}
+					break;
+			}
 		}
+
+		if (indx < count)
+			scale = FALSE; //exact match found
 		else
-		{	//need to cache this icon
-#ifdef E2_ADD_STOCKS
-			gpointer stock;
-			if (g_hash_table_lookup_extended (cached_stocks, check, NULL, &stock))
-#else
-			if (e2_icons_check_stock (check))
-#endif
-			{	//stock image
-//				cached->type = E2_IMAGE_BMP;
+		{
+			scale = TRUE;
+			if (iscale != G_MAXUSHORT)
+				indx = iscale;
+			else if (min > 0 && (psize-min) < (max-psize))
+				indx = imin;
+			else if (inone == G_MAXUSHORT)
+				indx = imax;
+			else
+				indx = inone;
+		}
+
+		dp = &g_array_index (allidata, E2_Image, indx);
+		if (dp->pixbuf == NULL)
+		{
+			if (scale)
+			{
+				GdkPixbuf *pxb = gdk_pixbuf_new_from_file_at_scale
+					(dp->fullpath, psize, psize, FALSE, NULL);
+				if (pxb != NULL)
+				{
+					E2_Image idata = { psize, NULL, pxb };
+					GArray *allidata2 = g_array_append_vals (allidata, &idata, 1);
+					if (allidata2 != allidata) //unlikely at least, or maybe never
+						g_hash_table_replace (cached_icons, (gchar*)name, allidata2);
+					return pxb;
+				}
+				else
+				{
+					//TODO return something else
+				}
+			}
+			else
+				dp->pixbuf = gdk_pixbuf_new_from_file (dp->fullpath, NULL);
+			if (dp->pixbuf == NULL)
+			{
+				//TODO remove this from GArray
+//				dp->fullpath = NULL;
+			}
+		}
+		return dp->pixbuf;
+	}
+	else
+	{
+		//not custom, maybe it's a stock
+		const gchar *check = name;
 #ifdef USE_GTK3_10
-				GtkIconTheme *thm = _e2_icons_get_current_theme ();
+		GtkIconTheme *thm = _e2_icons_get_current_theme ();
+#endif
+		while (1)
+		{
+#ifdef E2_ADD_STOCKS
+			E2_Stock* stock;
+			if (g_hash_table_lookup_extended (cached_stocks, check, NULL, (gpointer*)&stock)) //recorded stock image
+#else
+			if (e2_icons_check_stock (check)) //recognized stock image
+#endif
+			{
+//				cached->type = E2_IMAGE_BMP;
+// TODO check cached pixbuf size if present
+				GdkPixbuf *pxb;
+#ifdef USE_GTK3_10
 # ifdef E2_ADD_STOCKS
-				gchar *iname = ((E2_Stock*)stock)->name;
+				gchar *iname = stock->name;
 				if (iname == NULL)
-					iname = ((E2_Stock*)stock)->stock;
+					iname = stock->stock;
 				pxb = gtk_icon_theme_load_icon (thm, iname, psize,
 					GTK_ICON_LOOKUP_GENERIC_FALLBACK | GTK_ICON_LOOKUP_USE_BUILTIN, NULL);
 # else
@@ -304,42 +586,26 @@ GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, GtkIconSize size, gboolean mi
 					gtk_icon_factory_lookup_default (name),
 					gtk_rc_get_style (app.main_window),
 					gtk_widget_get_default_direction (),
-					GTK_STATE_NORMAL, size, NULL, NULL);
+					GTK_STATE_NORMAL, psize, NULL, NULL);
 #endif
-			}
-			else //a missing stock icon, or a custom icon file
-			{
-				gchar *fullname;
-				if (g_path_is_absolute (name))
-					fullname = (gchar *)name; //we want a custom icon
-				else
+				if (pxb != NULL)
 				{
-					gchar *freeme = e2_icons_get_custom_path (TRUE);
-					fullname = e2_utils_strcat (freeme, name); //maybe we want a custom icon
-					g_free (freeme);
+/* TODO cache the pixbuf c.f. custom icons
+					E2_Image *dp = MALLOCATE0 (E2_Image);	//too small for slice
+					CHECKALLOCATEDWARN (dp, return NULL;)
+					dp->psize = psize;
+//					dp->refcount = 1;
+					dp->pixbuf = pxb;
+					g_hash_table_insert (cached_icons, g_strdup(check), dp);
+*/
+					return pxb;
 				}
-
-				pxb = gdk_pixbuf_new_from_file_at_scale
-						(fullname, psize, psize, FALSE, NULL);
-
-				if (fullname != name)
-					g_free (fullname);
 			}
-
-			if (pxb != NULL)
+			else //name not recognized
+				if (strncmp (check, "gtk-", 4) == 0)
 			{
-				cached = MALLOCATE (E2_Image);	//too small for slice
-				CHECKALLOCATEDWARN (cached, return NULL;)
-				cached->size = psize;
-				cached->pixbuf = pxb;
-//				cached->refcount = 1;
-				g_hash_table_insert (cached_icons, cachename, cached);
-				return pxb;
-			}
-
-			g_free (cachename);
-			if (strncmp (check, "gtk-", 4) == 0)
 				check += 4; //try for partial-match
+			}
 			else if (missing && strcmp (name, STOCK_NAME_MISSING_IMAGE) != 0)
 			{
 				check = STOCK_NAME_MISSING_IMAGE; //try for missing-icon pixbuf
@@ -388,12 +654,22 @@ void e2_icons_register_stocks (void)
 #ifdef USE_GTK3_10
 	const gchar *stockpath = ICON_DIR G_DIR_SEPARATOR_S "stock";
 	//downstream assumes BGL open
-# ifdef E2_VFS
+# ifdef USE_GTK3_14
+	/* Icon resources are considered as part of the hicolor icon theme and must
+	  be located in subdirectories that are defined in the hicolor icon theme,
+	  such as @path/16x16/actions/run.png.
+	  Icons that are directly placed in the resource path instead of a subdirectory
+	  are also considered as ultimate fallback.
+	*/
+	GtkIconTheme *thm = _e2_icons_get_current_theme ();
+	gtk_icon_theme_add_resource_path (thm, stockpath);	
+# else //ndef USE_GTK3_14
+#  ifdef E2_VFS
 	VPATH ddata = { stockpath, NULL };	//files in installation-dir must be local
 	GList *stockfiles = (GList *)e2_fs_dir_foreach (&ddata,
-# else
+#  else
 	GList *stockfiles = (GList *)e2_fs_dir_foreach (stockpath,
-# endif
+#  endif
 		E2_DIRWATCH_NO, NULL, NULL, NULL E2_ERR_NONE());
 	if (!E2DREAD_FAILED (stockfiles))
 	{
@@ -430,6 +706,7 @@ void e2_icons_register_stocks (void)
 		}
 		g_list_free (stockfiles);
 	}
+# endif //ndef USE_GTK3_14
 
 #else //ndef USE_GTK3_10
 
@@ -703,7 +980,7 @@ void e2_icons_cache_stocks (void)
 				data->freelabel = TRUE;
 			}
 			g_hash_table_insert (cached_stocks, name, data);
-			g_object_unref (G_OBJECT(info));
+			g_object_unref (G_OBJECT (info));
 		}
 #else
 		GtkIconSet *iset;
@@ -734,7 +1011,7 @@ void e2_icons_cache_stocks (void)
 #endif //0
 
 #ifdef USE_GTK3_10
-	g_signal_connect (G_OBJECT(thm), "changed",
+	g_signal_connect (G_OBJECT (thm), "changed",
 		G_CALLBACK(_e2_icons_themechange_cb), NULL);
 #endif
 }
