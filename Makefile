@@ -341,18 +341,11 @@ install: all install_plugins
 	@install -d -m 755 $(BIN_DIR)
 	@install -m 755 $(TARGET) $(BIN_DIR)
 	@rm -f $(ICON_DIR)/*.png
-	@for dir in `ls -rA1 -I*.png $(ICONS)`; do \
-		install -d -m 755 $(ICON_DIR)/$$dir; \
-		for file in `ls $(ICONS)/$$dir |grep png`; do \
-			install -m 644 $(ICONS)/$$dir/$$file $(ICON_DIR)/$$dir/$$file; \
-		done \
-	done
-	@for dir in `ls -rA1 -I*.png $(ICONS)/stock`; do \
-		install -d -m 755 $(ICON_DIR)/stock/$$dir; \
-		for file in `ls $(ICONS)/stock/$$dir |grep $(ICONPATN)`; do \
-			install -m 644 $(ICONS)/stock/$$dir/$$file $(ICON_DIR)/stock/$$dir/$$file; \
-		done \
-	done
+	@install -d -m 755 $(ICON_DIR)
+	@cp -r $(ICONS)/* $(ICON_DIR)
+#	@chmod -f 0755 $(ICON_DIR)
+	@chmod -fR 0644 $(ICON_DIR)/*.png || true
+	@chmod -fR 0644 $(ICON_DIR)/*.svg || true
 	@install -d -m 755 $(DOC_DIR)
 	@for file in `ls $(DOCS)/ |grep -v svn |grep -v desktop_environment |grep -v api |grep -v emelfm2.1`; do \
 		install -m 644 $(DOCS)/$$file $(DOC_DIR); \
