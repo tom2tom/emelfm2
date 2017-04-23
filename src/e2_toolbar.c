@@ -572,6 +572,19 @@ and in the bookmarks setup, and a general submenu setup ...
 	NEEDCLOSEBGL
 }
 */
+#ifdef USE_GTK3_22
+/**
+@brief determine where to locate a toolbar menu relative to @a button
+@param button the activated widget on the toolbar
+@return widget-corner enumerator 
+*/
+GdkGravity e2_toolbar_get_button_gravity (GtkWidget *button)
+{
+	E2_ToolbarRuntime *rt = g_object_get_data (G_OBJECT (button), "bar-runtime");
+	return (e2_option_bool_get_direct (rt->hori)) ?
+		GDK_GRAVITY_SOUTH_WEST : GDK_GRAVITY_NORTH_EAST;
+}
+#else
 /**
 @brief set popup menu position
 
@@ -670,6 +683,7 @@ void e2_toolbar_set_menu_position (GtkMenu *menu, gint *x, gint *y,
 	*x = left;
 	*y = top;
 }
+#endif //ndef USE_GTK3_22
 /**
 @brief pop up a menu, if it's a 'rest' menu, create it first
 
@@ -695,12 +709,23 @@ static void _e2_toolbar_menu_popup (GtkWidget *button,
 
 	if (menu != NULL)
 	{
-		if (GTK_IS_BUTTON(button))
+#ifdef USE_GTK3_22
+		if (GTK_IS_BUTTON (button))
+		{
+			GdkGravity corner = e2_toolbar_get_button_gravity (button);
+			gtk_menu_popup_at_widget (GTK_MENU (menu), button,
+				corner, GDK_GRAVITY_NORTH_WEST, NULL);
+		}
+		else
+			gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
+		if (GTK_IS_BUTTON (button))
 			gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 				(GtkMenuPositionFunc) e2_toolbar_set_menu_position, button, mouse_button, time);
 		else
 			gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 				NULL, button, mouse_button, time);
+#endif
 	}
 }
 /**
@@ -2685,23 +2710,26 @@ static void _e2_toolbar_add_items (GtkTreeModel *model,
 						//provided that one or both of name, icon != NULL,
 						//button contains alignment which contains a box we want
 						GtkWidget *bbox1 =
-# ifdef USE_GTK2_14
+#ifdef USE_GTK2_14
 							gtk_bin_get_child (GTK_BIN (button));
 						bbox1 = gtk_bin_get_child (GTK_BIN (bbox1));
-# else
+#else
 							GTK_BIN (GTK_BIN (button)->child)->child;
-# endif
+#endif
 						GList *firstchildren = gtk_container_get_children (GTK_CONTAINER (bbox1));
 						GtkWidget *bbox2 =
-# ifdef USE_GTK2_14
+#ifdef USE_GTK2_14
 							gtk_bin_get_child (GTK_BIN (btn2));
 						bbox2 = gtk_bin_get_child (GTK_BIN (bbox2));
-# else
+#else
 							GTK_BIN (GTK_BIN (btn2)->child)->child;
-# endif
+#endif
 						GList *children = gtk_container_get_children (GTK_CONTAINER (bbox2));
-						gtk_widget_reparent ((GtkWidget*)children->data, bbox1);
-						gtk_widget_show_all ((GtkWidget*)children->data);
+						if (children != NULL)
+						{
+							gtk_widget_reparent ((GtkWidget*)children->data, bbox1);
+							gtk_widget_show_all ((GtkWidget*)children->data);
+						}
 #endif //ndef USE_GTK3_14
 						gtk_widget_destroy (btn2);
 						ex->true_image = (ex->button_style == 2 || firstchildren == NULL) ? //there is no icon
