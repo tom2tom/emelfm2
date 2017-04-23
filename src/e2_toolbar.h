@@ -140,8 +140,12 @@ gchar *toggles_array [E2_TOGGLE_COUNT];
 
 void e2_toolbar_rebadge (E2_ToolbarRuntime *rt);
 void e2_toolbar_initialise_space_handler (E2_ToolbarRuntime *rt);
+#ifdef USE_GTK3_22
+GdkGravity e2_toolbar_get_button_gravity (GtkWidget *button);
+#else
 void e2_toolbar_set_menu_position (GtkMenu *menu, gint *x, gint *y,
 	gboolean *push_in, GtkWidget *button);
+#endif
 gboolean e2_toolbar_button_toggle (gchar *action_name);
 gboolean e2_toolbar_button_toggle_custom (gchar *hashkey);
 gboolean e2_toolbar_toggle_button_get_state (gchar *action_name);

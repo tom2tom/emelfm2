@@ -1049,6 +1049,7 @@ static void	_e2_treedlg_fill_store (gchar *startpath, E2_TreeDialogRuntime *rt)
  /*** context menu ***/
 /********************/
 
+#ifndef USE_GTK3_22
 /**
 @brief set popup-menu position
 
@@ -1058,8 +1059,8 @@ set @a push_in to TRUE for menu completely inside the screen,
 FALSE for menu clamped to screen size
 
 @param menu UNUSED the GtkMenu to be positioned
-@param x	place to store gint representing the menu left
-@param y  place to store gint representing the menu top
+@param x place to store gint representing the menu left
+@param y place to store gint representing the menu top
 @param push_in place to store pushin flag
 @param rt pointer to data struct for the dialog to which the menu applies
 
@@ -1080,6 +1081,7 @@ static void _e2_treedlg_set_menu_position (GtkMenu *menu,
 	*y = top + alloc.y +alloc.height/2 - 30;
 	*push_in = FALSE;
 }
+#endif //def USE_GTK3_22
 /**
 @brief tree path copy callback
 
@@ -1214,6 +1216,12 @@ static void _e2_treedlg_show_context_menu (GtkWidget *treeview,
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, treeview);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) _e2_treedlg_set_menu_position, rt,
@@ -1222,6 +1230,7 @@ static void _e2_treedlg_show_context_menu (GtkWidget *treeview,
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			NULL, NULL, event_button, event_time);
+#endif
 }
 
   /*********************/
