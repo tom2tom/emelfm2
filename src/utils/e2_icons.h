@@ -162,7 +162,7 @@ gboolean e2_icons_check_stock (const gchar *name);
 void e2_icons_cache_init (void);
 void e2_icons_cache_clear (void);
 GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, gint psize, gboolean missing);
-gint e2_icons_get_pixsize (GtkIconSize size);
+gint e2_icons_get_pixsize (gint size);
 GtkIconSize e2_icons_get_size (gint psize);
 #endif
 
