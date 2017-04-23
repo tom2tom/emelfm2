@@ -96,6 +96,9 @@ static void _e2_icons_destroy_arrows (void)
 #endif
 
 /**
+@brief Get application icons
+
+@return list of GdkPixbuf's at different sizes
 */
 GList *e2_icons_get_application()
 {
@@ -219,7 +222,7 @@ static void _e2_icons_sizes_init (void)
 
 @return icon pixelsize
 */
-gint e2_icons_get_pixsize (GtkIconSize size)
+gint e2_icons_get_pixsize (gint size)
 {
 	return iconsizes [size];
 }
@@ -261,10 +264,8 @@ static E2_TwResult _e2_icons_customfiles_tw (VPATH *localpath, const struct stat
 		case E2TW_F:	//not-directory or link
 		case E2TW_SL:	//symbolic link to a non-directory
 			if (strcasestr (VPSTR(localpath), "stock") == NULL)
-			{
 				g_ptr_array_add (data->iconpaths,
 					g_string_chunk_insert_const (data->chunkedpaths, VPSTR(localpath)));
-			}
 			break;
 		default:
 			break;
@@ -474,25 +475,30 @@ static GtkIconTheme *_e2_icons_get_current_theme (void)
 If not already cached, the relevant image will be created and added to the cache.
 
 @param name gtk-stock-item name, or NULL for missing image icon, or localised custom-icon filename with or without path
-@param psize icon size, pixels (> GTK_ICON_SIZE_DIALOG) or enumerator
+@param isize icon size, enumerator or (if > GTK_ICON_SIZE_DIALOG) pixels
 @param missing TRUE to return missing-image icon if no pixbuf available for @a name
 @return pointer to cached GdkPixbuf (no extra refcount) for the image, or NULL if problem occurred
 */
-GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, gint psize, gboolean missing)
+GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, gint isize, gboolean missing)
 {
 	if (name == NULL)
 		name = STOCK_NAME_MISSING_IMAGE;	//revert to default icon image
-	if (psize >= 0 && psize <= GTK_ICON_SIZE_DIALOG)
-		psize = e2_icons_get_pixsize ((GtkIconSize)psize);
 
 	GArray *allidata = g_hash_table_lookup (cached_icons, name);
 	if (allidata != NULL)
 	{
 		//find 'best' in the cache
+		gint psize;
 		E2_Image *dp;
 		gboolean scale;
 		gshort this, min = 0, max = G_MAXSHORT;
 		gushort indx, iscale = G_MAXUSHORT, inone = G_MAXUSHORT, imin = 0, imax = G_MAXUSHORT, count = allidata->len;
+
+		if (isize >= 0 && isize <= GTK_ICON_SIZE_DIALOG)
+                    psize = e2_icons_get_pixsize (isize);
+		else
+                    psize = isize;
+
 		for (indx=0, dp=(E2_Image*)allidata->data; indx<count; indx++, dp++)
 		{
 			this = dp->psize;
@@ -590,23 +596,23 @@ GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, gint psize, gboolean missing)
 				gchar *iname = stock->name;
 				if (iname == NULL)
 					iname = stock->stock;
-				pxb = gtk_icon_theme_load_icon (thm, iname, psize,
+				pxb = gtk_icon_theme_load_icon (thm, iname, isize,
 					GTK_ICON_LOOKUP_GENERIC_FALLBACK | GTK_ICON_LOOKUP_USE_BUILTIN, NULL);
 # else
-				pxb = gtk_icon_theme_load_icon (thm, name, psize,
+				pxb = gtk_icon_theme_load_icon (thm, name, isize,
 					GTK_ICON_LOOKUP_GENERIC_FALLBACK | GTK_ICON_LOOKUP_USE_BUILTIN, NULL);
 # endif
 #elif defined(USE_GTK3_0)
 				pxb = gtk_icon_set_render_icon_pixbuf (
 					gtk_icon_factory_lookup_default (name),
 					gtk_widget_get_style_context (app.main_window),
-					size);
+					isize);
 #else
 				pxb = gtk_icon_set_render_icon (
 					gtk_icon_factory_lookup_default (name),
 					gtk_rc_get_style (app.main_window),
 					gtk_widget_get_default_direction (),
-					GTK_STATE_NORMAL, psize, NULL, NULL);
+					GTK_STATE_NORMAL, isize, NULL, NULL);
 #endif
 				if (pxb != NULL)
 				{
@@ -621,8 +627,8 @@ GdkPixbuf *e2_icons_get_puxbuf (const gchar *name, gint psize, gboolean missing)
 					return pxb;
 				}
 			}
-			else //name not recognized
-				if (strncmp (check, "gtk-", 4) == 0)
+			//name not recognized
+			if (strncmp (check, "gtk-", 4) == 0)
 			{
 				check += 4; //try for partial-match
 			}
@@ -776,7 +782,7 @@ static void _e2_icons_themechange_cb (GtkIconTheme *icon_theme, gpointer userdat
 # endif //def E2_ADD_STOCKS
 #if 0
 /**
-Find largest avaiable icon-size for @a name, up to a limit of 24 pixels.
+Find largest available icon-size for @a name, up to a limit of 24 pixels.
 This is a helper for initial registration of stock items.
 */
 static gint _e2_icons_match_size (const gchar *name, GtkIconTheme *thm)
@@ -970,7 +976,7 @@ void e2_icons_cache_stocks (void)
 	// will be inconsistent with old config data !!!
 #ifndef USE_GTK3_10
 # ifdef USE_GTK3_0
-	GtkStyleContext *context = gtk_widget_get_style_context (app.main_window);
+	GtkStyleContext *sc = gtk_widget_get_style_context (app.main_window);
  #else
 	GtkStyle *style = gtk_widget_get_style (app.main_window);
 # endif
@@ -1005,7 +1011,7 @@ void e2_icons_cache_stocks (void)
 #else
 		GtkIconSet *iset;
 # ifdef USE_GTK3_0
-		iset = gtk_style_context_lookup_icon_set (context, name);
+		iset = gtk_style_context_lookup_icon_set (sc, name);
 # else
 		iset = gtk_style_lookup_icon_set (style, name);
 # endif
