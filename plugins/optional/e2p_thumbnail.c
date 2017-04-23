@@ -914,6 +914,7 @@ static void _e2p_thumbs_transform (GdkPixbufRotation type, E2_ThumbDialogRuntime
  /*** context menu ***/
 /********************/
 
+#ifndef USE_GTK3_22
 /**
 @brief set popup-menu position
 
@@ -942,9 +943,10 @@ static void _e2p_thumbs_set_menu_position (GtkMenu *menu,
 	alloc = rt->iconview->allocation;
 #endif
 	*x = left + alloc.x + alloc.width/2;
-	*y = top + alloc.y +alloc.height/2 - 30;
+	*y = top + alloc.y + alloc.height/2 - 30;
 	*push_in = FALSE;
 }
+#endif //def USE_GTK3_22
 /**
 @brief timer callback execute command corresponding to item selected from a menu
 We do this outside the menu-item "activated" callback to avoid disrupting gtk's
@@ -1275,16 +1277,20 @@ static void _e2p_thumbs_show_context_menu (GtkWidget *iconview,
 
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
-
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, rt->dialog);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-			(GtkMenuPositionFunc) _e2p_thumbs_set_menu_position, rt,
-			0, event_time);
+			(GtkMenuPositionFunc) _e2p_thumbs_set_menu_position, rt, 0, event_time);
 	else
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			NULL, NULL, 3, event_time);
-
+#endif
 	if (selection)
 		g_list_foreach (selpaths, (GFunc) gtk_tree_path_free, NULL);
 	g_list_free (selpaths);
@@ -1477,6 +1483,7 @@ static GtkWidget *_e2p_thumbs_create_sorting_menu (E2_ThumbDialogRuntime *rt)
 
 	return menu;
 }
+#ifndef USE_GTK3_22
 /**
 @brief set popup menu position
 
@@ -1520,6 +1527,7 @@ static void _e2p_thumbs_set_sortmenu_position (GtkMenu *menu, gint *x, gint *y,
 		*y = button_y - menu_size.height - 2;
 	*push_in = FALSE;
 }
+#endif
 /**
 @brief cleanup during the destruction of the view related to a dialog
 @param object UNUSED the view-related object being destroyed
@@ -1566,11 +1574,15 @@ static void _e2p_thumbs_response_cb (GtkDialog *dialog, gint response,
 		case E2_RESPONSE_USER2: //sort-button click
 		{
 			GtkWidget *menu = _e2p_thumbs_create_sorting_menu (rt);
-			guint32 event_time = gtk_get_current_event_time ();
 			NEEDCLOSEBGL
+#ifdef USE_GTK3_22
+			gtk_menu_popup_at_widget (GTK_MENU (menu), rt->sortbtn,
+				GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST, NULL); //CHECKME if not enough under-space?
+#else
+			guint32 event_time = gtk_get_current_event_time ();
 			gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-				(GtkMenuPositionFunc) _e2p_thumbs_set_sortmenu_position,
-					rt->sortbtn, 1, event_time);
+				(GtkMenuPositionFunc) _e2p_thumbs_set_sortmenu_position, rt->sortbtn, 1, event_time);
+#endif
 			NEEDOPENBGL
 		}
 			break;
