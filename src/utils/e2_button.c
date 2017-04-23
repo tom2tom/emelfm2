@@ -34,7 +34,7 @@ E2_Button E2_BUTTON_APPLYTOALL =
 	{ N_("_All"),"apply_all"E2ICOND,N_("Change all unprocessed items"),
 		E2_BTN_TIPPED,E2_BTN_TIPPED,E2_RESPONSE_APPLYTOALL};
 E2_Button E2_BUTTON_DISCARD =
-	{ N_("_Discard"),STOCK_NAME_DISCARD,N_("Abandon any changes"),
+	{ N_("_Discard"),"discard"E2ICOND,N_("Abandon any changes"),
 		E2_BTN_TIPPED,E2_BTN_TIPPED,E2_RESPONSE_DISCARD};
 E2_Button E2_BUTTON_REFRESH =
 	{ N_("_Refresh"),STOCK_NAME_REFRESH,NULL,0,0,E2_RESPONSE_REFRESH};
