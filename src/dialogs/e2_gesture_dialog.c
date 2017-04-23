@@ -64,12 +64,12 @@ typedef struct _E2_GestureDialogRuntime
 static void _e2_gesture_dialog_cairo_setup (cairo_t *cr, GtkWidget *widget)
 {
 	GdkRGBA *color;
-	GtkStyleContext *context;
+	GtkStyleContext *sc;
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND); //enable display of dots ?
 	cairo_set_line_width (cr, 1.0); //approx 1 pixel
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
-	context = gtk_widget_get_style_context (widget);
-	gtk_style_context_get (context, GTK_STATE_NORMAL, GTK_STYLE_PROPERTY_COLOR,
+	sc = gtk_widget_get_style_context (widget);
+	gtk_style_context_get (sc, GTK_STATE_NORMAL, GTK_STYLE_PROPERTY_COLOR,
 		&color, NULL);
 	cairo_set_source_rgb (cr, color->red, color->green, color->blue);
 	gdk_rgba_free (color);

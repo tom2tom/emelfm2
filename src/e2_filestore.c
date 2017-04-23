@@ -1054,9 +1054,8 @@ GtkListStore *e2_filestore_fill (GList *entries, ViewInfo *view)
 /*
 #ifdef USE_GTK3_0
 	GdkRBGA *normal;
-	GtkStyleContext *context;
-	context = gtk_widget_get_style_context (curr_view->treeview);
-	gtk_style_context_get (context, GTK_STATE_NORMAL, GTK_STYLE_PROPERTY_COLOR,
+	GtkStyleContext *sc = gtk_widget_get_style_context (curr_view->treeview);
+	gtk_style_context_get (sc, GTK_STATE_NORMAL, GTK_STYLE_PROPERTY_COLOR,
 		&normal, NULL);
 	GDKCOLOR normal2 = {0,  (guint16)(65535 * normal->red),
 							(guint16)(65535 * normal->green),
