@@ -153,12 +153,13 @@ static gchar *_e2_command_line_get_name (const gchar *private)
 */
 static void _e2_command_line_update_entry (E2_CommandLineRuntime *rt)
 {
-	GtkWidget *entry =
+	GtkWidget *entry = (GtkWidget*) GTK_ENTRY(
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 #endif
+	);
 	if (e2_option_bool_get_direct (rt->opt_history_last))
 	{
 		GtkTreeIter iter;
@@ -236,13 +237,13 @@ static gboolean _e2_command_line_get (GtkWidget **widget,
 				for (line = app.command_lines; line != NULL ; line = g_list_next (line))
 				{
 					clrt = line->data;
-					if (*widget ==
+					if (*widget == (GtkWidget*)GTK_ENTRY (
 #ifdef USE_GTK2_14
 						gtk_bin_get_child (GTK_BIN (clrt->combo))
 #else
 						GTK_BIN (clrt->combo)->child
 #endif
-					)
+					))
 						break;
 				}
 				if (line != NULL)
@@ -259,12 +260,13 @@ static gboolean _e2_command_line_get (GtkWidget **widget,
 			return FALSE;
 	}
 	//set the real entry widget
-	*widget =
+	*widget = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN ((*rt)->combo));
+		gtk_bin_get_child (GTK_BIN ((*rt)->combo))
 #else
-		GTK_BIN ((*rt)->combo)->child;
+		GTK_BIN ((*rt)->combo)->child
 #endif
+	);
 	return TRUE;
 }
 /**
@@ -283,10 +285,16 @@ void e2_command_line_highlight (GtkWidget *entry, gboolean on)
 		return;
 	if (on)
 	{
-#ifdef USE_GTK3_0
-		GdkRGBA color;
-		e2_option_color_get_RGBA ("color-positive", &color);
-		gtk_widget_override_color (entry, GTK_STATE_NORMAL, &color);
+#ifdef USE_GTK3_16
+		gchar *color = e2_utils_color2str(e2_option_color_get ("color-positive"));
+		//CHECKME set for :focus too?
+		gchar *cssdata = g_strdup_printf ("GtkEntry { color:%s; }", color);
+		e2_widget_override_style (entry, cssdata);
+		g_free (color);
+		g_free (cssdata);
+#elif defined (USE_GTK3_0)
+		gtk_widget_override_color (entry, GTK_STATE_NORMAL,
+			e2_option_color_get ("color-positive"));
 #else
 		gtk_widget_modify_text (entry, GTK_STATE_NORMAL,
 			e2_option_color_get ("color-positive"));
@@ -294,7 +302,9 @@ void e2_command_line_highlight (GtkWidget *entry, gboolean on)
 	}
 	else
 	{
-#ifdef USE_GTK3_0
+#ifdef USE_GTK3_16
+		e2_widget_override_style (entry, NULL);
+#elif defined (USE_GTK3_0)
 		gtk_widget_override_color (entry, GTK_STATE_NORMAL, NULL);
 #else
 		gtk_widget_modify_text (entry, GTK_STATE_NORMAL, NULL);
@@ -313,6 +323,7 @@ Also sets the active iter for the combo, if relevant.
 */
 void e2_command_line_update_highlight (GtkWidget *entry, const gchar *newtext)
 {
+	printd (DEBUG, "parent-combo get @ 14");
 	GtkComboBox *combo = GTK_COMBO_BOX (
 #ifdef USE_GTK2_14
 		gtk_widget_get_parent (entry)
@@ -320,10 +331,12 @@ void e2_command_line_update_highlight (GtkWidget *entry, const gchar *newtext)
 		entry->parent
 #endif
 	);
-	GtkTreeModel *model = gtk_combo_box_get_model (combo);
+	printd (DEBUG, "parent-combo get @ 15");
+
 	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_combo_box_get_model (combo);
 	gboolean match = (gtk_tree_model_get_iter_first (model, &iter)
-		  && e2_tree_find_iter_from_str_simple (model, 0, newtext, &iter, FALSE));
+		&& e2_tree_find_iter_from_str_simple (model, 0, newtext, &iter, FALSE));
 	e2_command_line_highlight (entry, match);
 	if (match)
 	{
@@ -342,18 +355,19 @@ This is initiated from within _e2_fileview_change_dir(), with BGL closed/on
 static void _e2_command_line_change_dir (const gchar *path,
 	E2_CommandLineRuntime *rt)
 {
-	GtkWidget *entry =
+	GtkWidget *entry = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 #endif
+	);
 	if (e2_option_bool_get_direct (rt->opt_history_last))
 	{
 		gtk_entry_set_text (GTK_ENTRY (entry), path);
 		e2_command_line_update_highlight (entry, path);
 		if (e2_option_bool_get ("dir-line-pathname-hint"))
-			e2_widget_set_safetip (entry, path);
+			e2_widget_set_safetip (rt->combo, path);
 	}
 	else
 	{
@@ -588,12 +602,13 @@ static gboolean _e2_command_line_focus_dirline_action (gpointer from, E2_ActionR
 		E2_CommandLineRuntime *clrt = (E2_CommandLineRuntime *) list->data;
 		if (!clrt->original && clrt->pane == pane)
 		{
-			GtkWidget *child =
+			GtkWidget *child = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-				gtk_bin_get_child (GTK_BIN (clrt->combo));
+			gtk_bin_get_child (GTK_BIN (clrt->combo))
 #else
-			GTK_BIN (clrt->combo)->child;
+			GTK_BIN (clrt->combo)->child
 #endif
+			);
 #ifdef USE_GTK2_18
 			if (gtk_widget_has_focus (child))
 #else
@@ -659,12 +674,13 @@ static gboolean _e2_command_line_focus_action (gpointer from, E2_ActionRuntime *
 	_e2_command_line_get_first (&rt);	//get the first line
 	if (rt == NULL)
 		return FALSE;
-	GtkWidget *child =
+	GtkWidget *child = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 #endif
+	);
 	gtk_editable_set_position (GTK_EDITABLE (child), -1);
 	gtk_widget_grab_focus (child);
 	return TRUE;
@@ -684,12 +700,13 @@ static gboolean _e2_command_line_focus_toggle_action
 	_e2_command_line_get_first (&rt); //gets the first line
 	if (rt == NULL)
 		return FALSE;
-	GtkWidget *child =
+	GtkWidget *child = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 #endif
+	);
 #ifdef USE_GTK2_18
 	if (gtk_widget_has_focus (child))
 #else
@@ -733,12 +750,13 @@ static gboolean _e2_command_line_clear_action (gpointer from, E2_ActionRuntime *
 				rt = (E2_CommandLineRuntime *)line->data;
 				if (rt->combo <shares some ancestor with 'from'>) ?? from = NULL ?
 				{
-					entry =
+					entry = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-						gtk_bin_get_child (GTK_BIN (rt->combo));
+						gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-						GTK_BIN (rt->combo)->child;
+						GTK_BIN (rt->combo)->child
 #endif
+					);
 					break;
 				}
 			}
@@ -854,12 +872,13 @@ static gboolean _e2_command_line_insert_action
 	if (clrt == NULL)
 		return FALSE;
 
-	GtkWidget *entry =
+	GtkWidget *entry = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (clrt->combo));
+		gtk_bin_get_child (GTK_BIN (clrt->combo))
 #else
-		GTK_BIN (clrt->combo)->child;
+		GTK_BIN (clrt->combo)->child
 #endif
+	);
 	GString *cmd = g_string_sized_new (128);
 
 	if (GTK_IS_TEXT_VIEW (from)) //output
@@ -1105,12 +1124,13 @@ static void _e2_commmand_line_child_menu_cb (GtkMenuItem *item, E2_TaskRuntime *
 		if (clrt != NULL)
 		{
 			NEEDCLOSEBGL
-			GtkWidget *entry =
+			GtkWidget *entry = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-				gtk_bin_get_child (GTK_BIN (clrt->combo));
+				gtk_bin_get_child (GTK_BIN (clrt->combo))
 #else
-				GTK_BIN (clrt->combo)->child;
+				GTK_BIN (clrt->combo)->child
 #endif
+			);
 			gint newlen;
 			gint oldcursor = gtk_editable_get_position (GTK_EDITABLE (entry));
 			if (oldcursor == 0 ||
@@ -1168,13 +1188,25 @@ static gboolean _e2_command_line_insert_child_pid
 	GtkWidget *menu = e2_menu_create_child_menu (E2_CHILD_ACTIVE,
 		_e2_commmand_line_child_menu_cb);
 	//determine the menu's popup position
+#ifdef USE_GTK3_22
+	if (GTK_IS_BUTTON (from))
+	{
+		GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+		gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+			corner, GDK_GRAVITY_NORTH_WEST, NULL);
+	}
+	else
+	{
+		e2_menu_popup_at_widget (menu, (GtkWidget*)app.tab.text);
+	}
+#else
 	if (GTK_IS_BUTTON (from))
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_toolbar_set_menu_position, from, 1, 0);
 	else
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_output_set_menu_position, app.tab.text, 0, 0);
-
+#endif
 	return TRUE;
 }
 
@@ -1194,12 +1226,13 @@ gboolean e2_command_line_insert (const gchar *newtext)
 	_e2_command_line_get_first (&clrt); //in principle, there could be > 1 OK ??
 	if (clrt != NULL)
 	{
-		GtkWidget *entry =
+		GtkWidget *entry = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-			gtk_bin_get_child (GTK_BIN (clrt->combo));
+			gtk_bin_get_child (GTK_BIN (clrt->combo))
 #else
-			GTK_BIN (clrt->combo)->child;
+			GTK_BIN (clrt->combo)->child
 #endif
+		);
 		gint oldcursor = gtk_editable_get_position (GTK_EDITABLE (entry));
 		gint newlen = g_utf8_strlen (newtext, -1);
 		gtk_editable_insert_text (GTK_EDITABLE (entry), newtext, newlen, &oldcursor);
@@ -1216,12 +1249,13 @@ gboolean e2_command_line_insert (const gchar *newtext)
 */
 void e2_command_line_register_keybindings (E2_CommandLineRuntime *rt)
 {
-	GtkWidget *entry =
+	GtkWidget *entry = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 #endif
+	);
 	//other "key-press-event" connection(s) have non-NULL data
 	//also, if needed, could use bindings cb func
 	guint id = g_signal_lookup ("key-press-event", GTK_TYPE_ENTRY);
@@ -1245,12 +1279,13 @@ This should be applied before 'normal' button-event callbacks are connected
 */
 void e2_command_line_register_pointerbindings (E2_CommandLineRuntime *rt)
 {
-	GtkWidget *entry =
+	GtkWidget *entry = (GtkWidget*) GTK_ENTRY (
 # ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 # else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 # endif
+	);
 	gchar *category = (rt->original) ?
 		g_strconcat (_C(17),".",_C(23),".",_C(5),NULL):	//_(general.main.command line"
 		g_strconcat (_C(17),".",_C(23),".",_C(12),NULL);//_(general.main.dir line"
@@ -1329,12 +1364,13 @@ E2_CommandLineRuntime *e2_command_line_create (gboolean commands,
 	//actually create the comboboxentry and its history
 	//(on gtk2, MAY need BGL closed )
 	rt->combo = e2_combobox_get ((ActivateFunc)activate_cb, rt, &rt->history, flags);
-	GtkWidget *child =
+	GtkWidget *child = (GtkWidget*) GTK_ENTRY (
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (rt->combo));
+		gtk_bin_get_child (GTK_BIN (rt->combo))
 #else
-		GTK_BIN (rt->combo)->child;
+		GTK_BIN (rt->combo)->child
 #endif
+	);
 	rt->model = gtk_combo_box_get_model (GTK_COMBO_BOX (rt->combo));	//model is for a liststore
 
 	if (commands)

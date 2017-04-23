@@ -117,12 +117,13 @@ static gboolean _e2_combobox_key_press_cb (GtkWidget *combo, GdkEventKey *event,
 	if (GTK_IS_COMBO_BOX_ENTRY (combo))
 #endif
 	{
-		GtkWidget *entry =
+		GtkWidget *entry = (GtkWidget*) GTK_ENTRY(
 #ifdef USE_GTK2_14
-			gtk_bin_get_child (GTK_BIN (combo));
+			gtk_bin_get_child (GTK_BIN (combo))
 #else
-			GTK_BIN (combo)->child;
+			GTK_BIN (combo)->child
 #endif
+		);
 		if (pos == -1)
 			gtk_entry_set_text (GTK_ENTRY (entry), "");
 		else
@@ -173,13 +174,15 @@ static gboolean _e2_combobox_key_press_cb2 (GtkWidget *entry, GdkEventKey *event
 			const gchar *this = gtk_entry_get_text (GTK_ENTRY (entry));
 			if (this != NULL)	//cannot happen ?
 			{
-				e2_combobox_clear_value (
+	printd (DEBUG, "parent-combo get @ 8");
+				e2_combobox_clear_value ((GtkWidget*) GTK_COMBO_BOX (
 #ifdef USE_GTK2_14
-					gtk_widget_get_parent (entry),
+					gtk_widget_get_parent (entry)
 #else
-					entry->parent,
+					entry->parent
 #endif
-					this, TRUE);
+					), this, TRUE);
+	printd (DEBUG, "parent-combo get @ 9");
 			}
 			retval = TRUE;
 		}
@@ -189,6 +192,7 @@ static gboolean _e2_combobox_key_press_cb2 (GtkWidget *entry, GdkEventKey *event
 			GtkTreeModel *model;
 
 			gtk_entry_set_text (GTK_ENTRY (entry), "");
+	printd (DEBUG, "parent-combo get @ 10");
 			combo = GTK_COMBO_BOX (
 #ifdef USE_GTK2_14
 				gtk_widget_get_parent (entry)
@@ -196,6 +200,7 @@ static gboolean _e2_combobox_key_press_cb2 (GtkWidget *entry, GdkEventKey *event
 				entry->parent
 #endif
 			);
+	printd (DEBUG, "parent-combo get @ 11");
 			model = gtk_combo_box_get_model (combo);
 			gtk_list_store_clear (GTK_LIST_STORE (model));
 			if (history != NULL && *history != NULL)
@@ -285,12 +290,13 @@ static void _e2_combobox_changed_cb (GtkWidget *combo, gpointer data)
 		&& gtk_combo_box_get_active (GTK_COMBO_BOX (combo)) != -1)
 	{
 		gboolean focus = GPOINTER_TO_INT (data);
-		GtkWidget *entry =
+		GtkWidget *entry = (GtkWidget*) GTK_ENTRY(
 #ifdef USE_GTK2_14
-			gtk_bin_get_child (GTK_BIN (combo));
+			gtk_bin_get_child (GTK_BIN (combo))
 #else
-			GTK_BIN (combo)->child;
+			GTK_BIN (combo)->child
 #endif
+		);
 		if (focus)
 		{
 			gtk_widget_grab_focus (entry);
@@ -323,12 +329,6 @@ void e2_combobox_activated_cb (GtkWidget *entry, gpointer data)
 {
 	printd (DEBUG, "e2_combobox_activated_cb (entry: data:%x", data);
 	NEEDCLOSEBGL
-	GtkWidget *combo =
-#ifdef USE_GTK2_14
-		gtk_widget_get_parent (entry);
-#else
-		entry->parent;
-#endif
 	const gchar *text = gtk_entry_get_text (GTK_ENTRY (entry));
 	if (text != NULL && *text != '\0')
 	{
@@ -351,7 +351,16 @@ void e2_combobox_activated_cb (GtkWidget *entry, gpointer data)
 			newtext = (gchar*)text;
 			limit = 0;
 		}
-		e2_combobox_prepend_history (combo, newtext, limit, GPOINTER_TO_INT (data));
+	printd (DEBUG, "parent-combo get @ 12");
+		GtkComboBox *combo = GTK_COMBO_BOX (
+#ifdef USE_GTK2_14
+			gtk_widget_get_parent (entry)
+#else
+			entry->parent
+#endif
+		);
+	printd (DEBUG, "parent-combo get @ 13");
+		e2_combobox_prepend_history ((GtkWidget*)combo, newtext, limit, GPOINTER_TO_INT (data));
 		if (newtext != (gchar*)text)
 			g_free (newtext);
 	}
@@ -383,12 +392,13 @@ entry, and moves the cursor to the end
 */
 /*void e2_combobox_select_last (GtkWidget *combo)
 {
-	GtkWidget *entry =
+	GtkWidget *entry = (GtkWidget*) GTK_ENTRY(
 #ifdef USE_GTK2_14
-		gtk_bin_get_child (GTK_BIN (combo));
+		gtk_bin_get_child (GTK_BIN (combo))
 #else
-		GTK_BIN (combo)->child;
+		GTK_BIN (combo)->child
 #endif
+	);
 //	GtkTreeModel *model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
 	gint count = _e2_combobox_last_index ((GTK_COMBO_BOX (combo));
 	gchar *text = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
@@ -501,12 +511,13 @@ void e2_combobox_clear_value (GtkWidget *combo, const gchar *value, gboolean wit
 	if (with_entry)
 	{
 		//now it's safe to change entry content (and therefore, possibly value)
-		GtkWidget *entry =
+		GtkWidget *entry = (GtkWidget*) GTK_ENTRY(
 #ifdef USE_GTK2_14
-			gtk_bin_get_child (GTK_BIN (combo));
+			gtk_bin_get_child (GTK_BIN (combo))
 #else
-			GTK_BIN(combo)->child;
+			GTK_BIN(combo)->child
 #endif
+		);
 		const gchar *now = gtk_entry_get_text (GTK_ENTRY(entry));
 		if (!strcmp (now, value))
 		{
@@ -723,21 +734,22 @@ GtkWidget *e2_combobox_get (void (*activate_cb)(GtkEntry*,gpointer),
 		//early gtk3 cannot cope with combobox styling ?
 #ifdef USE_GTK3_6
 		//use distinct style-object for each combo, cuz all are destroyed during any config window-recreation
-		GtkCssProvider *liststyle = gtk_css_provider_new ();
+		GtkCssProvider *style = gtk_css_provider_new ();
 		const gchar *cssdata = "GtkComboBox { -GtkComboBox-appears-as-list:1; }";
 		GError *err = NULL;
-		if (gtk_css_provider_load_from_data (liststyle, cssdata, -1, &err))
+		gtk_css_provider_load_from_data (style, cssdata, -1, &err);
+		if (err == NULL)
 		{
 			GtkStyleContext *sc = gtk_widget_get_style_context (combo);
-			gtk_style_context_add_provider (sc, GTK_STYLE_PROVIDER(liststyle),
-				GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+			gtk_style_context_add_provider (sc, GTK_STYLE_PROVIDER(style),
+				(GTK_STYLE_PROVIDER_PRIORITY_FALLBACK+1));
 		}
 		else
 		{
 			printd (WARN, "Combobox styling failure: %s", err->message);
 			g_error_free (err);
 		}
-		g_object_unref (G_OBJECT (liststyle)); //back to refcount=1, or 0
+		g_object_unref (G_OBJECT (style)); //back to refcount=1, or 0
 #elif !defined(USE_GTK3_0)
 		static gboolean style_parsed = FALSE;
 		if (!style_parsed)
@@ -756,7 +768,7 @@ GtkWidget *e2_combobox_get (void (*activate_cb)(GtkEntry*,gpointer),
 	if (flags & E2_COMBOBOX_HAS_ENTRY)
 	{
 #ifdef USE_GTK2_14
-		GtkWidget *child = gtk_bin_get_child (GTK_BIN (combo));
+		GtkWidget *child =  (GtkWidget*)GTK_ENTRY (gtk_bin_get_child (GTK_BIN (combo)));
 #endif
 		 //<Delete> processing, no key translation needed, NULL history ok
 		g_signal_connect (G_OBJECT
