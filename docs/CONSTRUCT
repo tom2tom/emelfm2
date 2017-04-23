@@ -1,0 +1,63 @@
+$Id: INSTALL 2434 2012-02-18 20:58:16Z tpgww $
+
+REQUIREMENTS
+~~~~~~~~~~~~
+
+Gtk+ >= 2.6 (http://www.gtk.org)
+gcc >= 3.2 (http://gcc.gnu.org)
+shell commands - grep, sed
+libraries - libmagic is desirable, not mandatory, at runtime.
+
+The crypt plugin can make use of [de]compressors liblzo, libz and/or libbz2 if
+they're available, but will otherwise work without any [de]compression.
+Development files are not needed.
+
+Build-time options
+
+emelFM2 can be built with with some relevant capabilities of later Gtk+ versions.
+
+emelFM2 can be built with improved file alteration monitoring, using kernel-based
+mechansim (ATM only inotify on linux) or gamin >= 0.1.0 (http://www.gnome.org/~veillard/gamin/index.html).
+
+emelFM2 can be built with plugins that require some external libraries
+threadsafe modification of libgimpthumb
+(http://emelfm2.net/attachment/wiki/OtherDownLoads/libgimpthumb-2.6.7.tar.bz2)
+for the thumbnails plugin
+libacl with more-or-less the full capability of the POSIX standard for ACL's
+for the ACL plugin
+
+COMPILE
+~~~~~~~~~
+
+This is not an autotools project. The minimal configuration can be done manually,
+in the form of compile-time argument(s) to a make command, and/or modification
+of parameter(s) in file Makefile.config.
+
+To compile:
+
+make
+or
+make OPTION=choice OPTION2=choice2 ....
+
+The various make options are described, and set to their respective defaults,
+in file Makefile.config. 
+
+For new makers, any parameter specified in Makefile.config in this form:
+ OPTION ?= choice
+means that OPTION will be assiged the value choice unless OPTION is otherwise
+specified by the user, as an argument to the make command, as shown in the
+second example above.
+
+UPDATE TRANSLATION FILES
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+make i18n
+
+API DOCUMENTATION
+~~~~~~~~~~~~~~~~~
+
+If you have doxygen installed,
+
+make doc
+
+will create or refresh a suite of html files, in docs/api/html in the source code tree.
