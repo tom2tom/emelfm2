@@ -822,6 +822,65 @@ GtkWidget *e2_widget_add_notebook_page (GtkWidget *notebook, gchar *tabname,
 	e2_widget_sw_add_with_viewport (scrolled, vbox);
 	return vbox;
 }
+#ifdef USE_GTK3_16
+/**
+@brief adjust the style of @a widget
+
+@param widget what is to be styled
+@param cssdata style-parameters-string or NULL
+e.g.
+background‑color
+color rgba(r,g,b,a)
+font‑*
+ family
+ size
+ style
+ variant
+ weight
+ stretch
+font [ 〈font-style〉 || 〈font-variant〉 || 〈font-weight〉 || 〈font-stretch〉 ]? 〈font-size〉 〈font-family〉
+
+@return
+*/
+void e2_widget_override_style (GtkWidget *widget, const gchar *cssdata)
+{
+	GtkStyleContext *sc = gtk_widget_get_style_context (widget);
+	if (sc)
+	{
+		GtkStyleProvider *style = g_object_get_data (G_OBJECT(widget), "_e2-styler");
+		if (cssdata != NULL)
+		{
+			if (style != NULL)
+			{
+				gtk_style_context_remove_provider (sc, style);
+//				g_object_unref (G_OBJECT (style));
+			}
+		 	GtkCssProvider *style = gtk_css_provider_new ();
+			GError *err = NULL;
+			gtk_css_provider_load_from_data (style, cssdata, -1, &err);
+			if (err == NULL)
+			{
+				gtk_style_context_add_provider (sc, GTK_STYLE_PROVIDER (style),
+					(GTK_STYLE_PROVIDER_PRIORITY_FALLBACK+1));
+				g_object_set_data (G_OBJECT(widget), "_e2-styler", style);
+			}
+			else
+			{
+				printd (WARN, "Widget styling failure: %s", err->message);
+				g_error_free (err);
+				g_object_set_data (G_OBJECT(widget), "_e2-styler", NULL);
+			}
+			g_object_unref (G_OBJECT (style)); //back to refcount=1, or 0
+		}
+		else if (style != NULL)
+		{
+			gtk_style_context_remove_provider (sc, style);
+//			g_object_unref (G_OBJECT (style));
+			g_object_set_data (G_OBJECT(widget), "_e2-styler", NULL);
+		}
+	}
+}
+#else
 /**
 @brief  set font for @a widget to @a font_string
 
@@ -841,6 +900,7 @@ void e2_widget_set_font (GtkWidget *widget, const gchar *font_string)
 #endif
 	pango_font_description_free (font_desc);
 }
+#endif //ndef USE_GTK3_16
 /**
 @brief get approximate size of a character used in @a widget
 

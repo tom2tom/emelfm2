@@ -926,9 +926,17 @@ void e2_view_dialog_set_font (gint *char_width, gint *char_height, E2_ViewDialog
 			fntname = "Sans 10";
 		}
 	}
+#ifdef USE_GTK3_16
+	gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
+	e2_widget_override_style (rt->textview, cssdata);
+	g_free (cssdata);
+#else
 	e2_widget_set_font (rt->textview, fntname);
+#endif
 	e2_widget_get_font_pixels (rt->textview, char_width, char_height);
 }
+
+#ifndef USE_GTK3_22
 /**
 @brief set popup menu position
 
@@ -938,8 +946,8 @@ Set @a push_in to TRUE for menu completely inside the screen,
 FALSE for menu clamped to screen size
 
 @param menu the GtkMenu to be positioned
-@param x	place to store gint representing the menu left
-@param y  place to store gint representing the menu top
+@param x place to store gint representing the menu left
+@param y place to store gint representing the menu top
 @param push_in place to store pushin flag
 @param rt data struct for dialog in focus when the menu key was pressed
 
@@ -960,6 +968,7 @@ void e2_view_dialog_set_menu_position (GtkWidget *menu,
 	*y = top + alloc.y + alloc.height/2;
 	*push_in = FALSE;
 }
+#endif //ndef USE_GTK3_22
 /**
 @brief perform copy
 
@@ -1030,6 +1039,12 @@ static void _e2_view_dialog_show_context_menu (GtkWidget *textview,
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, textview);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_view_dialog_set_menu_position,
@@ -1038,6 +1053,7 @@ static void _e2_view_dialog_show_context_menu (GtkWidget *textview,
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			NULL, NULL, event_button, event_time);
+#endif
 }
 /**
 @brief construct and show hbox with search-bar items
@@ -1766,18 +1782,29 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 	GtkWidget *hbox = e2_view_dialog_create_searchbar (rt);
 	gtk_container_add (GTK_CONTAINER (hndlbox), hbox);
 	//add things to the action-area
-#ifdef USE_GTK3_12
+#ifdef USE_GTK3_0
 	rt->info_label = gtk_label_new (_("not found"));
+# ifdef USE_GTK3_16
+	gchar *color = e2_utils_color2str(e2_option_color_get ("color-negative"));
+	//CHECKME set for :focus too?
+	gchar *cssdata = g_strdup_printf ("GtkLabel { color:%s; }", color);
+	e2_widget_override_style (rt->info_label, cssdata);
+	g_free (color);
+	g_free (cssdata);
+# else
 	gtk_widget_override_color (rt->info_label, 0, e2_option_color_get ("color-negative"));
-//TODO make this show at LHS by styling only
+# endif
+	//TODO make this show at LHS by styling only
 	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
 		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
+# ifdef USE_GTK3_12
 WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
+# endif
 	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
 	gtk_container_add (GTK_CONTAINER(hbbox), rt->info_label);
 	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (hbbox), rt->info_label, TRUE);
 	gchar *labeltext;
-#else
+#else //GTK2
 	GtkWidget *hbbox =
 # ifdef USE_GTK2_14
 		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
