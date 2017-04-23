@@ -261,13 +261,7 @@ void e2_pane_flag_active (void)
 			default:
 			{
 				//set all active columns' header color
-#ifdef USE_GTK3_0
-				GdkRGBA color;
-				GdkRGBA *active_btncolor = &color;
-				e2_option_color_get_RGBA ("color-active-pane", active_btncolor);
-#else
-				GdkColor *active_btncolor = e2_option_color_get ("color-active-pane");
-#endif
+				GDKCOLOR *active_btncolor = e2_option_color_get ("color-active-pane");
 				GList *base = gtk_tree_view_get_columns (GTK_TREE_VIEW (curr_view->treeview));
 				GList *columns;
 #ifdef USE_GTK2_14
@@ -285,15 +279,21 @@ void e2_pane_flag_active (void)
 					else
 					{
 # endif
-# ifdef USE_GTK3_0
-						gtk_widget_override_background_color (header_button,
-# else //gtk 2.14-2.22
-						gtk_widget_modify_bg (header_button,
-# endif
-#else //gtk < 2.14
-						gtk_widget_modify_bg (((GtkTreeViewColumn *)columns->data)->button,
 #endif
-						GTK_STATE_NORMAL, active_btncolor);
+#ifdef USE_GTK3_16
+						gchar *color = e2_utils_color2str(active_btncolor);
+						//CHECKME set for :focus too?
+						gchar *cssdata = g_strdup_printf ("GtkButton {  background-color:%s; }", color);
+						e2_widget_override_style (header_button, cssdata);
+						g_free (color);
+						g_free (cssdata);
+#elif defined (USE_GTK3_0)
+						gtk_widget_override_background_color (header_button, GTK_STATE_NORMAL, active_btncolor);
+#elif defined (USE_GTK2_14)
+						gtk_widget_modify_bg (header_button, GTK_STATE_NORMAL, active_btncolor);
+#else
+						gtk_widget_modify_bg (((GtkTreeViewColumn *)columns->data)->button, GTK_STATE_NORMAL, active_btncolor);
+#endif
 #ifdef USE_GTK2_14
 # ifdef DEBUG_MESSAGES
 					}
@@ -315,15 +315,16 @@ void e2_pane_flag_active (void)
 					else
 					{
 # endif
-# ifdef USE_GTK3_0
-						gtk_widget_override_background_color (header_button,
-# else //gtk 2.14-2.22
-						gtk_widget_modify_bg (header_button,
-# endif
-#else //gtk < 2.14
-						gtk_widget_modify_bg (((GtkTreeViewColumn *)columns->data)->button,
 #endif
-							GTK_STATE_NORMAL, NULL);
+#ifdef USE_GTK3_16
+						e2_widget_override_style (header_button, NULL);
+#elif defined (USE_GTK3_0)
+						gtk_widget_override_background_color (header_button, GTK_STATE_NORMAL, NULL);
+#elif defined (USE_GTK2_14)
+						gtk_widget_modify_bg (header_button, GTK_STATE_NORMAL, NULL);
+#else
+						gtk_widget_modify_bg (((GtkTreeViewColumn *)columns->data)->button, GTK_STATE_NORMAL, NULL);
+#endif
 #ifdef USE_GTK2_14
 # ifdef DEBUG_MESSAGES
 					}
@@ -1298,6 +1299,16 @@ static gboolean _e2_pane_go_forward (gpointer from, E2_ActionRuntime *art)
 		GtkWidget *menu = _e2_pane_popup_forward (GTK_WIDGET (from), rt);
 		if (menu != NULL)
 		{
+#ifdef USE_GTK3_22
+			if (GTK_IS_BUTTON (from))
+			{
+				GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+				gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+					corner, GDK_GRAVITY_NORTH_WEST, NULL);
+			}
+			else
+				gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 			guint32 event_time = gtk_get_current_event_time ();
 			if (GTK_IS_BUTTON(from))
 				gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
@@ -1305,6 +1316,7 @@ static gboolean _e2_pane_go_forward (gpointer from, E2_ActionRuntime *art)
 			else
 				//FIXME
 				gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 0, event_time);
+#endif
 		}
 	}
 	else
@@ -1439,13 +1451,24 @@ static gboolean _e2_pane_go_back (gpointer from, E2_ActionRuntime *art)
 		GtkWidget *menu = _e2_pane_popup_backward (GTK_WIDGET (from), rt);
 		if (menu != NULL)
 		{
+#ifdef USE_GTK3_22
+			if (GTK_IS_BUTTON (from))
+			{
+				GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+				gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+					corner, GDK_GRAVITY_NORTH_WEST, NULL);
+			}
+			else
+				gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 			guint32 event_time = gtk_get_current_event_time ();
 			if (GTK_IS_BUTTON(from))
 				gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 					(GtkMenuPositionFunc) e2_toolbar_set_menu_position, from, 1, event_time);
 			else
-			//FIXME
-			gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 1, event_time);
+				//FIXME
+				gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 1, event_time);
+#endif
 		}
 	}
 	else
@@ -1708,6 +1731,16 @@ static gboolean _e2_pane_filter_menu_create (gpointer from, E2_ActionRuntime *ar
 {
 	E2_PaneRuntime *rt = e2_pane_get_runtime (from, art->data, NULL);
 	GtkWidget *menu = e2_menu_create_filter_menu (&rt->view);
+#ifdef USE_GTK3_22
+	if (GTK_IS_BUTTON (from))
+	{
+		GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+		gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+			corner, GDK_GRAVITY_NORTH_WEST, NULL);
+	}
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	guint32 event_time = gtk_get_current_event_time ();
 	if (GTK_IS_BUTTON(from))
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
@@ -1715,7 +1748,7 @@ static gboolean _e2_pane_filter_menu_create (gpointer from, E2_ActionRuntime *ar
 	else
 		//FIXME
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 1, event_time);
-
+#endif
 	return TRUE;
 }
 /**
@@ -1730,10 +1763,14 @@ static gboolean _e2_pane_filters_show (gpointer from, E2_ActionRuntime *art)
 {
 	E2_PaneRuntime *rt = e2_pane_get_runtime (from, art->data, NULL);
 	GtkWidget *menu = e2_menu_create_filter_menu (&rt->view);
+#ifdef USE_GTK3_22
+	e2_menu_popup_at_widget (menu, rt->view.treeview);
+#else
 	guint32 event_time = gtk_get_current_event_time ();
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 		(GtkMenuPositionFunc) e2_fileview_set_menu_position,
 			rt->view.treeview, 0, event_time);
+#endif
 	return TRUE;
 }
 #ifdef E2_VFS
@@ -1810,6 +1847,18 @@ static gboolean _e2_pane_vfs_menu_show (gpointer from, E2_ActionRuntime *art)
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 
+#ifdef USE_GTK3_22
+	if (art->action->data == NULL)	//CHECKME
+	{
+		e2_menu_popup_at_widget (menu, curr_view->treeview);
+	}
+	else
+	{
+		GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+		gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+			corner, GDK_GRAVITY_NORTH_WEST, NULL);
+	}
+#else
 	guint32 event_time = gtk_get_current_event_time ();
 	if (art->action->data == NULL)	//CHECKME
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
@@ -1818,6 +1867,7 @@ static gboolean _e2_pane_vfs_menu_show (gpointer from, E2_ActionRuntime *art)
 	else
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_toolbar_set_menu_position, from, 1, event_time);
+#endif
 	return TRUE;
 }
 #endif
