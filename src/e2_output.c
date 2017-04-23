@@ -1190,6 +1190,7 @@ static void _e2_output_scroll_to_child (GtkMenuItem *item, E2_TaskRuntime *rt)
 		}
 	}
 }
+#ifndef USE_GTK3_22
 /**
 @brief set popup menu position
 
@@ -1206,8 +1207,8 @@ FALSE for menu clamped to screen size
 
 @return
 */
-void e2_output_set_menu_position (GtkWidget *menu,
-	gint *x, gint *y, gboolean *push_in, GtkWidget *textview)
+void e2_output_set_menu_position (GtkWidget *menu, gint *x, gint *y,
+	gboolean *push_in, GtkWidget *textview)
 {
 	gint left, top;
 	GtkAllocation alloc;
@@ -1230,6 +1231,7 @@ void e2_output_set_menu_position (GtkWidget *menu,
 #endif
 	*push_in = FALSE;
 }
+#endif //ndef USE_GTK3_22
 /**
 @brief update gtk's flag which sets output pane text wrapping
 
@@ -1767,14 +1769,20 @@ OR
 #endif
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, textview);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup ((GtkMenu*)menu, NULL, NULL,
-			(GtkMenuPositionFunc) e2_output_set_menu_position,
-			textview, 0, event_time);
+			(GtkMenuPositionFunc) e2_output_set_menu_position, textview, 0, event_time);
 	else
 		//this was a button-3 click
 		gtk_menu_popup ((GtkMenu*)menu, NULL, NULL,
 			NULL, NULL, event_button, event_time);
+#endif
 }
 /**
 @brief create a new textview and buffer and some basic tags
@@ -1808,15 +1816,20 @@ static GtkWidget *_e2_output_create_view (E2_OutputTabRuntime *rt)
 	gtk_text_view_set_right_margin (rt->text,
 		e2_option_int_get ("output-right-margin"));
 	const gchar *fntname = e2_utils_get_output_font ();
+#ifdef USE_GTK3_16
+	gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
+	e2_widget_override_style (GTK_WIDGET (rt->text), cssdata);
+	g_free (cssdata);
+#else
 	PangoFontDescription *font_desc = pango_font_description_from_string
 			(fntname);
-#ifdef USE_GTK3_0
+# ifdef USE_GTK3_0
 	gtk_widget_override_font (GTK_WIDGET (rt->text), font_desc);
-#else
+# else
 	gtk_widget_modify_font (GTK_WIDGET (rt->text), font_desc);
-#endif
+# endif
 	pango_font_description_free (font_desc);
-
+#endif
 	//signal used for "links" in the output pane
 //	g_signal_connect (G_OBJECT (rt->text), "motion-notify-event",
 //		G_CALLBACK (test_cb), NULL);
@@ -3856,10 +3869,11 @@ Used only during window re-creation
 void e2_output_update_style (void)
 {
 	const gchar *fntname = e2_utils_get_output_font ();
-	PangoFontDescription *font_desc = pango_font_description_from_string
-			(fntname);
+	PangoFontDescription *font_desc = pango_font_description_from_string (fntname);
 	app.output.font_size = pango_font_description_get_size (font_desc);	//(pixels or points) * PANGO_SCALE
-
+#ifdef USE_GTK3_16
+	gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
+#endif
 	GList *member;
 	for (member = app.tabslist; member != NULL; member = member->next)
 	{
@@ -3870,7 +3884,9 @@ void e2_output_update_style (void)
 			e2_option_int_get ("output-left-margin"));
 		gtk_text_view_set_right_margin (tvw,
 			e2_option_int_get ("output-right-margin"));
-#ifdef USE_GTK3_0
+#ifdef USE_GTK3_16
+		e2_widget_override_style (GTK_WIDGET (tvw), cssdata);
+#elif defined (USE_GTK3_0)
 		gtk_widget_override_font (GTK_WIDGET (tvw), font_desc);
 #else
 		gtk_widget_modify_font (GTK_WIDGET (tvw), font_desc);
@@ -3895,6 +3911,9 @@ void e2_output_update_style (void)
 			(gint) (PANGO_SCALE_SMALL * app.output.font_size), NULL);
 	}
 	pango_font_description_free (font_desc);
+#ifdef USE_GTK3_16
+	g_free (cssdata);
+#endif
 }
 /**
 @brief create output pane
