@@ -226,13 +226,9 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 #ifdef USE_GTK3_0
 # include <gdk/gdkkeysyms-compat.h>
 # define GTK3_COMBO_FIX //include workarounds for gtk3.0.x bad behaviour
-#else
-# include <gdk/gdkkeysyms.h>
-#endif
-
-#ifdef USE_GTK3_4
 # define GDKCOLOR GdkRGBA
 #else
+# include <gdk/gdkkeysyms.h>
 # define GDKCOLOR GdkColor
 #endif
 
