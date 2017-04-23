@@ -885,7 +885,13 @@ Expects BGL on/active
 */
 void e2_dialog_set_cursor (GtkWidget *dialog, GdkCursorType type)
 {
-	GdkCursor *cursor = gdk_cursor_new (type);
+	GdkCursor *cursor;
+#ifdef USE_GTK3_16
+	GdkDisplay *display = gdk_display_get_default ();
+	cursor = gdk_cursor_new_for_display (display, type);
+#else
+	cursor = gdk_cursor_new (type);
+#endif
 	gdk_window_set_cursor (
 #ifdef USE_GTK2_14
 		gtk_widget_get_window (dialog),
