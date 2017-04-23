@@ -182,7 +182,7 @@ void e2_utils_show_help (gchar *title)
 */
 gchar *e2_utils_color2str (GDKCOLOR *color)
 {
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 	return g_strdup_printf ("#%.2X%.2X%.2X",
 		(int)color->red*255, (int)color->green*255, (int)color->blue*255);
 #else
@@ -3657,8 +3657,13 @@ modifier at least, when a mod-key is pressed. So we check the long way.
 */
 void e2_utils_save_state (GtkWidget *widget)
 {
+#ifdef USE_GTK3_20
+	GdkSeat *seat = gdk_display_get_default_seat (gdk_display_get_default());
+	GdkDevice *device = gdk_seat_get_pointer (seat);
+#else
 	GdkDeviceManager *manager = gdk_display_get_device_manager (gdk_display_get_default());
 	GdkDevice *device = gdk_device_manager_get_client_pointer (manager);
+#endif
 	if (device != NULL)
 	{
 		GdkWindow *win = gdk_device_get_window_at_position (device, NULL, NULL);
@@ -3700,7 +3705,7 @@ GdkModifierType e2_utils_get_modifiers (void)
 	if (!gtk_get_current_event_state (&mask))
 	{
 		GdkDisplay *display =
-		gdk_display_manager_get_default_display (gdk_display_manager_get());
+			gdk_display_manager_get_default_display (gdk_display_manager_get());
 		gdk_display_get_pointer (display, NULL, NULL, NULL, &mask);	//CHECKME any pointer ?
 	}
 //	guint modifiers = gtk_accelerator_get_default_mod_mask ();
@@ -3728,9 +3733,13 @@ static GList *_e2_utils_get_pointer_devices_for_widget (GtkWidget *widget)
 	}
 	else
 		wwin = NULL;
-
+#ifdef USE_GTK3_20
+	GdkSeat *seat = gdk_display_get_default_seat (gdk_display_get_default());
+	GList *devices = gdk_seat_get_slaves (seat, GDK_SEAT_CAPABILITY_ALL_POINTING);
+#else
 	GdkDeviceManager *manager = gdk_display_get_device_manager (gdk_display_get_default());
 	GList *devices = gdk_device_manager_list_devices (manager, GDK_DEVICE_TYPE_MASTER);
+#endif
 	if (devices != NULL)
 	{
 		GList *member;
@@ -3813,7 +3822,7 @@ gboolean e2_utils_get_pointer_position (GtkWidget *widget, gint *x, gint *y)
 void e2_utils_beep (void)
 {
 	GdkDisplay *display =
-	gdk_display_manager_get_default_display (gdk_display_manager_get());
+		gdk_display_manager_get_default_display (gdk_display_manager_get());
 	gdk_display_beep (display);
 }
 /**
