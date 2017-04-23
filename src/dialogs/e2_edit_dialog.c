@@ -980,6 +980,12 @@ static void _e2_edit_dialog_show_context_menu (GtkWidget *textview,
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, rt->dialog);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_view_dialog_set_menu_position,
@@ -988,6 +994,7 @@ static void _e2_edit_dialog_show_context_menu (GtkWidget *textview,
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			NULL, NULL, event_button, event_time);
+#endif
 }
 
   /*****************/
@@ -1579,7 +1586,13 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 		rt->textbuffer = buf;
 		//preserve appearance of output pane
 		const gchar *fontname = e2_utils_get_output_font ();
+#ifdef USE_GTK3_16
+		gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fontname);
+		e2_widget_override_style (rt->textview, cssdata);
+		g_free (cssdata);
+#else
 		e2_widget_set_font (rt->textview, fontname);
+#endif
 		e2_widget_get_font_pixels (rt->textview, &char_width, &char_height);
 	}
 	rt->textwrap = e2_option_bool_get ("dialog-view-wrap");
@@ -1673,19 +1686,30 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	//now add things to the action-area
-#ifdef USE_GTK3_12
+	//produce but don't yet show the "not found" warning
+#ifdef USE_GTK3_0
 	rt->info_label = gtk_label_new (_("not found"));
+# ifdef USE_GTK3_16
+	gchar *color = e2_utils_color2str(e2_option_color_get ("color-negative"));
+	//CHECKME set for :focus too?
+	gchar *cssdata = g_strdup_printf ("GtkLabel { color:%s; }", color);
+	e2_widget_override_style (rt->info_label, cssdata);
+	g_free (color);
+	g_free (cssdata);
+# else
 	gtk_widget_override_color (rt->info_label, 0, e2_option_color_get ("color-negative"));
+# endif
 //TODO make this show at LHS by styling only
 	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
 		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
+# ifdef USE_GTK3_12
 WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
+# endif
 	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
 	gtk_container_add (GTK_CONTAINER(hbbox), rt->info_label);
 	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (hbbox), rt->info_label, TRUE);
 	gchar *labeltext;
-#else
-	//produce but don't yet show the "not found" warning
+#else //GTK_2
 	gchar *labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
 		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
 	rt->info_label = e2_widget_add_mid_label (
