@@ -673,6 +673,7 @@ static void _e2_edftdlg_menu_move_down_cb (GtkMenuItem *item, E2_FileTypeDlgRunt
 	_e2_edftdlg_response_cb (GTK_DIALOG (filetypes_dialog), E2_RESPONSE_USER2, rt);
 //	NEEDCLOSEBGL
 }
+#ifndef USE_GTK3_22
 /**
 @brief set popup menu position
 
@@ -682,8 +683,8 @@ set @a push_in to TRUE for menu completely inside the screen,
 FALSE for menu clamped to screen size
 
 @param menu UNUSED the GtkMenu to be positioned
-@param x	place to store gint representing the menu left
-@param y  place to store gint representing the menu top
+@param x place to store gint representing the menu left
+@param y place to store gint representing the menu top
 @param push_in place to store pushin flag
 @param treeview the focused widget when the button was pressed
 
@@ -700,10 +701,11 @@ static void _e2_edftdlg_set_menu_position (GtkMenu *menu,
 #else
 	alloc = treeview->allocation;
 #endif
-	*x = left+ alloc.x + alloc.width/2;
+	*x = left + alloc.x + alloc.width/2;
 	*y = top + alloc.y +alloc.height/2 - 30;
 	*push_in = FALSE;
 }
+#endif //def USE_GTK3_22
 /**
 @brief construct and pop up destroyable context-menu for the filetype-dialog
 
@@ -742,6 +744,12 @@ static void _e2_edftdlg_menu_create (GtkWidget *treeview,
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 
+#ifdef USE_GTK3_22
+	if (button == 0)
+		e2_menu_popup_at_widget (menu, treeview);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (button == 0)
 		//this was a menu-key press
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
@@ -749,6 +757,7 @@ static void _e2_edftdlg_menu_create (GtkWidget *treeview,
 	else
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, button, time);
+#endif
 }
 /**
 @brief treeview menu-button press callback

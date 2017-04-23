@@ -1382,6 +1382,7 @@ static gboolean _e2_fileview_button_release_cb (GtkWidget *treeview,
 	NEEDOPENBGL
 	return FALSE;
 }
+#ifndef USE_GTK3_22
 /**
 @brief set popup menu position
 
@@ -1410,9 +1411,10 @@ void e2_fileview_set_menu_position (GtkMenu *menu,
 	alloc = treeview->allocation;
 #endif
 	*x = left + alloc.x + alloc.width/2;
-	*y = top + alloc.y +alloc.height/2 - 30;
+	*y = top + alloc.y + alloc.height/2 - 30;
 	*push_in = FALSE;
 }
+#endif //ndef USE_GTK3_22
 /**
 @brief menu button callback (does not apply for 'modified' menu button)
 

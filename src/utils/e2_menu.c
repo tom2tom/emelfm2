@@ -577,6 +577,31 @@ GtkWidget *e2_menu_add_toggle (GtkWidget *menu, gboolean onetime,
 
 	return item;
 }
+#ifdef USE_GTK3_22
+/**
+@brief popup @menu at a position relative to @a widget
+@param menu menu widget
+@param widget reference widget
+
+@return
+*/
+void e2_menu_popup_at_widget (GtkWidget *menu, GtkWidget *widget)
+{
+	GdkWindow *win;
+	GtkAllocation alloc;
+	GdkRectangle rect = {1, 1, 1, 1};
+
+	gtk_widget_get_allocation (widget, &alloc);
+	rect.x = alloc.x + alloc.width/2;
+	if (alloc.height < 30)
+		rect.y = alloc.y;
+	else
+		rect.y = alloc.y + 30;
+	win = gtk_widget_get_window (widget);
+	gtk_menu_popup_at_rect (GTK_MENU (menu), win, &rect,
+		GDK_GRAVITY_NORTH_EAST, GDK_GRAVITY_NORTH, NULL);
+}
+#endif
 /**
 @brief popup detroyable menu @a menu
 
@@ -592,7 +617,11 @@ void e2_menu_popup (GtkWidget *menu, gint button, guint32 time)
 {
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
+#ifdef USE_GTK3_22
+	gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, button, time);
+#endif
 }
 /* *
 @brief
@@ -610,7 +639,11 @@ void _e2_menu_popup (GtkWidget *menu, gint x, gint y, gint button, guint32 time)
 {
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
+#ifdef USE_GTK3_22
+	gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);
+#else
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, button, time);
+#endif
 }
 */
 /**
@@ -1258,11 +1291,22 @@ gboolean e2_menu_create_mounts_menu (gpointer from, E2_ActionRuntime *art)
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 
 	gtk_widget_show_all (menu);
+#ifdef USE_GTK3_22
+	if (GTK_IS_BUTTON (from))
+	{
+		GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+		gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+			corner, GDK_GRAVITY_NORTH_WEST, NULL);
+	}
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (GTK_IS_BUTTON (from))
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_toolbar_set_menu_position, from, 1, 0);
 	else
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 1, 0);
+#endif
 
 	return TRUE;
 }

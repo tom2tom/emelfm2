@@ -226,6 +226,7 @@ static gboolean _e2_file_info_dialog_get_file_type (VPATH *localpath,
 	}
 #endif
 }
+#ifndef USE_GTK3_22
 /**
 @brief set popup menu position
 
@@ -257,6 +258,7 @@ static void _e2_file_info_dialog_set_menu_position (GtkWidget *menu,
 	*y = top + alloc.y + alloc.height/2;
 	*push_in = FALSE;
 }
+#endif //ndef USE_GTK3_22
 /**
 @brief copy dialog data to clipboard
 
@@ -327,7 +329,7 @@ static void _e2_file_info_dialog_copy_cb (GtkMenuItem *menuitem,
 /**
 @brief construct and pop up destroyable context-menu for @a dialog
 
-@param textview the textview widget where the click happened
+@param dialog the displayed dialog widget
 @param event_button which mouse button was clicked (0 for a menu key)
 @param event_time time that the event happened (0 for a menu key)
 @param rt runtime struct to work on
@@ -342,6 +344,12 @@ static void _e2_file_info_dialog_show_context_menu (GtkWidget *dialog,
 		_("Copy displayed data"), _e2_file_info_dialog_copy_cb, rt);
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, dialog);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) _e2_file_info_dialog_set_menu_position,
@@ -350,6 +358,7 @@ static void _e2_file_info_dialog_show_context_menu (GtkWidget *dialog,
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			NULL, NULL, event_button, event_time);
+#endif
 }
 /**
 @brief menu-button press callback

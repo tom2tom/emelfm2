@@ -853,8 +853,12 @@ void e2_dnd_drag_data_received_cb (GtkWidget *treeview, GdkDragContext *context,
 
 			NEEDCLOSEBGL
 
+#ifdef USE_GTK3_22
+			gtk_menu_popup_at_pointer (GTK_MENU (drag_op_menu), NULL);	
+#else
 			gtk_menu_popup (GTK_MENU (drag_op_menu), NULL, NULL, NULL, NULL, 0,
 				(guint32) time);
+#endif
 
 			e2_main_loop_run (wdata.loopdata);
 

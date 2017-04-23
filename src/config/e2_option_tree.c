@@ -1191,11 +1191,14 @@ static gboolean _e2_option_tree_popup_menu_cb (GtkWidget *treeview,
 	NEEDCLOSEBGL
 	//set appropriate item sensitivities
 	e2_option_tree_menu_set_sensitive (menu, treeview);
-
+#ifdef USE_GTK3_22
+	e2_menu_popup_at_widget (menu, treeview);
+#else
 	guint32 event_time = gtk_get_current_event_time ();
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 		(GtkMenuPositionFunc) e2_confdlg_menu_set_position,
 		treeview, 0, event_time);	//button code = 0 as this was a menu-button press
+#endif
 	NEEDOPENBGL
 	return TRUE;
 }
@@ -1217,8 +1220,11 @@ static gboolean _e2_option_tree_button_press_cb2 (GtkWidget *treeview,
 		return FALSE;
 	//set appropriate item sensitivities
 	e2_option_tree_menu_set_sensitive (menu, treeview);
-
+#ifdef USE_GTK3_22
+	gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, event->button, event->time);
+#endif
 	return TRUE;
 }
 

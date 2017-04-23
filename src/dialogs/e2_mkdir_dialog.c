@@ -867,7 +867,11 @@ static gboolean _e2_mkdirdlg_button_press_cb (GtkWidget *dialog,
 		)
 	{
 		NEEDCLOSEBGL
+#ifdef USE_GTK3_22
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, 3, event->time);
+#endif
 		NEEDOPENBGL
 		return TRUE;
 	}

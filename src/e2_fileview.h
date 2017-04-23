@@ -231,8 +231,10 @@ void e2_fileview_filter_dirs_cb (GtkCheckMenuItem *widget, ViewInfo *view);
 void e2_fileview_remove_filters_cb (GtkMenuItem *widget, ViewInfo *view);
 void e2_fileview_initialize_filters (ViewInfo *view);
 
+#ifndef USE_GTK3_22
 void e2_fileview_set_menu_position (GtkMenu *menu,
 	gint *x, gint *y, gboolean *push_in, GtkWidget *treeview);
+#endif
 void e2_fileview_focus_row (ViewInfo *view, gint row,
 	gboolean select_row, gboolean clear_selection,
 	gboolean center, gboolean grab_focus);

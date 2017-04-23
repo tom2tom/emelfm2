@@ -406,6 +406,14 @@ static gboolean _e2_action_do_hover_timeout (E2HoverData *data)
 			if (!GTK_WIDGET_VISIBLE (data->menu))
 #endif
 			{
+#ifdef USE_GTK3_22
+				GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)data->hovered);
+				CLOSEBGL
+//				gtk_widget_show_all (popwin);
+				gtk_menu_popup_at_widget (GTK_MENU (data->menu), (GtkWidget*)data->hovered,
+					corner, GDK_GRAVITY_NORTH_WEST, NULL);
+				OPENBGL
+#else
 				gtk_widget_show (data->menu); //setup size for use when positioning ?
 				gint x, y;
 				gboolean push = TRUE;
@@ -414,6 +422,7 @@ static gboolean _e2_action_do_hover_timeout (E2HoverData *data)
 				gtk_window_move (GTK_WINDOW (popwin), x, y); //this might be ignored by WM ?
 				gtk_widget_show_all (popwin);
 				OPENBGL
+#endif
 			}
 		}
 		else

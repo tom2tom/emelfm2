@@ -303,6 +303,12 @@ static void _e2_confdlg_show_context_menu (GtkWidget *treeview, guint event_butt
 		_("Collapse all rows"), e2_tree_collapse_all_cb, treeview);
 	g_signal_connect (G_OBJECT (menu), "selection-done",
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
+#ifdef USE_GTK3_22
+	if (event_button == 0)
+		e2_menu_popup_at_widget (menu, treeview);
+	else
+		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
+#else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_confdlg_menu_set_position,
@@ -311,6 +317,7 @@ static void _e2_confdlg_show_context_menu (GtkWidget *treeview, guint event_butt
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			NULL, NULL, event_button, event_time);
+#endif
 }
 
   /*********************/
@@ -1469,7 +1476,7 @@ void e2_confdlg_extcolorpick_cb (GtkButton *button, E2_OptionSet *set)
 	data->tpath = path;
 	gtk_tree_model_get_iter (set->ex.tree.model, &iter, path);
 	gtk_tree_model_get (set->ex.tree.model, &iter, 2, &current, -1);
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 	GdkRGBA color;
 	if (*current == '\0')
 		gdk_rgba_parse (&color, "black");
@@ -1642,7 +1649,7 @@ static void _e2_confdlg_color_select_cb (GtkButton *button, E2_OptionSet *set)
 	else
 	{
 		//CHECKME close on Esc press ?
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 		GdkRGBA color;
 		dialog = gtk_color_chooser_dialog_new (title, GTK_WINDOW(config_dialog));
 		GtkColorChooser *gcc = GTK_COLOR_CHOOSER (dialog);
@@ -1717,7 +1724,7 @@ static void _e2_confdlg_color_entry_cb (GtkEditable *entry, GtkWidget *label)
 	NEEDCLOSEBGL
 	GDKCOLOR color;
 	gchar *color_str = gtk_editable_get_chars (entry, 0, -1);
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 	if (gdk_rgba_parse (&color, color_str))
 #else
 	if (gdk_color_parse (color_str, &color))

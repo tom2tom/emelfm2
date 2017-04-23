@@ -86,8 +86,10 @@ void e2_menu_add_filetype_items (GtkWidget *menu, ViewInfo *view);
 
 void e2_menu_mark_clear (gpointer data, GClosure *closure);
 void e2_menu_connect (GtkWidget *menu, gboolean  active);
+#ifdef USE_GTK3_22
+void e2_menu_popup_at_widget (GtkWidget *menu, GtkWidget *widget);
+#endif
 void e2_menu_popup (GtkWidget *menu, gint button, guint32 time);
-
 void e2_menu_custom_option_register (void);
 
 #endif //ndef __E2_MENU_H__
