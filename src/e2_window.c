@@ -1056,7 +1056,13 @@ Expects BGL on/active
 */
 void e2_window_set_cursor (GdkCursorType type)
 {
-	GdkCursor *cursor = gdk_cursor_new (type);
+	GdkCursor *cursor;
+#ifdef USE_GTK3_16
+	GdkDisplay *display = gdk_display_get_default ();
+	cursor = gdk_cursor_new_for_display (display, type);
+#else
+	cursor = gdk_cursor_new (type);
+#endif
 	gdk_window_set_cursor (
 #ifdef USE_GTK2_14
 		gtk_widget_get_window (app.main_window),
@@ -1962,7 +1968,9 @@ void e2_window_recreate (E2_WindowRuntime *rt)
 		adj->upper = curr_upperx;
 #endif
 		gtk_adjustment_set_value (adj, curr_thumbx);
-		gtk_adjustment_changed (adj);
+#ifndef USE_GTK3_18
+		gtk_adjustment_value_changed (adj);
+#endif
 	}
 	//try to reselect items, and at least clean the hash
 	e2_fileview_reselect_names (curr_view, selnames1, TRUE);
@@ -1989,7 +1997,9 @@ void e2_window_recreate (E2_WindowRuntime *rt)
 		adj->upper = other_upperx;
 #endif
 		gtk_adjustment_set_value (adj, other_thumbx);
-		gtk_adjustment_changed (adj);
+#ifndef USE_GTK3_18
+		gtk_adjustment_value_changed (adj);
+#endif
 	}
 	//try to reselect items, then clean the hash
 	e2_fileview_reselect_names (other_view, selnames2, TRUE);
