@@ -118,8 +118,10 @@ void e2_output_clear_styles (E2_OutputTabRuntime *rt, const gchar *origin);
 #endif
 void e2_output_update_style (void);
 GtkWidget *e2_output_initialise (void) G_GNUC_MALLOC;
+#ifndef USE_GTK3_22
 void e2_output_set_menu_position (GtkWidget *menu, gint *x, gint *y,
 	gboolean *push_in, GtkWidget *textview);
+#endif
 void e2_output_actions_register (void);
 void e2_output_options_register (void);
 
