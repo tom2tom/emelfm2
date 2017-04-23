@@ -69,7 +69,7 @@ static void _e2p_upgrade_reload (gboolean read)
 		E2_OptionSet *set;
 		set = *walker;
 		if (set->type == E2_OPTION_TYPE_TREE)
-			set->ex.tree.def.strings = NULL; //union with .func, which cannot be cleared during e2_option_clear_data()
+			set->ex.tree.def.tree_strings = NULL; //union with .func, which cannot be cleared during e2_option_clear_data()
 	}
 	e2_option_clear_data ();	//clear current option values
 	e2_option_default_register ();//install defaults
@@ -532,13 +532,15 @@ static gboolean _e2p_upgrade_0_9_2 (const gchar *localcfg, const gchar *sed)
 		gchar *oldstr2 = g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|",NULL);
 		gchar *newstr2 = g_strconcat("\t\t|<Control>r||",_A(14),".",_A(76),"|\\n",
 			"\t\t|<Control>l||",_A(5),".",_A(103),"|",NULL);
-		//cleanup icon names
+		//cleanup icon names CHECKME is double plugin fix is really needed ?
 		gchar *command = g_strconcat (sed,
 			" -i"
 			" -e 's/",oldstr1,"/",newstr1,"/'"
 			" -e 's/",oldstr2,"/",newstr2,"/'"
-			" -e 's/_[0-9]{2}\\.png//'"
-			" -e 's/\\|plugin_/\\|plugin-/'"
+			" -e 's/gtk\\-discard/discard/'"
+			" -e 's/plugin_/plugin-/'"
+			" -e 's/_[1-9][0-9]\\.png//'"
+			" -e 's/plugin_/plugin-/'"
 			" ",localcfg,NULL);
 
 		gboolean success = (system (command) == 0);
