@@ -1803,6 +1803,18 @@ static gboolean _e2_task_abort (gpointer from, E2_ActionRuntime *art)
 		_e2_task_abort_cb);
 	if (menu != NULL)
 	{
+#ifdef USE_GTK3_22
+		if (GTK_IS_BUTTON (from))
+		{
+			GdkGravity corner = e2_toolbar_get_button_gravity ((GtkWidget*)from);
+			gtk_menu_popup_at_widget (GTK_MENU (menu), (GtkWidget*)from,
+				corner, GDK_GRAVITY_NORTH_WEST, NULL);
+		}
+		else
+		{
+			e2_menu_popup_at_widget (menu, app.tab.text);
+		}
+#else
 		//determine the menu's popup position
 		if (GTK_IS_BUTTON (from))
 			gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
@@ -1810,6 +1822,7 @@ static gboolean _e2_task_abort (gpointer from, E2_ActionRuntime *art)
 		else
 			gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 				(GtkMenuPositionFunc) e2_output_set_menu_position, app.tab.text, 0, 0);
+#endif
 		return TRUE;
 	}
 	return FALSE;
