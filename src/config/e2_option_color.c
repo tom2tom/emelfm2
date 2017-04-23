@@ -192,7 +192,7 @@ void e2_option_color_filetypes_sync (void)
 											id = _e2_option_color_create_chunk ();
 											i = 0;
 										}
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 										gdk_rgba_parse (id[i], usecolor);
 #else
 										gdk_color_parse (usecolor, id[i]);
@@ -251,7 +251,7 @@ E2_OptionSet *e2_option_color_register (gchar *name, gchar *group, gchar *desc,
 	E2_OptionSet *set = e2_option_register (E2_OPTION_TYPE_COLOR, name, group,
 		desc, tip, depends, flags);
 	set->ival = -1;
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 	if (gdk_rgba_parse (&set->ex.color.value, value))
 #else
 	if (gdk_color_parse (value, &set->ex.color.value))
@@ -260,7 +260,7 @@ E2_OptionSet *e2_option_color_register (gchar *name, gchar *group, gchar *desc,
 	else
 	{
 		set->sval = g_strdup ("#000000");
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 		gdk_rgba_parse (&set->ex.color.value, set->sval);
 #else
 		gdk_color_parse (set->sval, &set->ex.color.value);
@@ -284,37 +284,6 @@ GDKCOLOR *e2_option_color_get (const gchar *name)
 		return NULL;
 	}
 }
-#ifdef USE_GTK3_0
-/**
-@brief populate @a color with data of colour-option @a name
-
-The alpha value of @a color is set to 1.0, the caller should change that if needed
-
-@param name name of option
-@param color pointer to data struct to be filled
-
-@return TRUE if @a color is populated successfully
-*/
-gboolean e2_option_color_get_RGBA (const gchar *name, GdkRGBA *color)
-{
-	E2_OptionSet *set = e2_option_get (name);
-	if (set == NULL)
-		return FALSE;
-	if (set->type == E2_OPTION_TYPE_COLOR)
-	{
-		color->red = (gdouble)set->ex.color.value.red / 65535;
-		color->green = (gdouble)set->ex.color.value.green / 65535;
-		color->blue = (gdouble)set->ex.color.value.blue / 65535;
-		color->alpha = 1.0;
-		return TRUE;
-	}
-	else
-	{
-		printd (WARN, "trying to get color option '%s', which isn't a color option", set->name);
-		return FALSE;
-	}
-}
-#endif
 
 gboolean e2_option_color_set_str (gchar *name, gchar *value)
 {
@@ -332,7 +301,7 @@ gboolean e2_option_color_set_str (gchar *name, gchar *value)
 
 gboolean e2_option_color_set_str_direct (E2_OptionSet *set, gchar *value)
 {
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 	if (gdk_rgba_parse (&set->ex.color.value, value))
 #else
 	if (gdk_color_parse (value, &set->ex.color.value))
@@ -344,7 +313,7 @@ gboolean e2_option_color_set_str_direct (E2_OptionSet *set, gchar *value)
 	}
 	else
 	{
-#ifdef USE_GTK3_4
+#ifdef USE_GTK3_0
 		gdk_rgba_parse (&set->ex.color.value, set->sval);
 #else
 		gdk_color_parse (set->sval, &set->ex.color.value);
