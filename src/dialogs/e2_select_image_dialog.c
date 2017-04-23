@@ -93,10 +93,15 @@ static void _e2_sidlg_response_cb (GtkDialog *dialog, gint response, E2_SID_Runt
 			if (selected != NULL)
 			{
 				GtkTreeIter iter;
-				gchar *fullname;
+				gchar *icon, *fullpath, *instring;
 				gtk_tree_model_get_iter (rt->custommodel, &iter, tpath);
-				gtk_tree_model_get (rt->custommodel, &iter, PATH_COL, &fullname, -1);
-				g_object_set_data_full (G_OBJECT (dialog), "image", fullname,
+				gtk_tree_model_get (rt->custommodel, &iter, PATH_COL, &fullpath, -1);
+				icon = g_path_get_basename (fullpath);
+				g_free (fullpath);
+				instring = strrchr (icon, '.');
+				if (instring != NULL)
+					*instring = 0;
+				g_object_set_data_full (G_OBJECT (dialog), "image", icon,
 					(GDestroyNotify) g_free);
 			}
 			else //signal that this is one to ignore
@@ -608,10 +613,10 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 #ifdef USE_GTK3_10
 	gint psize = 24;
 	gtk_icon_size_lookup (GTK_ICON_SIZE_LARGE_TOOLBAR, &psize, NULL);
-	GtkIconTheme *thm =	gtk_icon_theme_get_for_screen
+	GtkIconTheme *thm = gtk_icon_theme_get_for_screen
 		(gtk_widget_get_screen (app.main_window));
 #elif defined (USE_GTK3_0)
-	GtkStyleContext *context = gtk_widget_get_style_context (app.main_window);
+	GtkStyleContext *sc = gtk_widget_get_style_context (app.main_window);
 #else
 	GtkStyle *style = gtk_widget_get_style (app.main_window);
 	GtkTextDirection dir = gtk_widget_get_direction (app.main_window);
@@ -638,7 +643,7 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 		GtkIconInfo *inf = gtk_icon_theme_lookup_icon (thm, iname, psize,
 			GTK_ICON_LOOKUP_GENERIC_FALLBACK | GTK_ICON_LOOKUP_USE_BUILTIN);
 # elif defined(USE_GTK3_0)
-		GtkIconSet *iset = gtk_style_context_lookup_icon_set (context, stock);
+		GtkIconSet *iset = gtk_style_context_lookup_icon_set (sc, stock);
 # else
 		GtkIconSet *iset = gtk_style_lookup_icon_set (style, stock);
 # endif
@@ -653,7 +658,7 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 # ifdef USE_GTK3_10
 			pxb = gtk_icon_info_load_icon (inf, NULL);
 # elif defined(USE_GTK3_0)
-			pxb = gtk_icon_set_render_icon_pixbuf (iset, context,
+			pxb = gtk_icon_set_render_icon_pixbuf (iset, sc,
 				GTK_ICON_SIZE_LARGE_TOOLBAR);
 # else
 			pxb = gtk_icon_set_render_icon (iset, style, dir, GTK_STATE_NORMAL,
@@ -724,7 +729,7 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 		STOCK_NAME_DIALOG_QUESTION,
 		STOCK_NAME_DIALOG_WARNING,
 		STOCK_NAME_DIRECTORY,
-		STOCK_NAME_DISCARD,
+//		STOCK_NAME_DISCARD,
 		STOCK_NAME_DISCONNECT,
 		STOCK_NAME_DND,
 		STOCK_NAME_DND_MULTIPLE,
@@ -845,7 +850,7 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 	if (ids != NULL)
 	{
 #ifdef USE_GTK3_0
-		GtkStyleContext *context = gtk_widget_get_style_context (app.main_window);
+		GtkStyleContext *sc = gtk_widget_get_style_context (app.main_window);
 #else
 		GtkStyle *style = gtk_widget_get_style (app.main_window);
 		GtkTextDirection dir = gtk_widget_get_direction (app.main_window);
@@ -856,14 +861,14 @@ static void _e2_sidlg_fill_stock_store (GtkListStore *store)
 		for (member = ids; member != NULL; member = g_slist_next (member))
 		{
 #ifdef USE_GTK3_0
-			GtkIconSet *iset = gtk_style_context_lookup_icon_set (context, (const gchar*) member->data);
+			GtkIconSet *iset = gtk_style_context_lookup_icon_set (sc, (const gchar*) member->data);
 #else
 			GtkIconSet *iset = gtk_style_lookup_icon_set (style, (const gchar*) member->data);
 #endif
 			if (iset != NULL)
 			{
 #ifdef USE_GTK3_0
-				GdkPixbuf *pxb = gtk_icon_set_render_icon_pixbuf (iset, context,
+				GdkPixbuf *pxb = gtk_icon_set_render_icon_pixbuf (iset, sc,
 					GTK_ICON_SIZE_LARGE_TOOLBAR);
 #else
 				GdkPixbuf *pxb = gtk_icon_set_render_icon (iset, style, dir,
@@ -1141,8 +1146,14 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 	}
 /*
 #ifdef USE_GTK3_10
+	GdkCursor *cursor;
 	//icons population can take a while!
-	GdkCursor *cursor = gdk_cursor_new (GDK_WATCH);
+#ifdef USE_GTK3_16
+	GdkDisplay *display = gdk_display_get_default ();
+	cursor = gdk_cursor_new_for_display (display, GDK_WATCH);
+#else
+	cursor = gdk_cursor_new (GDK_WATCH);
+#endif
 	gdk_window_set_cursor (gtk_widget_get_window (parent), cursor);
 	g_object_unref (G_OBJECT (cursor));
 	gdk_flush ();
@@ -1274,7 +1285,11 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 /*
 #ifdef USE_GTK3_10
 	//icons population can take a while!
+#ifdef USE_GTK3_16
+	cursor = gdk_cursor_new_for_display (display, GDK_LEFT_PTR);
+#else
 	cursor = gdk_cursor_new (GDK_LEFT_PTR);
+#endif
 	gdk_window_set_cursor (gtk_widget_get_window (parent), cursor);
 	g_object_unref (G_OBJECT (cursor));
 	gdk_flush ();
