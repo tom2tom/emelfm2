@@ -63,13 +63,13 @@ static void _e2p_upgrade_reload (gboolean read)
 {
 	guint i;
 	gpointer *walker;
-	//prevent attempts to clean non-existent backup data (dunno how the pointers get bad)
+	//prevent attempts to clean non-existent backup data (union'd pointers still @ set->ex.tree.def.func)
 	for (i = 0, walker = options_array->pdata; i < options_array->len; i++, walker++)
 	{
 		E2_OptionSet *set;
 		set = *walker;
 		if (set->type == E2_OPTION_TYPE_TREE)
-			set->ex.tree.def.tree_strings = NULL;
+			set->ex.tree.def.strings = NULL; //union with .func, which cannot be cleared during e2_option_clear_data()
 	}
 	e2_option_clear_data ();	//clear current option values
 	e2_option_default_register ();//install defaults
@@ -208,7 +208,16 @@ static gboolean _e2p_upgrade_too_old (const gchar *localcfg)
 
 	if (choice == GTK_RESPONSE_YES)
 	{
-		_e2p_upgrade_backup (localcfg);
+		guint i;
+		gpointer *walker;
+		//prevent attempts to clean non-existent backup data (union'd pointers still @ set->ex.tree.def.func)
+		for (i = 0, walker = options_array->pdata; i < options_array->len; i++, walker++)
+		{
+			E2_OptionSet *set;
+			set = *walker;
+			if (set->type == E2_OPTION_TYPE_TREE)
+				set->ex.tree.def.tree_strings = NULL; //union with .func, which cannot be cleared during e2_option_clear_data()
+		}
 		e2_option_clear_data ();
 		e2_option_default_register ();
 		e2_option_date_style (); //customise date-format option
