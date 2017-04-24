@@ -2299,6 +2299,10 @@ void e2_config_dialog_create (gchar *page)
 	g_signal_connect (G_OBJECT (config_dialog), "show",
 		G_CALLBACK (_e2_confdlg_show_cb), sw);
 #endif
+
+#ifdef USE_GTK3_12
+	GtkWidget *added_btn =
+#endif
 	e2_dialog_add_custom_button_full (config_dialog, FALSE,
 		E2_RESPONSE_USER1, _("De_fault"), STOCK_NAME_CLEAR,
 		_("Revert all options to their default settings"),
@@ -2323,11 +2327,10 @@ void e2_config_dialog_create (gchar *page)
 		&E2_BUTTON_MORE, &E2_BUTTON_DISCARD, &E2_BUTTON_APPLY, NULL);
 
 	//prepare all the buttons for mnemonic-blocking during any keybinding config
-#ifdef USE_GTK3_12
-WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
-#endif
 	e2_option_tree_connect_mnemonics (
-#ifdef USE_GTK2_14
+#ifdef USE_GTK3_12
+		gtk_widget_get_parent (added_btn)
+#elif defined (USE_GTK2_14)
 		gtk_dialog_get_action_area (GTK_DIALOG(config_dialog))
 #else
 		GTK_DIALOG(config_dialog)->action_area
