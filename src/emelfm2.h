@@ -842,11 +842,11 @@ pthread_mutex_t history_mutex;
 
 //macros related to blocking simultaneous access to thread-unsafe UI backend (notably xlib)
 
-/*
-#ifdef GDK_WINDOWING_WAYLAND !!and it's actually working
-# define DISPLAYTHREADSAFE
+#ifdef E2_THREADSAFE
+# ifdef GDK_WINDOWING_WAYLAND
+#  define DISPLAYTHREADSAFE
+# endif
 #endif
-*/
 
 #ifdef DISPLAYTHREADSAFE
 # define CLOSEBGL
@@ -936,8 +936,6 @@ while (g_main_context_pending (__ctx)) { g_main_context_iteration (__ctx, TRUE);
 #define GET_EVENTS_CONTEXT GMainContext *__ctx = g_main_context_default ();
 #define EXTRA_WAIT_FOR_EVENTS_UNLOCKED \
 while (g_main_context_pending (__ctx)) { g_main_context_iteration (__ctx, TRUE); usleep(5000); }
-
-
 
 #else //other version
 

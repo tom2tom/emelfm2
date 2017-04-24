@@ -41,40 +41,26 @@ DESKTOP_FILE=docs/desktop_environment/$(TARGET).desktop
 SU_FILE=app.$(TARGET).policy
 
 # build info for build.h etc
-VERSION=0.9.2
+VERSION=0.9.1
 #this is effectively a sub-version, to manage config file upgrades while not changing the version
-RELEASE=
-#RELEASE=.1
+#RELEASE=
+RELEASE=.2
 BUILDDATE=$(shell date)
 BUILDSTAMP=$(shell date +"%02d %b %04Y")
 BUILDINFO=$(shell uname) $(shell uname -r)/$(shell uname -m)
 COPYRIGHT=2003-$(shell date +"%04Y"), tooar <tooar@emelfm2.net>
-# for logging build-time settings, |-separated strings
-BUILD_PARMS:=BIN_DIR=$(BIN_DIR)|CFLAGS=$(CFLAGS)|CONFIGDOC=$(CONFIGDOC)|DEBUG=$(DEBUG)
-BUILD_PARMS+=|DOC_DIR=$(DOC_DIR)|DOCS_VERSION=$(DOCS_VERSION)|EDITOR_SPELLCHECK=$(EDITOR_SPELLCHECK)
-BUILD_PARMS+=|EXTRA_BINDINGS=$(EXTRA_BINDINGS)|FILES_UTF8ONLY=$(FILES_UTF8ONLY)|HELPDOC=$(HELPDOC)
-BUILD_PARMS+=|I18N=$(I18N)|ICON_DIR=$(ICON_DIR)|LIB_DIR=$(LIB_DIR)|LOCALE_DIR=$(LOCALE_DIR)
-BUILD_PARMS+=|MAN_DIR=$(MAN_DIR)|NEW_COMMAND=$(NEW_COMMAND)|PANES_HORIZONTAL=$(PANES_HORIZONTAL)
-BUILD_PARMS+=|PLUGINS_DIR=$(PLUGINS_DIR)|PREFIX=$(PREFIX)|STRIP=$(STRIP)|USE_GAMIN=$(USE_GAMIN)
-BUILD_PARMS+=|USE_INOTIFY=$(USE_INOTIFY)|USE_KQUEUE=$(USE_KQUEUE)|USE_PORTEVENT=$(USE_PORTEVENT)
-BUILD_PARMS+=|WITH_ACL=$(WITH_ACL)|WITH_ASSIST=$(WITH_ASSIST)|WITH_CUSTOMMOUSE=$(WITH_CUSTOMMOUSE)
-BUILD_PARMS+=|WITH_DEVKIT=$(WITH_DEVKIT)|WITH_GTK2=$(WITH_GTK2)|WITH_GTK3=$(WITH_GTK3)|WITH_HAL=$(WITH_HAL)
-BUILD_PARMS+=|WITH_KERNELFAM=$(WITH_KERNELFAM)|WITH_LATEST=$(WITH_LATEST)|WITH_OUTPUTSTYLES=$(WITH_OUTPUTSTYLES)
-BUILD_PARMS+=|WITH_POLKIT=$(WITH_POLKIT)|WITH_THUMBLIB=$(WITH_THUMBLIB)|WITH_THUMBS=$(WITH_THUMBS)
-BUILD_PARMS+=|WITH_TRACKER=$(WITH_TRACKER)|WITH_TRANSPARENCY=$(WITH_TRANSPARENCY)|WITH_UDISKS=$(WITH_UDISKS)
-BUILD_PARMS+=|XDG_DESKTOP_DIR=$(XDG_DESKTOP_DIR)|XDG_INTEGRATION=$(XDG_INTEGRATION)
 
-ifeq ($(DOCS_VERSION), 1)
+ifneq ($(DOCS_VERSION),0)
 # cannot use just +=, that inserts a space
 TMP:=$(DOC_DIR)-$(VERSION)
 DOC_DIR:=$(TMP)
 endif
 
 # check for deprecated alternative parameters
-ifeq ($(WITH_LATEST), 0)
+ifeq ($(WITH_LATEST),0)
 WITH_LATEST = $(USE_LATEST)
 endif
-ifeq ($(WITH_UDISKS), 0)
+ifeq ($(WITH_UDISKS),0)
 WITH_UDISKS = $(WITH_DEVKIT)
 endif
 
@@ -92,7 +78,7 @@ LIBS_OBJECTS = $(LIBS_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
 LIBS_DEP_FILES = $(LIBS_SOURCES:%.c=$(OBJECTS_DIR)/%.deps)
 
 # replicated stock icons installation
-ifeq ($(WITH_SYSTEM_ICONS), 1)
+ifneq ($(WITH_SYSTEM_ICONS),0)
 ICONPATN = png
 else
 ICONPATN = gtk-discard.png
@@ -110,7 +96,7 @@ ifeq ($(WITH_THUMBS),0)
 # when doing make install, make i18n etc don't want to have to supply optional plugin parameters
 WITH_THUMBS:=$(shell test -f $(OBJECTS_DIR)/$(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME1).so && echo "1" || echo "0" 2>&1)
 endif
-ifeq ($(WITH_THUMBS),1)
+ifneq ($(WITH_THUMBS),0)
 THUMBS_HEADERS = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME1)*.h)
 THUMBS_SOURCES = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME1)*.c)
 THUMBS_OBJECTS = $(THUMBS_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
@@ -126,7 +112,7 @@ endif
 ifeq ($(WITH_TRACKER),0)
 WITH_TRACKER:=$(shell test -f $(OBJECTS_DIR)/$(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME2).so && echo "1" || echo "0" 2>&1)
 endif
-ifeq ($(WITH_TRACKER),1)
+ifneq ($(WITH_TRACKER),0)
 TRACKER_HEADERS = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME2)*.h)
 TRACKER_SOURCES = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME2)*.c)
 TRACKER_OBJECTS = $(TRACKER_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
@@ -137,7 +123,7 @@ endif
 ifeq ($(WITH_ACL),0)
 WITH_ACL:=$(shell test -f $(OBJECTS_DIR)/$(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME3).so && echo "1" || echo "0" 2>&1)
 endif
-ifeq ($(WITH_ACL),1)
+ifneq ($(WITH_ACL),0)
 ACL_HEADERS = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME3)*.h)
 ACL_SOURCES = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME3)*.c)
 ACL_OBJECTS = $(ACL_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
@@ -148,14 +134,14 @@ endif
 ifeq ($(WITH_VFS),0)
 WITH_VFS:=$(shell test -f $(OBJECTS_DIR)/$(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME9).so && echo "1" || echo "0" 2>&1)
 endif
-ifeq ($(WITH_VFS),1)
+ifneq ($(WITH_VFS),0)
  VFS_HEADERS = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME9)*.h)
  VFS_SOURCES = $(wildcard $(OPTLIBS)/$(PLUGFILEPREFIX)$(BASENAME9)*.c)
  VFS_OBJECTS = $(VFS_SOURCES:%.c=$(OBJECTS_DIR)/%.so)
  VFS_FLAGS = $(shell $(PKG_CONFIG) --cflags gio-2.0 gio-unix-2.0)
  VFS_LIBS = $(shell $(PKG_CONFIG) --libs gio-2.0 gio-unix-2.0)
 else
- ifeq ($(WITH_GVFS),1)
+ ifneq ($(WITH_GVFS),0)
   VFS_HEADERS = #FIXME
   VFS_SOURCES = #FIXME
   VFS_OBJECTS = #FIXME
@@ -171,7 +157,7 @@ LIBS_XDEP_FILES = $(LIBS_XSOURCES:%.c=$(OBJECTS_DIR)/%.deps)
 
 # set up flags
 lCFLAGS = $(CFLAGS)
-#ifeq ($(WITH_LATEST), 1)
+#ifneq ($(WITH_LATEST),0)
 #these are redundant now
 #lCFLAGS += -DGTK_DISABLE_DEPRECATED
 #lCFLAGS += -DGDK_DISABLE_DEPRECATED
@@ -183,16 +169,17 @@ lCFLAGS = $(CFLAGS)
 #endif
 
 # set up debugging
-ifeq ($(DEBUG), 0)
+ifeq ($(DEBUG),0)
 # this default level omits all warning-message code
 DEBUG_LEVEL ?= 2
 else
+STRIP = 0
 #this is the highest level
 DEBUG_LEVEL ?= 5
 lCFLAGS += -g -O0
 endif
 
-ifeq ($(USE_GAMIN), 1)
+ifneq ($(USE_GAMIN),0)
 #gamin prevails over specific kernel monitoring
 WITH_KERNELFAM = 0
 USE_INOTIFY = 0
@@ -215,7 +202,7 @@ BIN_MSGMERGE = $(shell which msgmerge 2>/dev/null)
 ifeq ($(BIN_MSGMERGE), "")
 I18N = 0
 endif
-ifeq ($(I18N), 1)
+ifneq ($(I18N),0)
 PO_FILES=$(wildcard $(PO_DIR)/*.po)
 MO_FILES=$(PO_FILES:%.po=%.mo)
 lCFLAGS += -DENABLE_NLS
@@ -232,16 +219,16 @@ LINC = $(foreach dir, $(DIRS), -I$(dir))
 #lCFLAGS += -D_FORTIFY_SOURCE
 lCFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_REENTRANT -I. $(LINC)
 
-ifeq ($(WITH_GTK2), 1)
+ifneq ($(WITH_GTK2),0)
 GTK2 = 1
 GTK3 = 0
 else
- ifeq ($(WITH_GTK3), 1)
+ ifneq ($(WITH_GTK3),0)
   GTK2 = 0
   GTK3 = 1
  else
   GTK2 = $(shell $(PKG_CONFIG) --exists gtk+-2.0 && echo "1" || echo "0")
-  ifeq ($(WITH_LATEST), 1)
+  ifneq ($(WITH_LATEST),0)
     GTK3 = $(shell $(PKG_CONFIG) --exists gtk+-3.0 && echo "1" || echo "0")
   else
     GTK3 = 0
@@ -249,7 +236,15 @@ else
  endif
 endif
 
-#ifeq ($(WITH_LATEST), 1)
+ifneq ($(USE_WAYLAND),0)
+ ifeq ($(GTK3),1)
+  USE_WAYLAND = $(shell $(PKG_CONFIG) --exists gdk-wayland-3.0 && echo "1" || echo "0")
+ else
+  USE_WAYLAND = 0
+ endif
+endif
+
+#ifneq ($(WITH_LATEST),0)
 #GLIB3 = $(shell $(PKG_CONFIG) --exists glib-3.0 && echo "1" || echo "0")
 #else
 #GLIB3 = 0
@@ -260,24 +255,27 @@ EXTDBUS = $(shell $(PKG_CONFIG) --atleast-version=2.26 glib-2.0 && echo "0" || e
 # may need extra lib for threads
 EXTGTHREAD = $(shell $(PKG_CONFIG) --atleast-version=2.32 glib-2.0 && echo "0" || echo "1")
 
-ifeq ($(GTK3), 1)
+ifneq ($(GTK3),0)
 lCFLAGS += $(shell $(PKG_CONFIG) --cflags gtk+-3.0 gdk-3.0)
+ ifneq ($(USE_WAYLAND),0)
+  lCFLAGS += $(shell $(PKG_CONFIG) --cflags gdk-wayland-3.0)
+ endif
 else
 lCFLAGS += $(shell $(PKG_CONFIG) --cflags gtk+-2.0)
 endif
-ifeq ($(EXTGTHREAD), 1)
+ifneq ($(EXTGTHREAD),0)
 lCFLAGS += $(shell $(PKG_CONFIG) --cflags gthread-2.0)
 endif
-ifeq ($(EDITOR_SPELLCHECK),1)
+ifneq ($(EDITOR_SPELLCHECK),0)
 lCFLAGS += $(shell $(PKG_CONFIG) --cflags gtkspell-2.0)
 endif
-ifeq ($(WITH_UDISKS),1)
- ifeq ($(EXTDBUS), 1)
+ifneq ($(WITH_UDISKS),0)
+ ifneq ($(EXTDBUS), 0)
   lCFLAGS += $(shell $(PKG_CONFIG) --cflags dbus-glib-1)
  endif
 else
-ifeq ($(WITH_HAL),1)
- ifeq ($(EXTDBUS), 1)
+ifneq ($(WITH_HAL),0)
+ ifneq ($(EXTDBUS),0)
   lCFLAGS += $(shell $(PKG_CONFIG) --cflags dbus-1 dbus-glib-1 hal hal-storage)
  else
   lCFLAGS += $(shell $(PKG_CONFIG) --cflags dbus-1 hal hal-storage)
@@ -288,32 +286,35 @@ endif
 lLIBS_CFLAGS = -shared -fPIC -DPIC
 
 #setup linking
-ifeq ($(GTK3), 1)
+ifneq ($(GTK3),0)
 lLIBS = $(shell $(PKG_CONFIG) --libs gtk+-3.0 gdk-3.0)
+ ifneq ($(USE_WAYLAND),0)
+  lLIBS += $(shell $(PKG_CONFIG) --libs gdk-wayland-3.0)
+ endif
 else
 lLIBS = $(shell $(PKG_CONFIG) --libs gtk+-2.0)
 endif
-ifeq ($(EXTGTHREAD), 1)
+ifneq ($(EXTGTHREAD),0)
  lLIBS += $(shell $(PKG_CONFIG) --libs gthread-2.0 gmodule-2.0)
 else
  lLIBS += $(shell $(PKG_CONFIG) --libs gmodule-2.0)
 endif
 # -lrt needed for clock_gettime(), explicit -lm, -ldl needed for some arch-linux distros
 lLIBS += -lrt -lm -ldl
-ifeq ($(USE_GAMIN), 1)
+ifneq ($(USE_GAMIN),0)
 #gamin code is a superset of FAM code, so gamin needs fam as well
 lLIBS += -lfam
 endif
-ifeq ($(EDITOR_SPELLCHECK),1)
+ifneq ($(EDITOR_SPELLCHECK),0)
 lLIBS += $(shell $(PKG_CONFIG) --libs gtkspell-2.0)
 endif
-ifeq ($(WITH_UDISKS),1)
- ifeq ($(EXTDBUS), 1)
+ifneq ($(WITH_UDISKS),0)
+ ifneq ($(EXTDBUS),0)
   lLIBS += $(shell $(PKG_CONFIG) --libs dbus-glib-1)
  endif
 else
-ifeq ($(WITH_HAL),1)
- ifeq ($(EXTDBUS), 1)
+ifneq ($(WITH_HAL),0)
+ ifneq ($(EXTDBUS),0)
   lLIBS += $(shell $(PKG_CONFIG) --libs dbus-1 dbus-glib-1 hal hal-storage)
  else
   lLIBS += $(shell $(PKG_CONFIG) --libs dbus-1 hal hal-storage)
@@ -326,6 +327,22 @@ ifeq ($(OPSYS),FreeBSD)
 OSREL = $(shell sysctl -n kern.osreldate)
 lLIBS += $(shell if test $(OSREL) -lt 500041 ; then echo "-lgnugetopt"; fi)
 endif
+
+# for logging build-time settings, |-separated strings
+BUILD_PARMS:=BIN_DIR=$(BIN_DIR)|CFLAGS=$(CFLAGS)|CONFIGDOC=$(CONFIGDOC)|DEBUG=$(DEBUG)
+BUILD_PARMS+=|DOC_DIR=$(DOC_DIR)|DOCS_VERSION=$(DOCS_VERSION)|EDITOR_SPELLCHECK=$(EDITOR_SPELLCHECK)
+BUILD_PARMS+=|EXTRA_BINDINGS=$(EXTRA_BINDINGS)|FILES_UTF8ONLY=$(FILES_UTF8ONLY)|HELPDOC=$(HELPDOC)
+BUILD_PARMS+=|I18N=$(I18N)|ICON_DIR=$(ICON_DIR)|LIB_DIR=$(LIB_DIR)|LOCALE_DIR=$(LOCALE_DIR)
+BUILD_PARMS+=|MAN_DIR=$(MAN_DIR)|NEW_COMMAND=$(NEW_COMMAND)|PANES_HORIZONTAL=$(PANES_HORIZONTAL)
+BUILD_PARMS+=|PLUGINS_DIR=$(PLUGINS_DIR)|PREFIX=$(PREFIX)|STRIP=$(STRIP)|USE_GAMIN=$(USE_GAMIN)
+BUILD_PARMS+=|USE_INOTIFY=$(USE_INOTIFY)|USE_KQUEUE=$(USE_KQUEUE)|USE_PORTEVENT=$(USE_PORTEVENT)
+BUILD_PARMS+=|USE_WAYLAND=$(USE_WAYLAND)|WITH_KERNELFAM=$(WITH_KERNELFAM)
+BUILD_PARMS+=|WITH_ACL=$(WITH_ACL)|WITH_ASSIST=$(WITH_ASSIST)|WITH_CUSTOMMOUSE=$(WITH_CUSTOMMOUSE)
+BUILD_PARMS+=|WITH_DEVKIT=$(WITH_DEVKIT)|WITH_GTK2=$(WITH_GTK2)|WITH_GTK3=$(WITH_GTK3)|WITH_HAL=$(WITH_HAL)
+BUILD_PARMS+=|WITH_LATEST=$(WITH_LATEST)|WITH_OUTPUTSTYLES=$(WITH_OUTPUTSTYLES)
+BUILD_PARMS+=|WITH_POLKIT=$(WITH_POLKIT)|WITH_THUMBLIB=$(WITH_THUMBLIB)|WITH_THUMBS=$(WITH_THUMBS)
+BUILD_PARMS+=|WITH_TRACKER=$(WITH_TRACKER)|WITH_TRANSPARENCY=$(WITH_TRANSPARENCY)|WITH_UDISKS=$(WITH_UDISKS)
+BUILD_PARMS+=|XDG_DESKTOP_DIR=$(XDG_DESKTOP_DIR)|XDG_INTEGRATION=$(XDG_INTEGRATION)
 
 .PHONY: all plugins install install_plugins uninstall uninstall_plugins doc \
         clean clean_plugins distclean deps i18n install_i18n uninstall_i18n \
@@ -367,13 +384,13 @@ install_plugins: plugins
 	done
 	@install -d -m 755 $(ICON_DIR)/48x48
 #FIXME also handle svg icons etc
-ifeq ($(WITH_THUMBS),1)
+ifneq ($(WITH_THUMBS),0)
 	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME1).png $(ICON_DIR)/48x48;
 endif
-ifeq ($(WITH_TRACKER),1)
+ifneq ($(WITH_TRACKER),0)
 	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME2).png $(ICON_DIR)/48x48;
 endif
-ifeq ($(WITH_ACL),1)
+ifneq ($(WITH_ACL),0)
 	@install -m 644 $(OPTLIBS)/$(ICONFILEPREFIX)$(BASENAME3).png $(ICON_DIR)/48x48;
 endif
 
@@ -420,11 +437,9 @@ clean_plugins:
 $(TARGET): $(OBJECTS)
 	@echo "linking binary '$(TARGET)'"
 	@$(CC) $(LDFLAGS) $(OBJECTS) -o $(TARGET) -Wl,--as-needed $(lLIBS)
-ifeq ($(STRIP), 1)
-ifneq ($(DEBUG), 1)
+ifneq ($(STRIP),0)
 	@echo "stripping binary '$(TARGET)'"
 	@strip $(TARGET)
-endif
 endif
 
 $(OBJECTS): $(OBJECTS_DIR)/%.o: %.c src/emelfm2.h
@@ -434,37 +449,29 @@ $(OBJECTS): $(OBJECTS_DIR)/%.o: %.c src/emelfm2.h
 $(LIBS_OBJECTS): $(OBJECTS_DIR)/%.so: %.c src/emelfm2.h src/e2_plugins.h
 	@echo "compiling '$*.c'"
 	@$(CC) $(lCFLAGS) $(lLIBS_CFLAGS) $(LDFLAGS) -o $@ $*.c
-ifeq ($(STRIP), 1)
-ifneq ($(DEBUG), 1)
+ifneq ($(STRIP),0)
 	@strip -g $@
-endif
 endif
 
 $(THUMBS_OBJECTS): $(OBJECTS_DIR)/%.so: %.c src/emelfm2.h src/e2_plugins.h
 	@echo "compiling '$*.c'"
 	@$(CC) $(lCFLAGS) $(lLIBS_CFLAGS) $(THUMBS_FLAGS) $(LDFLAGS) -o $@ $*.c -Wl,--as-needed $(THUMBS_LIBS)
-ifeq ($(STRIP), 1)
-ifneq ($(DEBUG), 1)
+ifneq ($(STRIP),0)
 	@strip -g $@
-endif
 endif
 
 $(TRACKER_OBJECTS): $(OBJECTS_DIR)/%.so: %.c src/emelfm2.h src/e2_plugins.h
 	@echo "compiling '$*.c'"
 	@$(CC) $(lCFLAGS) $(lLIBS_CFLAGS) $(TRACKER_FLAGS) $(LDFLAGS) -o $@ $*.c -Wl,--as-needed $(TRACKER_LIBS)
-ifeq ($(STRIP), 1)
-ifneq ($(DEBUG), 1)
+ifneq ($(STRIP),0)
 	@strip -g $@
-endif
 endif
 
 $(ACL_OBJECTS): $(OBJECTS_DIR)/%.so: %.c src/emelfm2.h src/e2_plugins.h
 	@echo "compiling '$*.c'"
 	@$(CC) $(lCFLAGS) $(lLIBS_CFLAGS) $(ACL_FLAGS) $(LDFLAGS) -o $@ $*.c -Wl,--as-needed $(ACL_LIBS)
-ifeq ($(STRIP), 1)
-ifneq ($(DEBUG), 1)
+ifneq ($(STRIP),0)
 	@strip -g $@
-endif
 endif
 
 $(SU_FILE): po/app.emelfm2.policy.in
@@ -473,10 +480,8 @@ $(SU_FILE): po/app.emelfm2.policy.in
 $(VFS_OBJECTS): $(OBJECTS_DIR)/%.so: %.c $(OPTLIBS)/e2_vfs_dialog.c src/e2_plugins.h
 	@echo "compiling '$*.c'"
 	@$(CC) $(lCFLAGS) $(lLIBS_CFLAGS) $(VFS_FLAGS) $(LDFLAGS) -o $@ $*.c -Wl,--as-needed $(VFS_LIBS) 
-ifeq ($(STRIP), 1)
-ifneq ($(DEBUG), 1)
+ifneq ($(STRIP),0)
 	@strip -g $@
-endif
 endif
 
 deps: $(DEP_FILES) #UNUSED $(LIB_DEP_FILES)
@@ -595,103 +600,105 @@ $(BUILD_FILE):
 	@echo "#define LOCALE_DIR \"$(LOCALE_DIR)\"" >> $(BUILD_FILE)
 	@echo "#define E2_DEBUG_LEVEL $(DEBUG_LEVEL)" >> $(BUILD_FILE)
 
-ifeq ($(WITH_LATEST), 1)
+ifneq ($(WITH_LATEST),0)
 	@echo "#define E2_CURRENTLIBS" >> $(BUILD_FILE)
-ifeq ($(WITH_TRANSPARENCY), 1)
+ifneq ($(WITH_TRANSPARENCY),0)
 	@echo "#define E2_COMPOSIT" >> $(BUILD_FILE)
 endif
 else
-ifeq ($(GTK3), 1)
-ifeq ($(GTK2), 0)
+ifneq ($(GTK3),0)
+ifeq ($(GTK2),0)
 	@echo "#define E2_MIN_GTK3" >> $(BUILD_FILE)
-ifeq ($(WITH_TRANSPARENCY), 1)
+ifneq ($(WITH_TRANSPARENCY),0)
 	@echo "#define E2_COMPOSIT" >> $(BUILD_FILE)
 endif
 endif
 endif
 endif
-
-ifeq ($(XDG_INTEGRATION), 1)
+ifneq ($(USE_WAYLAND),0)
+	@echo "#define E2_THREADSAFE" >> $(BUILD_FILE)
+endif
+ifneq ($(XDG_INTEGRATION),0)
 #this is used only to allow make install without parameters
 	@echo "#define E2_XDG" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_ASSIST),1)
+ifneq ($(WITH_ASSIST),0)
 	@echo "#define E2_ASSISTED" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_VFS),1)
+ifneq ($(WITH_VFS),0)
 	@echo "#define E2_VFS" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_UDISKS),1)
+ifneq ($(WITH_UDISKS),0)
 	@echo "#define E2_DEVKIT" >> $(BUILD_FILE)
 else
-ifeq ($(WITH_HAL),1)
+ifneq ($(WITH_HAL),0)
 	@echo "#define E2_HAL" >> $(BUILD_FILE)
 endif
 endif
-ifeq ($(WITH_POLKIT), 1)
+ifneq ($(WITH_POLKIT),0)
 	@echo "#define E2_POLKIT" >> $(BUILD_FILE)
 endif
-ifeq ($(EDITOR_SPELLCHECK),1)
+ifneq ($(EDITOR_SPELLCHECK),0)
 	@echo "#define E2_SPELLCHECK" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_CUSTOMMOUSE),1)
+ifneq ($(WITH_CUSTOMMOUSE),0)
 	@echo "#define E2_MOUSECUSTOM" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_OUTPUTSTYLES),1)
+ifneq ($(WITH_OUTPUTSTYLES),0)
 	@echo "#define E2_OUTPUTSTYLES" >> $(BUILD_FILE)
 endif
-ifeq ($(EXTRA_BINDINGS),1)
+ifneq ($(EXTRA_BINDINGS),0)
 	@echo "#define E2_TRANSIENTBINDINGS" >> $(BUILD_FILE)
 endif
-ifeq ($(FILES_UTF8ONLY), 1)
+ifneq ($(FILES_UTF8ONLY),0)
 	@echo "#define E2_FILES_UTF8ONLY" >> $(BUILD_FILE)
 endif
-ifeq ($(NEW_COMMAND), 1)
+ifneq ($(NEW_COMMAND),0)
 	@echo "#define E2_NEW_COMMAND" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_THUMBS), 1)
+ifneq ($(WITH_THUMBS),0)
 	@echo "#define E2_THUMBNAILS" >> $(BUILD_FILE)
-ifeq ($(WITH_THUMBLIB),1)
+ifneq ($(WITH_THUMBLIB),0)
 	@echo "#define E2_THUMBLIB" >> $(BUILD_FILE)
 endif
 endif
-ifeq ($(WITH_ACL),1)
+ifneq ($(WITH_ACL),0)
 	@echo "#define E2_ACL" >> $(BUILD_FILE)
 endif
-ifeq ($(WITH_TRACKER),1)
+ifneq ($(WITH_TRACKER),0)
 	@echo "#define E2_TRACKER" >> $(BUILD_FILE)
 endif
 
-ifeq ($(DOCS_VERSION), 1)
+ifneq ($(DOCS_VERSION),0)
 	@echo "#define E2_VERSIONDOCS" >> $(BUILD_FILE)
 endif
 	@echo "#define MAIN_HELP \"$(HELPDOC)\"" >> $(BUILD_FILE)
 	@echo "#define CFG_HELP \"$(CONFIGDOC)\"" >> $(BUILD_FILE)
 
-ifeq ($(PANES_HORIZONTAL), 1)
+ifneq ($(PANES_HORIZONTAL),0)
 	@echo "#define E2_PANES_HORIZONTAL" >> $(BUILD_FILE)
 endif
 
-ifeq ($(USE_GAMIN), 1)
+ifneq ($(USE_GAMIN),0)
 	@echo "#define E2_GAMIN" >> $(BUILD_FILE)
 else
-ifeq ($(USE_INOTIFY), 1)
+ifneq ($(USE_INOTIFY),0)
 	@echo "#ifdef __linux__" >> $(BUILD_FILE)
 	@echo "#define E2_FAM_INOTIFY" >> $(BUILD_FILE)
 	@echo "#endif" >> $(BUILD_FILE)
 endif
-ifeq ($(USE_KQUEUE), 1)
+ifneq ($(USE_KQUEUE),0)
 	@echo "#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(darwin)" >> $(BUILD_FILE)
 	@echo "#define E2_FAM_KQUEUE" >> $(BUILD_FILE)
 	@echo "#endif" >> $(BUILD_FILE)
 endif
-ifeq ($(USE_PORTEVENT), 1)
+ifneq ($(USE_PORTEVENT),0)
 	@echo "#ifdef __solaris__" >> $(BUILD_FILE)
 	@echo "#define E2_FAM_PORTEVENT" >> $(BUILD_FILE)
 	@echo "#endif" >> $(BUILD_FILE)
 endif
 endif
-ifeq ($(WITH_SYSTEM_ICONS), 1)
+ifneq ($(WITH_SYSTEM_ICONS),0)
 #see also gtk 3.10+ check in emelfm2.h
 	@echo "#define E2_ADD_STOCKS" >> $(BUILD_FILE)
 endif
