@@ -254,7 +254,7 @@ static GtkWidget *_e2_menu_add_tied_check (GtkWidget *menu, E2_OptionSet *set,
 @brief add item to @a menu
 Args of @a func should be (GtkMenuItem*,some pointer)
 @param menu menu widget
-@param label menu item text, optionally with mnemonic
+@param label menu item text, which may contain markup and/or mnemonic
 @param icon custom iconfile path, or stock-icon identifier, or NULL or "" for no icon
 @param tip tooltip string, or NULL
 @param activate_cb callback function for handling menu item activation, or NULL
@@ -302,7 +302,8 @@ GtkWidget *e2_menu_add (GtkWidget *menu, const gchar *labeltext, const gchar *ic
 			if (labeltext)
 			{
 				GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-				GtkWidget *label = gtk_label_new_with_mnemonic (labeltext);
+				GtkWidget *label = gtk_label_new (NULL);
+				gtk_label_set_markup_with_mnemonic (GTK_LABEL (label), labeltext);
 				gtk_container_add (GTK_CONTAINER (box), image);
 				gtk_container_add (GTK_CONTAINER (box), label);
 				gtk_container_add (GTK_CONTAINER (menu_item), box);
