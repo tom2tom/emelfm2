@@ -1214,7 +1214,7 @@ void e2_output_set_menu_position (GtkWidget *menu, gint *x, gint *y,
 	GtkAllocation alloc;
 	gtk_window_get_position (GTK_WINDOW (app.main_window), &left, &top);
 #ifdef USE_GTK3_0
-	//gtk3 bug, reports wrong value for textview alloc.y
+	//gtk3 reports different value for textview alloc.y ?!
 	gtk_widget_get_allocation (app.main_window, &alloc);
 	top = top + alloc.height * app.window.output_paned_ratio;
 #endif
@@ -1223,11 +1223,17 @@ void e2_output_set_menu_position (GtkWidget *menu, gint *x, gint *y,
 #else
 	alloc = textview->allocation;
 #endif
-	*x = left + alloc.x + alloc.width/2;
+	*x = left + alloc.x + alloc.width/2 - 30;
 #ifdef USE_GTK3_0
-	*y = top + alloc.height/2;
+	if (alloc.height < 100)
+		*y = top + alloc.y;
+	else
+		*y = top + alloc.y + alloc.height/2 - 50;
 #else
-	*y = top + alloc.y + alloc.height/2;
+	if (alloc.height < 100)
+		*y = top + alloc.y;
+	else
+		*y = top + alloc.y + alloc.height/2 - 50;
 #endif
 	*push_in = FALSE;
 }

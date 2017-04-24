@@ -1399,19 +1399,49 @@ FALSE for menu clamped to screen size
 
 @return
 */
-void e2_fileview_set_menu_position (GtkMenu *menu,
-	gint *x, gint *y, gboolean *push_in, GtkWidget *treeview)
+void e2_fileview_set_menu_position (GtkMenu *menu, gint *x, gint *y,
+	gboolean *push_in, GtkWidget *treeview)
 {
-	gint left, top;
-	gtk_window_get_position (GTK_WINDOW (app.main_window), &left, &top);
+	gint left, top, lx, ly, lh, lw;
 	GtkAllocation alloc;
+
+	gtk_window_get_position (GTK_WINDOW (app.main_window), &left, &top);
+	if (treeview == app.pane2.view.treeview)
+	{
 #ifdef USE_GTK2_18
-	gtk_widget_get_allocation (treeview, &alloc);
+		gtk_widget_get_allocation (app.main_window, &alloc);
 #else
-	alloc = treeview->allocation;
+		alloc = app.main_window->allocation;
 #endif
-	*x = left + alloc.x + alloc.width/2;
-	*y = top + alloc.y + alloc.height/2 - 30;
+		if (app.window.panes_horizontal)
+		{
+			top += alloc.height * app.window.panes_paned_ratio;
+		}
+		else
+		{
+			left += alloc.width * app.window.panes_paned_ratio;
+		}
+	}
+
+	GtkWidget *parent = gtk_widget_get_parent (treeview);
+#ifdef USE_GTK2_18
+	gtk_widget_get_allocation (parent, &alloc);
+#else
+	alloc = parent->allocation;
+#endif
+	lx = alloc.x;
+	ly = alloc.y;
+	lw = alloc.width;
+	lh = alloc.height;
+
+	if (lw < 60)
+		*x = left + lx;
+	else
+		*x = left + lx + lw/2 - 30;
+	if (lh < 100)
+		*y = top + ly;
+	else
+		*y = top + ly + lh/2 - 50;
 	*push_in = FALSE;
 }
 #endif //ndef USE_GTK3_22
