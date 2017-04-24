@@ -1860,7 +1860,7 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 # else
 		GTK_DIALOG (rt->dialog)->action_area;
 # endif
-	gchar *labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
+	labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
 		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
 	rt->info_label = e2_widget_add_mid_label (hbbox, labeltext, 0.0, TRUE, 0);
 #endif
