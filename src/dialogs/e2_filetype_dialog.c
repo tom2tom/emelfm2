@@ -746,7 +746,10 @@ static void _e2_edftdlg_menu_create (GtkWidget *treeview,
 
 #ifdef USE_GTK3_22
 	if (button == 0)
-		e2_menu_popup_at_widget (menu, treeview);
+	{
+		GtkWidget *parent = gtk_widget_get_parent (treeview);
+		e2_menu_popup_at_widget (menu, parent);
+	}
 	else
 		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
 #else

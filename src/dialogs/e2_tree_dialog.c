@@ -1218,7 +1218,7 @@ static void _e2_treedlg_show_context_menu (GtkWidget *treeview,
 
 #ifdef USE_GTK3_22
 	if (event_button == 0)
-		e2_menu_popup_at_widget (menu, treeview);
+		e2_menu_popup_at_widget (menu, rt->dialog);
 	else
 		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
 #else

@@ -1052,7 +1052,7 @@ static void _e2_view_dialog_show_context_menu (GtkWidget *textview,
 
 #ifdef USE_GTK3_22
 	if (event_button == 0)
-		e2_menu_popup_at_widget (menu, textview);
+		e2_menu_popup_at_widget (menu, rt->dialog);
 	else
 		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
 #else

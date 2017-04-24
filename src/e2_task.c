@@ -1812,7 +1812,8 @@ static gboolean _e2_task_abort (gpointer from, E2_ActionRuntime *art)
 		}
 		else
 		{
-			e2_menu_popup_at_widget (menu, app.tab.text);
+			GtkWidget *parent = gtk_widget_get_parent ((GtkWidget*)app.tab.text);
+			e2_menu_popup_at_widget (menu, parent);
 		}
 #else
 		//determine the menu's popup position

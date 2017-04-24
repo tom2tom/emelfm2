@@ -1192,7 +1192,8 @@ static gboolean _e2_option_tree_popup_menu_cb (GtkWidget *treeview,
 	//set appropriate item sensitivities
 	e2_option_tree_menu_set_sensitive (menu, treeview);
 #ifdef USE_GTK3_22
-	e2_menu_popup_at_widget (menu, treeview);
+	GtkWidget *parent = gtk_widget_get_parent (treeview);
+	e2_menu_popup_at_widget (menu, parent);
 #else
 	guint32 event_time = gtk_get_current_event_time ();
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL,

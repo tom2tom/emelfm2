@@ -1762,7 +1762,8 @@ static gboolean _e2_pane_filters_show (gpointer from, E2_ActionRuntime *art)
 	E2_PaneRuntime *rt = e2_pane_get_runtime (from, art->data, NULL);
 	GtkWidget *menu = e2_menu_create_filter_menu (&rt->view);
 #ifdef USE_GTK3_22
-	e2_menu_popup_at_widget (menu, rt->view.treeview);
+	GtkWidget *parent = gtk_widget_get_parent (rt->view.treeview);
+	e2_menu_popup_at_widget (menu, parent);
 #else
 	guint32 event_time = gtk_get_current_event_time ();
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
@@ -1848,7 +1849,8 @@ static gboolean _e2_pane_vfs_menu_show (gpointer from, E2_ActionRuntime *art)
 #ifdef USE_GTK3_22
 	if (art->action->data == NULL)	//CHECKME
 	{
-		e2_menu_popup_at_widget (menu, curr_view->treeview);
+		GtkWidget *parent = gtk_widget_get_parent (curr_view->treeview);
+		e2_menu_popup_at_widget (menu, parent);
 	}
 	else
 	{

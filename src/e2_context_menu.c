@@ -334,7 +334,10 @@ void e2_context_menu_show (guint button, guint32 time, gint type, ViewInfo *view
 
 #ifdef USE_GTK3_22
 		if (button == 0)
-			e2_menu_popup_at_widget (app.context_menu, view->treeview);
+		{
+			GtkWidget *parent = gtk_widget_get_parent (view->treeview);
+			e2_menu_popup_at_widget (app.context_menu, parent);
+		}
 		else
 			gtk_menu_popup_at_pointer (GTK_MENU (app.context_menu), NULL);	
 #else

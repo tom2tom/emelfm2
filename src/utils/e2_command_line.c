@@ -1195,7 +1195,8 @@ static gboolean _e2_command_line_insert_child_pid
 	}
 	else
 	{
-		e2_menu_popup_at_widget (menu, (GtkWidget*)app.tab.text);
+		GtkWidget *parent = gtk_widget_get_parent ((GtkWidget*)app.tab.text);
+		e2_menu_popup_at_widget (menu, parent);
 	}
 #else
 	if (GTK_IS_BUTTON (from))

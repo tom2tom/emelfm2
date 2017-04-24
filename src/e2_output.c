@@ -1777,7 +1777,10 @@ OR
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 #ifdef USE_GTK3_22
 	if (event_button == 0)
-		e2_menu_popup_at_widget (menu, textview);
+	{
+		GtkWidget *parent = gtk_widget_get_parent (textview);
+		e2_menu_popup_at_widget (menu, parent);
+	}
 	else
 		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
 #else

@@ -305,7 +305,10 @@ static void _e2_confdlg_show_context_menu (GtkWidget *treeview, guint event_butt
 		G_CALLBACK (e2_menu_selection_done_cb), NULL);
 #ifdef USE_GTK3_22
 	if (event_button == 0)
-		e2_menu_popup_at_widget (menu, treeview);
+	{
+		GtkWidget *parent = gtk_widget_get_parent (treeview);
+		e2_menu_popup_at_widget (menu, parent);
+	}
 	else
 		gtk_menu_popup_at_pointer (GTK_MENU (menu), NULL);	
 #else
