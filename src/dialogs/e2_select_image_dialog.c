@@ -1234,19 +1234,20 @@ GtkWidget *e2_sid_create (GtkWidget *parent, const gchar *name, gchar *icon, Gdk
 	//set to 0 in page-switch cb triggered in gtk_widget_show_all()
 	gint page = _e2_sidlg_show_current (TRUE, rt);
 
-#ifdef USE_GTK3_12
-WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
-#endif
+	rt->rem_btn = e2_dialog_add_defined_button (rt->dialog, &E2_BUTTON_REMOVE);
+	e2_widget_set_safetip (rt->rem_btn, _("Remove the current icon"));
+	if (*icon == '\0')	//nothing to remove at present
+		gtk_widget_set_sensitive (rt->rem_btn, FALSE);
+
 	GtkWidget *action_area =
-#ifdef USE_GTK2_14
+#ifdef USE_GTK3_12
+		gtk_widget_get_parent (rt->rem_btn);
+#elif defined (USE_GTK2_14)
 		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
 #else
 		GTK_DIALOG (rt->dialog)->action_area;
 #endif
-#ifdef USE_GTK3_0
-	gtk_container_add (GTK_CONTAINER (action_area), rt->dir_chooser);
-	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (action_area), rt->dir_chooser, TRUE);
-#else
+#ifndef USE_GTK3_0
 	//we don't put the chooser-button in dialog action-area (buttons there are all homogenous)
 	//but we do make it look quite like it's in there
 	gint action_area_border;
@@ -1268,17 +1269,26 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 	gtk_box_reorder_child (GTK_BOX (dialog_vbox), bbox, 0);
 #endif
 
-	rt->rem_btn = e2_dialog_add_defined_button (rt->dialog, &E2_BUTTON_REMOVE);
-	e2_widget_set_safetip (rt->rem_btn, _("Remove the current icon"));
-	if (*icon == '\0')	//nothing to remove at present
-		gtk_widget_set_sensitive (rt->rem_btn, FALSE);
-
 	gtk_window_set_default_size (GTK_WINDOW (rt->dialog), -1, 350);
 
 	E2_Button no_btn;
 	e2_button_derive (&no_btn, &E2_BUTTON_NO, BTN_NO_KEEP);
 	e2_dialog_show (rt->dialog, parent, 0,
 		&E2_BUTTON_MORE, &no_btn, &E2_BUTTON_APPLY, NULL); //sets notebook page to 0
+
+#ifdef USE_GTK3_0
+# ifdef USE_GTK3_2
+	GList *member;
+	GList *children = gtk_container_get_children (GTK_CONTAINER(action_area));
+	for (member = children; member != NULL; member = member->next)
+		gtk_button_box_set_child_non_homogeneous (GTK_BUTTON_BOX (action_area),
+			(GtkWidget*)member->data, TRUE);
+	g_list_free (children);
+# endif
+	gtk_container_add (GTK_CONTAINER (action_area), rt->dir_chooser);
+	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (action_area), rt->dir_chooser, TRUE);
+	gtk_widget_show_all (rt->dir_chooser);
+#endif
 
 	if (page != 0)
 		gtk_notebook_set_current_page (rt->notebook, page);
