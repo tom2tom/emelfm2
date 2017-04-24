@@ -1817,9 +1817,20 @@ static GtkWidget *_e2_output_create_view (E2_OutputTabRuntime *rt)
 		e2_option_int_get ("output-right-margin"));
 	const gchar *fntname = e2_utils_get_output_font ();
 #ifdef USE_GTK3_16
-	gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
-	e2_widget_override_style (GTK_WIDGET (rt->text), cssdata);
-	g_free (cssdata);
+	gchar *instring = strchr (fntname, ' ');
+	if (instring != NULL && *(instring+1) != '0')
+	{
+		gchar size[8];
+		gchar *base = g_strdup (fntname);
+		instring = base + (instring - fntname);
+		*instring = 0;
+		gfloat points = strtoul (instring+1, NULL, 10);
+		snprintf (size, 8, "%5.2f", points/12);
+		e2_widget_override_style (GTK_WIDGET (rt->text), "GtkTexView { font-family:%s;font-size:%sem; }", base, size);
+		g_free (base);
+	}
+	else
+		e2_widget_override_style (GTK_WIDGET (rt->text), "GtkTexView { font-family:%s; }", fntname);
 #else
 	PangoFontDescription *font_desc = pango_font_description_from_string
 			(fntname);
@@ -3872,7 +3883,14 @@ void e2_output_update_style (void)
 	PangoFontDescription *font_desc = pango_font_description_from_string (fntname);
 	app.output.font_size = pango_font_description_get_size (font_desc);	//(pixels or points) * PANGO_SCALE
 #ifdef USE_GTK3_16
-	gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
+	gchar *cssdata;
+	const gchar *instring = strchr (fntname, ' ');
+	if (instring != NULL)
+	{
+		//TODO base, size
+	}
+	else
+		cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
 #endif
 	GList *member;
 	for (member = app.tabslist; member != NULL; member = member->next)

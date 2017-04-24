@@ -842,26 +842,38 @@ font [ 〈font-style〉 || 〈font-variant〉 || 〈font-weight〉 || 〈font-st
 
 @return
 */
-void e2_widget_override_style (GtkWidget *widget, const gchar *cssdata)
+void e2_widget_override_style (GtkWidget *widget, const gchar *template, ...)
 {
 	GtkStyleContext *sc = gtk_widget_get_style_context (widget);
 	if (sc)
 	{
-		GtkStyleProvider *style = g_object_get_data (G_OBJECT(widget), "_e2-styler");
-		if (cssdata != NULL)
+		GtkCssProvider *style = g_object_get_data (G_OBJECT(widget), "_e2-styler");
+		if (template != NULL)
 		{
+			gboolean cleared;
+			gchar *cssdata;
+			va_list args;
+			GError *err;
+
 			if (style != NULL)
 			{
-				gtk_style_context_remove_provider (sc, style);
-//				g_object_unref (G_OBJECT (style));
+				cleared = TRUE;
+				gtk_style_context_remove_provider (sc, GTK_STYLE_PROVIDER (style));
+				if (G_IS_OBJECT (style))
+					g_object_unref (G_OBJECT (style));
 			}
-		 	GtkCssProvider *style = gtk_css_provider_new ();
-			GError *err = NULL;
+			else
+				cleared = FALSE;
+
+		 	style = gtk_css_provider_new ();
+			va_start (args, template);
+			cssdata = g_strdup_vprintf (template, args);
+			err = NULL;
 			gtk_css_provider_load_from_data (style, cssdata, -1, &err);
 			if (err == NULL)
 			{
 				gtk_style_context_add_provider (sc, GTK_STYLE_PROVIDER (style),
-					(GTK_STYLE_PROVIDER_PRIORITY_FALLBACK+1));
+					GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 				g_object_set_data (G_OBJECT(widget), "_e2-styler", style);
 			}
 			else
@@ -870,12 +882,22 @@ void e2_widget_override_style (GtkWidget *widget, const gchar *cssdata)
 				g_error_free (err);
 				g_object_set_data (G_OBJECT(widget), "_e2-styler", NULL);
 			}
-			g_object_unref (G_OBJECT (style)); //back to refcount=1, or 0
+			if (G_IS_OBJECT(style))
+			{
+				if (!cleared)
+					g_object_unref (G_OBJECT (style)); //back to refcount=1, or 0
+			}
+			else
+			{
+				printd (DEBUG, "FIX style-object refcount");
+			}
+			g_free (cssdata);
 		}
 		else if (style != NULL)
 		{
-			gtk_style_context_remove_provider (sc, style);
-//			g_object_unref (G_OBJECT (style));
+			gtk_style_context_remove_provider (sc, GTK_STYLE_PROVIDER (style));
+			if (G_IS_OBJECT (style))
+				g_object_unref (G_OBJECT (style));
 			g_object_set_data (G_OBJECT(widget), "_e2-styler", NULL);
 		}
 	}

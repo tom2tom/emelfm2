@@ -1874,10 +1874,8 @@ static void _e2p_find_widget_changed_cb (GtkWidget *widget, gpointer user_data)
 	{
 		//CHECKME set for :focus too?
 		gchar *color = e2_utils_color2str(e2_option_color_get ("color-negative"));
-		gchar *cssdata = g_strdup_printf ("GtkLabel { color:%s; }", color);
-		e2_widget_override_style (label, cssdata);
+		e2_widget_override_style (label, "GtkLabel { color:%s; }", color);
 		g_free (color);
-		g_free (cssdata);
 	}
 #elif defined (USE_GTK3_0)
 	if (clean)
@@ -1921,8 +1919,6 @@ static void _e2p_find_update_tablabels (GtkWidget *notebook)
 	count = gtk_notebook_get_n_pages (GTK_NOTEBOOK (notebook));
 #ifdef USE_GTK3_16
 	gchar *color = e2_utils_color2str(dirty);
-	//CHECKME set :focus too ?
-	gchar *cssdata = g_strdup_printf ("GtkLabel { color:%s; }", color);
 #endif
 	for (i = 0; i < count; i++)
 	{
@@ -1937,7 +1933,8 @@ static void _e2p_find_update_tablabels (GtkWidget *notebook)
 		if (clean)
 			e2_widget_override_style (label, NULL);
 		else
-			e2_widget_override_style (label, cssdata);
+			//CHECKME set :focus too ?
+			e2_widget_override_style (label, "GtkLabel { color:%s; }", color);
 #elif defined (USE_GTK3_0)
 		if (clean)
 		{
@@ -1964,7 +1961,6 @@ static void _e2p_find_update_tablabels (GtkWidget *notebook)
 	}
 #ifdef USE_GTK3_16
 	g_free (color); 
-	g_free (cssdata);
 #endif
 }
 /**

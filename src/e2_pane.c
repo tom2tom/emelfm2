@@ -283,10 +283,8 @@ void e2_pane_flag_active (void)
 #ifdef USE_GTK3_16
 						gchar *color = e2_utils_color2str(active_btncolor);
 						//CHECKME set for :focus too?
-						gchar *cssdata = g_strdup_printf ("GtkButton {  background-color:%s; }", color);
-						e2_widget_override_style (header_button, cssdata);
+						e2_widget_override_style (header_button, "GtkButton {  background-color:%s; }", color);
 						g_free (color);
-						g_free (cssdata);
 #elif defined (USE_GTK3_0)
 						gtk_widget_override_background_color (header_button, GTK_STATE_NORMAL, active_btncolor);
 #elif defined (USE_GTK2_14)

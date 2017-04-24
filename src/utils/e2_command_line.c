@@ -288,10 +288,8 @@ void e2_command_line_highlight (GtkWidget *entry, gboolean on)
 #ifdef USE_GTK3_16
 		gchar *color = e2_utils_color2str(e2_option_color_get ("color-positive"));
 		//CHECKME set for :focus too?
-		gchar *cssdata = g_strdup_printf ("GtkEntry { color:%s; }", color);
-		e2_widget_override_style (entry, cssdata);
+		e2_widget_override_style (entry, "GtkEntry { color:%s; }", color);
 		g_free (color);
-		g_free (cssdata);
 #elif defined (USE_GTK3_0)
 		gtk_widget_override_color (entry, GTK_STATE_NORMAL,
 			e2_option_color_get ("color-positive"));

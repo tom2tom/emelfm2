@@ -85,7 +85,7 @@ GtkWidget *e2_widget_add_notebook_page (//GtkWidget *dialog,
 	GtkWidget *notebook, gchar *name, GtkPolicyType swpolicy) G_GNUC_MALLOC;
 void e2_widget_get_font_pixels (GtkWidget *widget, int *width, int *height);
 #ifdef USE_GTK3_16
-void e2_widget_override_style (GtkWidget *widget, const gchar *cssdata);
+void e2_widget_override_style (GtkWidget *widget, const gchar *template, ...);
 #else
 void e2_widget_set_font (GtkWidget *widget, const gchar *font_string);
 #endif

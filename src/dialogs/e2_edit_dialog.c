@@ -1585,13 +1585,24 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 	{
 		rt->textbuffer = buf;
 		//preserve appearance of output pane
-		const gchar *fontname = e2_utils_get_output_font ();
+		const gchar *fntname = e2_utils_get_output_font ();
 #ifdef USE_GTK3_16
-		gchar *cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fontname);
-		e2_widget_override_style (rt->textview, cssdata);
-		g_free (cssdata);
+		gchar *instring = strchr (fntname, ' ');
+		if (instring != NULL && *(instring+1) != '0')
+		{
+			gchar size[8];
+			gchar *base = g_strdup (fntname);
+			instring = base + (instring - fntname);
+			*instring = 0;
+			gfloat points = strtoul (instring+1, NULL, 10);
+			snprintf (size, 8, "%5.2f", points/12);
+			e2_widget_override_style (rt->textview, "GtkTexView { font-family:%s; font-size:%sem; }", base, size);
+			g_free (base);
+		}
+		else
+			e2_widget_override_style (rt->textview, "GtkTexView { font-family:%s; }", fntname);
 #else
-		e2_widget_set_font (rt->textview, fontname);
+		e2_widget_set_font (rt->textview, fntname);
 #endif
 		e2_widget_get_font_pixels (rt->textview, &char_width, &char_height);
 	}
@@ -1685,51 +1696,8 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 	gtk_size_group_add_widget (rt->sgroup, hbox2);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-	//now add things to the action-area
-	//produce but don't yet show the "not found" warning
-#ifdef USE_GTK3_0
-	rt->info_label = gtk_label_new (_("not found"));
-# ifdef USE_GTK3_16
-	gchar *color = e2_utils_color2str(e2_option_color_get ("color-negative"));
-	//CHECKME set for :focus too?
-	gchar *cssdata = g_strdup_printf ("GtkLabel { color:%s; }", color);
-	e2_widget_override_style (rt->info_label, cssdata);
-	g_free (color);
-	g_free (cssdata);
-# else
-	gtk_widget_override_color (rt->info_label, 0, e2_option_color_get ("color-negative"));
-# endif
-//TODO make this show at LHS by styling only
-	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
-		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
-# ifdef USE_GTK3_12
-WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alternative)
-# endif
-	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
-	gtk_container_add (GTK_CONTAINER(hbbox), rt->info_label);
-	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (hbbox), rt->info_label, TRUE);
-	gchar *labeltext;
-#else //GTK_2
-	gchar *labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
-		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
-	rt->info_label = e2_widget_add_mid_label (
-# ifdef USE_GTK2_14
-		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog)),
-# else
-		GTK_DIALOG (rt->dialog)->action_area,
-# endif
-		labeltext, 0.0, TRUE, 0);
-	//left-align the label
-	gtk_button_box_set_child_secondary (
-		GTK_BUTTON_BOX (
-# ifdef USE_GTK2_14
-		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog))
-# else
-		GTK_DIALOG (rt->dialog)->action_area
-# endif
-		), rt->info_label, TRUE);
-#endif
-	labeltext = _("_Replace");
+	//populate dialog action-area
+	gchar *labeltext = _("_Replace");
 	replace_keycode = e2_utils_get_mnemonic_keycode (labeltext);
 	guint asciicode = GPOINTER_TO_UINT (g_hash_table_lookup (app.keysnative,
 			GUINT_TO_POINTER (replace_keycode)));
@@ -1738,6 +1706,7 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 	rt->replacebtn =
 	e2_dialog_add_simple_button (rt->dialog, STOCK_NAME_CONVERT, labeltext, E2_RESPONSE_USER1);
 	e2_widget_set_safetip (rt->replacebtn, _("Replace this match"));
+
 	labeltext = _("_Find");
 	find_keycode = e2_utils_get_mnemonic_keycode (labeltext);
 	asciicode = GPOINTER_TO_UINT (g_hash_table_lookup (app.keysnative,
@@ -1760,6 +1729,48 @@ WARNING(gtk 3.12 deprecates dialog action-area use without any practicable alter
 	e2_dialog_add_simple_button (rt->dialog, STOCK_NAME_SAVE, labeltext, E2_RESPONSE_USER2);
 	//allow saving of a fresh output buffer
 	gtk_widget_set_sensitive (rt->savebtn, !fileedit);
+
+	//initially-hidden "not found" label
+#ifdef USE_GTK3_0
+	rt->info_label = gtk_label_new (_("not found"));
+# ifdef USE_GTK3_16
+	gchar *color = e2_utils_color2str(e2_option_color_get ("color-negative"));
+	//CHECKME set for :focus too?
+	e2_widget_override_style (rt->info_label, "GtkLabel { color:%s; }", color);
+	g_free (color);
+# else
+	gtk_widget_override_color (rt->info_label, 0, e2_option_color_get ("color-negative"));
+# endif
+//TODO make this show at LHS by styling only
+	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
+		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
+# ifdef USE_GTK3_12
+	GtkWidget *hbbox = gtk_widget_get_parent (rt->replacebtn);
+# else
+	GtkWidget *hbbox = gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog));
+# endif
+	gtk_container_add (GTK_CONTAINER(hbbox), rt->info_label);
+	gtk_button_box_set_child_secondary (GTK_BUTTON_BOX (hbbox), rt->info_label, TRUE);
+#else //GTK_2
+	labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
+		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
+	rt->info_label = e2_widget_add_mid_label (
+# ifdef USE_GTK2_14
+		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog)),
+# else
+		GTK_DIALOG (rt->dialog)->action_area,
+# endif
+		labeltext, 0.0, TRUE, 0);
+	//left-align the label
+	gtk_button_box_set_child_secondary (
+		GTK_BUTTON_BOX (
+# ifdef USE_GTK2_14
+		gtk_dialog_get_action_area (GTK_DIALOG (rt->dialog))
+# else
+		GTK_DIALOG (rt->dialog)->action_area
+# endif
+		), rt->info_label, TRUE);
+#endif
 
 //	e2_dialog_set_responses (rt->dialog, E2_RESPONSE_FIND, GTK_RESPONSE_CLOSE);
 	//make sure we always exit cleanly
