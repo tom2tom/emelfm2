@@ -341,8 +341,8 @@ void e2_context_menu_show (guint button, guint32 time, gint type, ViewInfo *view
 		if (button == 0)
 			//this was a menu key press or specific action
 			gtk_menu_popup (GTK_MENU (app.context_menu), NULL, NULL,
-				(GtkMenuPositionFunc) e2_fileview_set_menu_position,
-				view->treeview, 0, time);
+				(GtkMenuPositionFunc) e2_fileview_set_menu_position, view->treeview,
+					0, time);
 		else
 			//this was a button-3 click
 			gtk_menu_popup (GTK_MENU (app.context_menu), NULL, NULL,

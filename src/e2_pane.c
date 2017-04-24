@@ -1766,8 +1766,8 @@ static gboolean _e2_pane_filters_show (gpointer from, E2_ActionRuntime *art)
 #else
 	guint32 event_time = gtk_get_current_event_time ();
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-		(GtkMenuPositionFunc) e2_fileview_set_menu_position,
-			rt->view.treeview, 0, event_time);
+		(GtkMenuPositionFunc) e2_fileview_set_menu_position, rt->view.treeview,
+			0, event_time);
 #endif
 	return TRUE;
 }
@@ -1860,8 +1860,8 @@ static gboolean _e2_pane_vfs_menu_show (gpointer from, E2_ActionRuntime *art)
 	guint32 event_time = gtk_get_current_event_time ();
 	if (art->action->data == NULL)	//CHECKME
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-			(GtkMenuPositionFunc) e2_fileview_set_menu_position,
-				curr_view->treeview, 0, event_time);
+			(GtkMenuPositionFunc) e2_fileview_set_menu_position, curr_view->treeview,
+				0, event_time);
 	else
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
 			(GtkMenuPositionFunc) e2_toolbar_set_menu_position, from, 1, event_time);

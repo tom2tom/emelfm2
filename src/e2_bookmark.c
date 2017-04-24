@@ -611,8 +611,8 @@ static gboolean _e2_bookmark_show (gpointer from, E2_ActionRuntime *art)
 #else
 		guint32 event_time = gtk_get_current_event_time ();
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-			(GtkMenuPositionFunc) e2_fileview_set_menu_position,
-			rt->view.treeview, 0, event_time);
+			(GtkMenuPositionFunc) e2_fileview_set_menu_position, rt->view.treeview,
+				0, event_time);
 #endif
 		return TRUE;
 	}

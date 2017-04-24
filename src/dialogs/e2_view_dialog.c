@@ -964,8 +964,8 @@ FALSE for menu clamped to screen size
 
 @return
 */
-void e2_view_dialog_set_menu_position (GtkWidget *menu,
-	gint *x, gint *y, gboolean *push_in, E2_ViewDialogRuntime *rt)
+void e2_view_dialog_set_menu_position (GtkWidget *menu, gint *x, gint *y,
+	gboolean *push_in, E2_ViewDialogRuntime *rt)
 {
 	gint left, top;
 	gtk_window_get_position (GTK_WINDOW (rt->dialog), &left, &top);
@@ -1058,8 +1058,8 @@ static void _e2_view_dialog_show_context_menu (GtkWidget *textview,
 #else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-			(GtkMenuPositionFunc) e2_view_dialog_set_menu_position,
-			rt, 0, event_time);
+			(GtkMenuPositionFunc) e2_view_dialog_set_menu_position, rt,
+				0, event_time);
 	else
 		//this was a button-3 click
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,

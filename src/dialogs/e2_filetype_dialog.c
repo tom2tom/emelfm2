@@ -690,8 +690,8 @@ FALSE for menu clamped to screen size
 
 @return
 */
-static void _e2_edftdlg_set_menu_position (GtkMenu *menu,
-	gint *x, gint *y, gboolean *push_in, GtkWidget *treeview)
+static void _e2_edftdlg_set_menu_position (GtkMenu *menu, gint *x, gint *y,
+	gboolean *push_in, GtkWidget *treeview)
 {
 	gint left, top;
 	gtk_window_get_position (GTK_WINDOW (filetypes_dialog), &left, &top);

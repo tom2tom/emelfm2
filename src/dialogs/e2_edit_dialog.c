@@ -988,12 +988,12 @@ static void _e2_edit_dialog_show_context_menu (GtkWidget *textview,
 #else
 	if (event_button == 0)
 		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-			(GtkMenuPositionFunc) e2_view_dialog_set_menu_position,
-			rt, event_button, event_time);
+			(GtkMenuPositionFunc) e2_view_dialog_set_menu_position, rt,
+				event_button, event_time);
 	else
 		//this was a button-3 click
-		gtk_menu_popup (GTK_MENU (menu), NULL, NULL,
-			NULL, NULL, event_button, event_time);
+		gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
+			event_button, event_time);
 #endif
 }
 

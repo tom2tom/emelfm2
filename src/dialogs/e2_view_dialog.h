@@ -130,8 +130,8 @@ gboolean e2_view_dialog_read_text (VPATH *localfile, E2_ViewDialogRuntime *rt);
 void e2_view_dialog_set_font (gint *char_width, gint *char_height,
 	E2_ViewDialogRuntime *rt);
 #ifndef USE_GTK3_22
-void e2_view_dialog_set_menu_position (GtkWidget *menu,
-	gint *x, gint *y, gboolean *push_in, E2_ViewDialogRuntime *rt);
+void e2_view_dialog_set_menu_position (GtkWidget *menu, gint *x, gint *y,
+	gboolean *push_in, E2_ViewDialogRuntime *rt);
 #endif
 void e2_view_dialog_update_combo (GtkWidget *combo);
 gboolean e2_view_dialog_combokey_cb (GtkWidget *entry, GdkEventKey *event,
