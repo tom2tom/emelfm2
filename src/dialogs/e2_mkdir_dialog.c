@@ -325,9 +325,7 @@ This is called from _e2_mkdirdlg_update_status() (inside BGL)
 */
 static void _e2_mkdirdlg_update_creation_widgets (gchar *reason, E2_MkdirDialogRuntime *rt)
 {
-	gchar *color;
-	gchar *constant;
-	gchar *label;
+	gchar *color, *constant, *label_text;
 
 	printd (DEBUG, "mkdir dialog update creation widgets");
 	if (rt->creation_possible)
@@ -340,11 +338,12 @@ static void _e2_mkdirdlg_update_creation_widgets (gchar *reason, E2_MkdirDialogR
 		color = e2_option_str_get ("color-negative");
 		constant = _("no");
 	}
-	label = g_strconcat ("<span weight=\"bold\" size=\"small\" foreground=\"",
+	//CHECKME gtk3 label styling via CSS instead of markup e2_widget_override_style()
+	label_text = g_strconcat ("<span weight=\"bold\" size=\"small\" foreground=\"",
 			color, "\">", constant, " </span>", reason == NULL ? NULL : "<small>(",
 			reason, ")</small>", NULL);
-	gtk_label_set_markup (GTK_LABEL (rt->info_label2), label);
-	g_free (label);
+	gtk_label_set_markup (GTK_LABEL (rt->info_label2), label_text);
+	g_free (label_text);
 
 	//FIXME gtk stops repeated clicking of create button without leaving it
 	//if the E2_RESPONSE_CREATE sensitivity or corresponding button

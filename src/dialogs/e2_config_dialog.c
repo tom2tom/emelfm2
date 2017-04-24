@@ -1346,6 +1346,7 @@ static void _e2_confdlg_font_entry_cb (GtkEditable *entry, GtkWidget *label)
 	gchar *font_str = gtk_editable_get_chars (entry, 0, -1);
 	if ((font_str != NULL) && (*font_str != '\0') && (strlen (font_str) > 2))
 	{
+		//CHECKME gtk3 label styling via CSS instead of markup
 		gchar *label_text = g_strdup_printf ("\t<small><i>%s</i></small> <span font_desc=\"%s\">%s</span>",
 			_("example:"), font_str, _("abcd efgh ABCD EFGH"));
 		gtk_label_set_markup (GTK_LABEL (label), label_text);
@@ -1730,6 +1731,7 @@ static void _e2_confdlg_color_entry_cb (GtkEditable *entry, GtkWidget *label)
 	if (gdk_color_parse (color_str, &color))
 #endif
 	{
+		//CHECKME gtk3 label styling via CSS instead of markup
 		gchar *label_text = g_strdup_printf ("\t<small><i>%s</i></small>  "
 		"<span foreground=\"%s\" background=\"%s\">%s</span> "
 		"<span foreground=\"%s\">%s</span>  %s",

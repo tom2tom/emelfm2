@@ -1732,16 +1732,13 @@ static void _e2_edit_dialog_create (VPATH *localpath, GtkTextBuffer *buf, E2_Vie
 
 	//initially-hidden "not found" label
 #ifdef USE_GTK3_0
-	rt->info_label = gtk_label_new (_("not found"));
-# ifdef USE_GTK3_16
-	gchar *color = e2_utils_color2str(e2_option_color_get ("color-negative"));
-	//CHECKME set for :focus too?
-	e2_widget_override_style (rt->info_label, "GtkLabel { color:%s; }", color);
-	g_free (color);
-# else
-	gtk_widget_override_color (rt->info_label, 0, e2_option_color_get ("color-negative"));
-# endif
-//TODO make this show at LHS by styling only
+	//CHECKME gtk3 label styling via CSS instead of markup e2_widget_override_style()
+	rt->info_label = gtk_label_new (NULL);
+	labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
+		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);
+	gtk_label_set_markup (GTK_LABEL(rt->info_label), labeltext);
+	g_free (labeltext);
+	//TODO make this show at LHS by styling only
 	g_object_set (G_OBJECT(rt->info_label), "halign", GTK_ALIGN_START,
 		"valign", GTK_ALIGN_CENTER, "hexpand", TRUE, "hexpand-set", TRUE, NULL);
 # ifdef USE_GTK3_12
