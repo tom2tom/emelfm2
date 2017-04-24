@@ -735,7 +735,7 @@ void e2_icons_register_stocks (void)
 # endif //ndef USE_GTK3_14
 
 #else //ndef USE_GTK3_10
-
+/*
 #ifdef USE_GTK3_0
 	GtkStyleContext *sc = gtk_widget_get_style_context (app.main_window);
 	GtkIconSet *iset = gtk_style_context_lookup_icon_set (sc, GTK_STOCK_DISCARD);
@@ -764,7 +764,7 @@ void e2_icons_register_stocks (void)
 		gtk_icon_factory_add_default (extra_gtk_icons);
 		g_object_unref (G_OBJECT (extra_gtk_icons));	//ensure cleanup on gtk close
 	}
-
+*/
 #endif //ndef USE_GTK3_10
 }
 
