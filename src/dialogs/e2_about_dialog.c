@@ -136,7 +136,7 @@ static GtkWidget *_e2_about_dialog_create (void)
 	if (dialog_data == NULL)
 		return NULL;
 	GtkWidget *dialog = e2_dialog_create (_("help"), BINNAME, (ResponseFunc)_e2_about_dialog_response_cb,
-		dialog_data, "<span size=\"x-large\" weight=\"bold\">%s</span>", PROGNAME" "VERSION" "RELEASE);
+		dialog_data, "<span size=\"x-large\" weight=\"bold\">%s</span>", PROGNAME" "VERSION RELEASE);
 	e2_dialog_set_negative_response (dialog, GTK_RESPONSE_CLOSE);
 #ifndef USE_GTK3_0
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);	//looks better, with notebook
