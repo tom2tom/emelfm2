@@ -30,4 +30,4 @@ Section: localization
 Architecture: all
 Depends: ${misc:Depends}, emelfm2 (= ${source:Version})
 Description: Non-english translations for file manager emelFM2
- Provides translated UI strings for: fr, de, ja, ru, pl locales
+ Provides translated UI strings for: ja, zh_CN, fr, de, ru, pl locales
