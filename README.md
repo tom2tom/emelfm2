@@ -6,7 +6,7 @@ emelFM2 is licensed under the [GNU General Public License V.3](./docs/GPL).
 #### WEBSITES
 emelFM2 [homepage](http://www.emelfm2.net)
 
-emelFM1 at [sourceforge](http://emelFM.sourceforge.net)
+You might be interested in our ancestor, emelFM1, at [sourceforge](http://emelFM.sourceforge.net)
 #### MAILING LIST
 There is an emelFM2 mailing list provided by freelists.org. You can subscribe to that list by sending an email to [freelists](mailto:emelfm2-request@freelists.org) with 'subscribe' in the subject and you can unsubscribe from the list by sending email to the same address with 'unsubscribe' in the subject.
 
