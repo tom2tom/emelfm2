@@ -243,7 +243,7 @@ void e2_pane_flag_active (void)
 		{
 			case 1:
 			{  //set bold Filename-column header title
-				gchar *new_title = gettext (e2_all_columns[FILENAME].title);
+ 				gchar *new_title = gettext (e2_all_columns[FILENAME].title);
 				gchar *new_title2 = g_strconcat ("<b>", new_title,"</b>", NULL);
 				gtk_label_set_markup (curr_view->name_label, new_title2);
 				g_free (new_title2);
@@ -261,17 +261,20 @@ void e2_pane_flag_active (void)
 			default:
 			{
 				//set all active columns' header color
-				GDKCOLOR *active_btncolor = e2_option_color_get ("color-active-pane");
-				GList *base = gtk_tree_view_get_columns (GTK_TREE_VIEW (curr_view->treeview));
-				GList *columns;
 #ifdef USE_GTK2_14
 				GtkWidget *header_button;
 #endif
-				for (columns = base; columns !=NULL; columns = columns->next)
+				GDKCOLOR *active_btncolor = e2_option_color_get ("color-active-pane");
+#ifdef USE_GTK3_16
+				gchar *color = e2_utils_color2str(active_btncolor);
+#endif
+				GList *member;
+				GList *columns = gtk_tree_view_get_columns (GTK_TREE_VIEW (curr_view->treeview));
+				for (member = columns; member !=NULL; member = member->next)
 				{
 #ifdef USE_GTK2_14
 					header_button = gtk_widget_get_ancestor (
-						gtk_tree_view_column_get_widget ((GtkTreeViewColumn *)columns->data),
+						gtk_tree_view_column_get_widget ((GtkTreeViewColumn *)member->data),
 						GTK_TYPE_BUTTON);
 # ifdef DEBUG_MESSAGES
 					if (header_button == NULL)
@@ -281,16 +284,14 @@ void e2_pane_flag_active (void)
 # endif
 #endif
 #ifdef USE_GTK3_16
-						gchar *color = e2_utils_color2str(active_btncolor);
 						//CHECKME set for :focus too?
-						e2_widget_override_style (header_button, "GtkButton {  background-color:%s; }", color);
-						g_free (color);
+						e2_widget_override_style (header_button, "GtkButton { background-color:%s; }", color);
 #elif defined (USE_GTK3_0)
 						gtk_widget_override_background_color (header_button, GTK_STATE_NORMAL, active_btncolor);
 #elif defined (USE_GTK2_14)
 						gtk_widget_modify_bg (header_button, GTK_STATE_NORMAL, active_btncolor);
 #else
-						gtk_widget_modify_bg (((GtkTreeViewColumn *)columns->data)->button, GTK_STATE_NORMAL, active_btncolor);
+						gtk_widget_modify_bg (((GtkTreeViewColumn *)member->data)->button, GTK_STATE_NORMAL, active_btncolor);
 #endif
 #ifdef USE_GTK2_14
 # ifdef DEBUG_MESSAGES
@@ -298,14 +299,17 @@ void e2_pane_flag_active (void)
 # endif
 #endif
 				}
-				g_list_free (base);
+#ifdef USE_GTK3_16
+				g_free (color);
+#endif
+				g_list_free (columns);
 				//revert all inactive columns' header color to default
-				base = gtk_tree_view_get_columns (GTK_TREE_VIEW (other_view->treeview));
-				for (columns = base; columns != NULL; columns = columns->next)
+				columns = gtk_tree_view_get_columns (GTK_TREE_VIEW (other_view->treeview));
+				for (member = columns; member != NULL; member = member->next)
 				{
 #ifdef USE_GTK2_14
 					header_button = gtk_widget_get_ancestor (
-						gtk_tree_view_column_get_widget ((GtkTreeViewColumn *)columns->data),
+						gtk_tree_view_column_get_widget ((GtkTreeViewColumn *)member->data),
 						GTK_TYPE_BUTTON);
 # ifdef DEBUG_MESSAGES
 					if (header_button == NULL)
@@ -321,7 +325,7 @@ void e2_pane_flag_active (void)
 #elif defined (USE_GTK2_14)
 						gtk_widget_modify_bg (header_button, GTK_STATE_NORMAL, NULL);
 #else
-						gtk_widget_modify_bg (((GtkTreeViewColumn *)columns->data)->button, GTK_STATE_NORMAL, NULL);
+						gtk_widget_modify_bg (((GtkTreeViewColumn *)member->data)->button, GTK_STATE_NORMAL, NULL);
 #endif
 #ifdef USE_GTK2_14
 # ifdef DEBUG_MESSAGES
@@ -329,7 +333,7 @@ void e2_pane_flag_active (void)
 # endif
 #endif
 				}
-				g_list_free (base);
+				g_list_free (columns);
 				break;
 			}
 		}
