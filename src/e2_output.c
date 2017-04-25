@@ -3893,10 +3893,17 @@ void e2_output_update_style (void)
 	app.output.font_size = pango_font_description_get_size (font_desc);	//(pixels or points) * PANGO_SCALE
 #ifdef USE_GTK3_16
 	gchar *cssdata;
-	const gchar *instring = strchr (fntname, ' ');
+	gchar *instring = strchr (fntname, ' ');
 	if (instring != NULL)
 	{
-		//TODO base, size
+		gchar size[8];
+		gchar *base = g_strdup (fntname);
+		instring = base + (instring - fntname);
+		*instring = 0;
+		gfloat points = strtoul (instring+1, NULL, 10);
+		snprintf (size, 8, "%5.2f", points/12);
+		cssdata = g_strdup_printf ("GtkTexView { font-family:%s; font-size:%sem; }", base, size);
+		g_free (base);
 	}
 	else
 		cssdata = g_strdup_printf ("GtkTexView { font-family:%s; }", fntname);
