@@ -8,7 +8,7 @@ emelFM2 [homepage](http://www.emelfm2.net)
 
 You might be interested in our ancestor, emelFM1, at [sourceforge](http://emelFM.sourceforge.net)
 #### MAILING LIST
-There is an emelFM2 mailing list provided by freelists.org. You can subscribe to that list by sending an email to [freelists](mailto:emelfm2-request@freelists.org) with 'subscribe' in the subject and you can unsubscribe from the list by sending email to the same address with 'unsubscribe' in the subject.
+You can subscribe to the emelFM2 mailing list by sending an email to [freelists.org](mailto:emelfm2-request@freelists.org) with 'subscribe' in the subject and you can unsubscribe from the list by sending email to the same address with 'unsubscribe' in the subject. This is a low-traffic list, you won't be bombarded.
 
 The [email address](mailto:emelfm2@freelists.org)
 
