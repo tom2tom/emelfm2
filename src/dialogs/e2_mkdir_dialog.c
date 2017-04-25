@@ -338,7 +338,6 @@ static void _e2_mkdirdlg_update_creation_widgets (gchar *reason, E2_MkdirDialogR
 		color = e2_option_str_get ("color-negative");
 		constant = _("no");
 	}
-	//CHECKME gtk3 label styling via CSS instead of markup e2_widget_override_style()
 	label_text = g_strconcat ("<span weight=\"bold\" size=\"small\" foreground=\"",
 			color, "\">", constant, " </span>", reason == NULL ? NULL : "<small>(",
 			reason, ")</small>", NULL);

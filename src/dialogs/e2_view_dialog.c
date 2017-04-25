@@ -1833,7 +1833,6 @@ static GtkWidget *_e2_view_dialog_create (VPATH *localpath,
 
 	//initially-hidden "not found" label
 #ifdef USE_GTK3_0
-	//CHECKME gtk3 label styling via CSS instead of markup e2_widget_override_style()
 	rt->info_label = gtk_label_new (NULL);
 	labeltext = g_strconcat ("<span weight=\"bold\" foreground=\"",
 		e2_option_str_get ("color-negative"), "\">", _("not found"), "</span>", NULL);

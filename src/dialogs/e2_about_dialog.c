@@ -135,7 +135,6 @@ static GtkWidget *_e2_about_dialog_create (void)
 	E2_Sextet *dialog_data = e2_utils_sextet_new ();
 	if (dialog_data == NULL)
 		return NULL;
-	//CHECKME gtk3 label styling via CSS instead of markup
 	GtkWidget *dialog = e2_dialog_create (_("help"), BINNAME, (ResponseFunc)_e2_about_dialog_response_cb,
 		dialog_data, "<span size=\"x-large\" weight=\"bold\">%s</span>", PROGNAME" "VERSION" "RELEASE);
 	e2_dialog_set_negative_response (dialog, GTK_RESPONSE_CLOSE);
