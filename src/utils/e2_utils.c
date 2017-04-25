@@ -183,8 +183,8 @@ void e2_utils_show_help (gchar *title)
 gchar *e2_utils_color2str (GDKCOLOR *color)
 {
 #ifdef USE_GTK3_0
-	return g_strdup_printf ("#%.2X%.2X%.2X",
-		(int)color->red*255, (int)color->green*255, (int)color->blue*255);
+	return g_strdup_printf ("#%2X%2X%2X",
+		(int)(color->red*255), (int)(color->green*255), (int)(color->blue*255));
 #else
 	return g_strdup_printf ("#%.2X%.2X%.2X",
 		color->red/256, color->green/256, color->blue/256);
