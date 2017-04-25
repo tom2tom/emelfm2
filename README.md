@@ -6,11 +6,15 @@ emelFM2 requires Gtk+2.6 or later. Gtk+3.x is ok, though problem(s) (notably asp
 emelFM2 is licensed under the [GNU General Public License V.3](./docs/GPL).
 ### WEBSITES
 emelFM2 [homepage](http://www.emelfm2.net)
+
 emelFM1 at [sourceforge](http://emelFM.sourceforge.net)
 ### MAILING LIST
 There is an emelFM2 mailing list provided by freelists.org. You can subscribe to that list by sending an email to [freelists](mailto:emelfm2-request@freelists.org) with 'subscribe' in the subject and you can unsubscribe from the list by sending email to the same address with 'unsubscribe' in the subject.
+
 The [email address](mailto:emelfm2@freelists.org)
+
 The list [web interface](http://www.freelists.org/cgi-bin/list.fcgi?list_id=emelfm2)
+
 The list [archive](http://www.freelists.org/archives/emelfm2)
 ### HELP
 Your help is wanted! It is always nice to get bug reports, comments, feature requests or patches. There is a [wiki](http://emelfm2.net/wiki/UserGuide) where some content needs to be added. If you have any programming skills, you might also want to take a look at the [TODO](./docs/TODO) list.
