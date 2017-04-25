@@ -1703,7 +1703,6 @@ void e2_window_create (E2_WindowRuntime *rt)
 		if (e2_cl_options.session_user)
 		{
 			markup = TRUE;
-			//CHECKME gtk3 label styling via CSS instead of markup
 			g_string_append_printf (who_where,
 			"<span foreground=\"%s\" weight=\"bold\">%s</span>",
 				e2_option_str_get ("color-negative"), pw_buf->pw_name);
@@ -1717,7 +1716,6 @@ void e2_window_create (E2_WindowRuntime *rt)
 	else
 	{
 		markup = TRUE;
-		//CHECKME gtk3 label styling via CSS instead of markup
 		g_string_append_printf (who_where,
 		"<span foreground=\"%s\" weight=\"bold\"><?%s?></span>",
 			e2_option_str_get ("color-negative"), _("WhoAmI"));
