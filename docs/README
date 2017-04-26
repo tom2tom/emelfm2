@@ -3,15 +3,15 @@ This file is part of emelFM2.
 
 DESCRIPTION
 ~~~~~~~~~
-emelFM2 is a file manager that implements the popular two-pane
-design. It features a simple GTK interface, a flexible filetyping
-scheme, and a built-in command line for executing commands without
-opening a terminal-emulator application. It's designed to be small,
-and as fast as possible.
+emelFM2 is a file manager that implements the popular two-pane design.
+It features a simple Gtk interface, a flexible filetyping scheme, and
+capacity for executing commands without opening a terminal-emulator
+application. It's designed to be small, and as fast as possible.
+For users so inclined, it's extensively customizable.
 
-emelFM2 requires Gtk+2.6 or later. Gtk+3.x is ok, though problem(s)
-(notably aspects of the UI layout) may become apparent. It's too
-soon to comment about Gtk+4.
+emelFM2 works on Gtk from 2.6 to 3.22.
+Some aspects of the design of Gtk3 and/or Gtk3 themes are 'unfriendly'
+(not only to emelFM2).
 
 H2 LICENSE
 ~~~~~~~~~~
@@ -19,17 +19,16 @@ emelFM2 is licensed under the GNU General Public License V.3.
 
 WEBSITES
 ~~~~~~~~
-emelFM2       http://www.emelfm2.net
+emelFM2   http://www.emelfm2.net
 
-emelFM1       http://emelFM.sourceforge.net/
+emelFM1   http://emelFM.sourceforge.net
 
 MAILING LIST
 ~~~~~~~~~~~~
-There is an emelFM2 mailing list provided by freelists.org. You
-can subscribe to that list by sending an email to
-emelfm2-request@freelists.org with 'subscribe' in the subject
-and you can unsubscribe from the list by sending email to the
-same address with 'unsubscribe' in the subject.
+You can subscribe to the emelFM2 mailing list by sending an email to
+emelfm2-request@freelists.org with 'subscribe' in the subject and you
+can unsubscribe from the list by sending email to the same address with
+'unsubscribe' in the subject. This is a low-traffic list, you won't be bombarded.
 
 email address: emelfm2@freelists.org
 web interface: http://www.freelists.org/cgi-bin/list.fcgi?list_id=emelfm2
@@ -43,14 +42,11 @@ to be added. If you have any programming skills, you might also want
 to take a look at the TODO list.
 
 Please send bug reports, comments or feature requests to the mailing
-list (see above). You do not need to be a subscriber to the list.
+list (see above). You need to be a subscriber to the list.
 
 INTERNATIONALISATION
 ~~~~~~~~~~~~~~~~~~~~
-Within the codebase, all strings to be translated have the necessary
-_() or N_() tags.
-
-Translations exist for
+User-interface-string translations exist for
  * japanese
  * simplified chinese
  * french
@@ -58,8 +54,8 @@ Translations exist for
  * russian
  * polish
 
-Feel free to do another language. Start by asking on the mailing
-list if anybody else is already doing the same. The 'make' targets are
+Feel free to do another language. Start by asking on the mailing list
+if anybody else is already doing the same. The 'make' targets are
 i18n and [un]install_i18n.
 
 The help documents USAGE and CONFIGURATION might well be translated
@@ -75,6 +71,6 @@ BUILD, COMPILE
 ~~~~~~~~~~~~~~
 See files CONSTRUCT and Makefile.config.
 
-INSTALLATION, UNINSTALLATION
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INSTALL, UNINSTALL
+~~~~~~~~~~~~~~~~~~
 See the INSTALL file.
