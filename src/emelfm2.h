@@ -171,6 +171,9 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # if GTK_CHECK_VERSION (3,22,0)
 #  define USE_GTK3_22
 # endif
+# if GTK_CHECK_VERSION (4,0,0)
+#  define USE_GTK4_0
+# endif
 
 #elif defined(E2_MIN_GTK3)
 //GTK3 is available and either: explicitly requested or GTK2 is not available
@@ -195,6 +198,9 @@ along with emelFM2; see the file GPL. If not, see http://www.gnu.org/licenses.
 # define USE_GLIB2_42
 # define USE_GLIB2_44
 # define USE_GLIB2_46
+# define USE_GLIB2_48
+# define USE_GLIB2_50
+# define USE_GLIB2_52
 # define USE_GTK2_8
 # define USE_GTK2_10
 # define USE_GTK2_12
@@ -861,7 +867,6 @@ pthread_mutex_t history_mutex;
 pthread_mutex_t display_mutex;	//BGL replacement
 //workaround for deprecated/lack-of internal X11 lock in gtk3.6+, use display_mutex
 //# define LOCAL_BGL BUT gtk doesn't understand local locking
-
 #ifdef DEBUG_MESSAGES
 # define CLOSEBGL e2_main_close_uilock ();
 # define OPENBGL e2_main_open_uilock ();
@@ -891,7 +896,16 @@ pthread_mutex_t display_mutex;	//BGL replacement
 
 #endif //ndef DISPLAYTHREADSAFE
 
-#ifndef NEEDCLOSEBGL
+#if 0
+//macro for locally locking the display-mutex in contexts (callbacks, essentially)
+// where that mutex would have been locked by the calling code, if that were in effect
+// YUK - hundreds of function calls, just to work around a gtk design-decision !
+# define NEEDCLOSEBGL CLOSEBGL
+//equivalent to NEEDCLOSEBGL, but investigation needed to determine exactly what needs to happen
+# define NEEDCLOSEBGLX CLOSEBGL
+//macro for local unlocking the display-mutex after a NEEDCLOSEBGL
+# define NEEDOPENBGL OPENBGL
+#else
 # define NEEDCLOSEBGL
 # define NEEDCLOSEBGLX
 # define NEEDOPENBGL
