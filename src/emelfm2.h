@@ -897,13 +897,13 @@ pthread_mutex_t display_mutex;	//BGL replacement
 #endif //ndef DISPLAYTHREADSAFE
 
 #if 0
-//macro for locally locking the display-mutex in contexts (callbacks, essentially)
-// where that mutex would have been locked by the calling code, if that were in effect
+//macro for locally locking the display-mutex where (in callbacks, essentially)
+// that mutex would have been locked by gtk, if that were in effect
 // YUK - hundreds of function calls, just to work around a gtk design-decision !
 # define NEEDCLOSEBGL CLOSEBGL
 //equivalent to NEEDCLOSEBGL, but investigation needed to determine exactly what needs to happen
 # define NEEDCLOSEBGLX CLOSEBGL
-//macro for local unlocking the display-mutex after a NEEDCLOSEBGL
+//for local unlocking the display-mutex after a NEEDCLOSEBGL
 # define NEEDOPENBGL OPENBGL
 #else
 # define NEEDCLOSEBGL
