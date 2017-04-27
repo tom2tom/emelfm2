@@ -422,7 +422,6 @@ clean:
 	@echo "cleaning up"
 	@rm -f $(TARGET)
 	@rm -f $(BUILD_FILE)
-	@rm -f $(DESKTOP_FILE)
 	@rm -f *.bak
 	@rm -f $(PO_DIR)/$(TARGET).pot
 	@rm -f $(PO_DIR)/*.mo
