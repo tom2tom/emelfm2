@@ -257,7 +257,7 @@ static gboolean _e2p_shred_write_buffer (VPATH *localpath, gint descriptor,
 /**
 @brief fill @a buffer with the contents of some file from $PATH
 This is an alternative to storing some sequence of data that is readily
-recognisable as over-written data
+recognizable as over-written data
 Expects BGL to be open on arrival here
 @param buffer pointer to buffer to be overwritten
 @param buffersize size of @a buffer
@@ -316,48 +316,57 @@ static gboolean _e2p_shred_randomise_buffer (gpointer buffer, size_t buffersize,
 	guint count = g_list_length (entries);
 	while (times > 0)
 	{
-		guint8 c;
-restart:
-		c = _e2p_shred_getrandom ();
-		guint first = count * c / 256;
-		guint i = 0;
-		gchar *filename, *filepath = NULL;
 		GList *member;
-reloop:
-		for (member = g_list_nth (entries, first); member != NULL; member = member->next)
+		gchar *filepath;
+		guint8 c;
+		guint first, first1 = 65365000;
+restart:
+		do
 		{
-			filename = (gchar *)member->data;
-			if (strcmp (filename, ".."))
-			{
-				filepath = g_build_filename (execpath, filename, NULL);
-#ifdef E2_VFS
-				ddata.path = filepath;
-				if (!e2_fs_access (&ddata, R_OK E2_ERR_NONE()))
-#else
-				if (!e2_fs_access (filepath, R_OK E2_ERR_NONE()))
-#endif
-					break;
-				g_free (filepath);
-			}
-			filepath = NULL;
+			c = _e2p_shred_getrandom ();
+			first = count * c / 256;
+			if (first == count)
+				first--;
+		} while (first == first1);
+		first1 = first;
 
-			if (++i == count);
-			{
-				//try with next dir from PATH or ...
-				printd (DEBUG, "cannot find a file for data source");
-				//FIXME warn user
-//				e2_fs_error_simple (
-//					_("You do not have authority to read anything in %s"), execpath);
-				goto cleanup;
-			}
+		if (first > 0)
+		{
+			//'rotate' the candidates (in case first is near the end)
+			GList *p2 = g_list_nth (entries, first-1);
+			member = p2->next;
+			p2->next = NULL;
+			entries = g_list_concat (member, entries);
 		}
-		if (member == NULL && i < count)
-		{	//reached end of list, cycle back to start
-			first = 0;
-			goto reloop;
+
+		filepath = NULL;
+		for (member = entries; member != NULL; member = member->next)
+		{
+			gchar *filename = (gchar *)member->data;
+			if (strcmp (filename, "..") == 0)
+				continue;
+			filepath = g_build_filename (execpath, filename, NULL);
+#ifdef E2_VFS
+			ddata.path = filepath;
+			if (!e2_fs_access (&ddata, R_OK E2_ERR_NONE()))
+#else
+			if (!e2_fs_access (filepath, R_OK E2_ERR_NONE()))
+#endif
+				break;
+
+			g_free (filepath);
+			filepath = NULL;
 		}
+
 		if (filepath == NULL)
+		{
+			//try with next dir from PATH or ...
+			printd (DEBUG, "Cannot find a file for data source");
+			//FIXME warn user
+//			e2_fs_error_simple (
+//				_("You do not have authority to read anything in %s"), execpath);
 			goto cleanup;
+		}
 
 		E2_ERR_DECLARE
 		gint fdesc = e2_fs_safeopen (filepath, O_RDONLY, 0);
@@ -448,8 +457,7 @@ static gboolean _e2p_shred_flush_file (VPATH *localpath E2_ERR_ARG())
 	struct stat sb;
 	if (e2_fs_stat (localpath, &sb E2_ERR_SAMEARG()))
 	{
-		e2_fs_error_local (_("Cannot get current data for %s"),
-			localpath E2_ERR_MSGC());
+		e2_fs_error_local (_("Cannot get current data for %s"), localpath E2_ERR_MSGC());
 		E2_ERR_PCLEAR
 		return FALSE;
 	}
@@ -543,8 +551,21 @@ cleanup:
 */
 static gboolean _e2p_shred_file1 (VPATH *localpath E2_ERR_ARG())
 {
+#ifdef DEBUG_MESSAGES
+	gboolean retval = _e2p_shred_flush_file (localpath E2_ERR_SAMEARG());
+	if (retval)
+	{
+		retval = _e2p_shred_hide_item (localpath E2_ERR_SAMEARG());
+		if (!retval)
+			printd (DEBUG, "Failed to hide flushed file '%s'", VPSTR(localpath));
+	}
+	else
+		printd (DEBUG, "Failed to flush file '%s'", VPSTR(localpath));
+	return retval;
+#else
 	return (_e2p_shred_flush_file (localpath E2_ERR_SAMEARG())
 		 && _e2p_shred_hide_item (localpath E2_ERR_SAMEARG()));
+#endif
 }
 /**
 @brief obfuscate and delete directory @a localpath
