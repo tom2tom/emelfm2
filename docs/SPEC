@@ -48,7 +48,7 @@ Supported languages are: japanese, french, german, russian, polish.
 %setup -q
 
 %build
-#adjust the make parameters to suit - see file INSTALL
+#adjust the make parameters to suit - see files INSTALL and Makefile.config
 %make DOCS_VERSION=0 USE_LATEST=1 CFLAGS="-O2 -march=%{_target_cpu}"
 
 %install
