@@ -1,3 +1,10 @@
+emelfm2 (0.9.1
+BUILD_PARMS+=|DOC_DIR=$(DOC_DIR)|DOCS_$(DOCS_VERSION)|EDITOR_SPELLCHECK=$(EDITOR_SPELLCHECK)-1) unstable; urgency=low
+
+  * new upstream
+
+ -- tooar <tooar@emelfm2.net>  Sat, 20 Jan 2018 18:37:06 +1100
+
 emelfm2 (0.9.1-1) unstable; urgency=low
 
   * new upstream
